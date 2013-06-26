@@ -44,12 +44,9 @@ public abstract class GenericCache<T> {
                     logger.warn(String.format(FEILMELDING_KLARTE_HENTE_INNHOLD_MEN_INNHOLDET_VAR_UGYLDIG, cacheKey));
                     throw new IOException();
                 }
-                Element newElement;
-                if(element == null) {
-                    newElement = new Element(cacheKey, cacheContent);
-                    element = newElement;
-                }
+                element = new Element(cacheKey, cacheContent);
                 element.setEternal(true);
+
                 c.put(element);
             } catch (IOException e) {
                 logger.warn(String.format(FEILMELDING_KLARTE_IKKE_HENTE_INNHOLD_FOR_CACHE_KEY, cacheKey, e.getMessage()), e);
@@ -93,7 +90,7 @@ public abstract class GenericCache<T> {
     }
     private boolean isExpired(Element element) {
         long now = System.currentTimeMillis();
-        long expirationTime = element.getCreationTime()+this.refreshIntervalSeconds*1000;
+        long expirationTime = element.getCreationTime()+(this.refreshIntervalSeconds*1000);
         return now > expirationTime;
     }
 

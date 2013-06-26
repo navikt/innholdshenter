@@ -61,14 +61,28 @@ public class EnonicContentRetrieverFullTest {
             "<entry key=\"kontaktinfo.overskrifter.maalform\">Ønsket målform</entry>" +
             "</properties>";
 
+    private static final String PROPERTIES_CONTENT_2 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+            "<!DOCTYPE properties SYSTEM \"http://java.sun.com/dtd/properties.dtd\">\n" +
+            "<properties>" +
+            "<entry key=\"cv.kontaktdetaljer.kontaktinfo.tlf\">Telefon</entry>" +
+            "<entry key=\"cv.kontaktdetaljer.kontaktinfo.epost\">Epost</entry>" +
+            "</properties>";
+
     private static final Properties PROPERTIES = new Properties();
+    private static final Properties PROPERTIES_2 = new Properties();
     private static final Properties CACHED_PROPERTIES = new Properties();
+    private static final Properties CACHED_PROPERTIES_2 = new Properties();
 
     static {
+        PROPERTIES_2.setProperty("cv.kontaktdetaljer.kontaktinfo.tlf", "Telefon");
+        PROPERTIES_2.setProperty("cv.kontaktdetaljer.kontaktinfo.epost", "Epost");
         PROPERTIES.setProperty("cv.kontaktdetaljer.kontaktinfo.land", "Land");
         PROPERTIES.setProperty("kontaktinfo.overskrifter.maalform", "Ønsket målform");
         CACHED_PROPERTIES.setProperty("cv.kontaktdetaljer.kontaktinfo.land", "Land (cached)");
         CACHED_PROPERTIES.setProperty("kontaktinfo.overskrifter.maalform", "Ønsket målform (cached)");
+        CACHED_PROPERTIES_2.setProperty("cv.kontaktdetaljer.kontaktinfo.tlf", "Telefon  (cached)");
+        CACHED_PROPERTIES_2.setProperty("cv.kontaktdetaljer.kontaktinfo.epost", "Epost (cached)");
+
     }
 
     @Before
@@ -79,6 +93,7 @@ public class EnonicContentRetrieverFullTest {
         testListener = new EhcacheTestListener();
         cacheManager = CacheManager.create();
         if(cacheManager.cacheExists(cacheName)) {
+            cacheManager.getCache(cacheName).removeAll();
             cacheManager.removeCache(cacheName);
         }
         cacheManager.addCache(cacheName);
@@ -91,20 +106,34 @@ public class EnonicContentRetrieverFullTest {
         contentRetriever.setBaseUrl(SERVER);
         contentRetriever.setRefreshIntervalSeconds(REFRESH_INTERVAL);
     }
+    @Test
+    public void skal_Oppdatere_Utdaterte_Cachede_Properties_I_Cache_fra_URL() throws Exception {
+        when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenReturn(PROPERTIES_CONTENT);
+        cache.put(new Element(URL, CACHED_PROPERTIES_2));
+        testListener.resetStatus();
+
+        Thread.sleep((REFRESH_INTERVAL+1)*1000);
+        Properties result = contentRetriever.getProperties(PATH);
+
+        verify(httpClient).execute(any(HttpGet.class), any(BasicResponseHandler.class));
+        assertEquals(PROPERTIES, result);
+        assertEquals(testListener.getLastStatus(), ListenerStatus.ELEMENT_UPDATED);
+    }
 
     @Test
     public void skalHenteIkkeCachetInnholdFraUrl() throws Exception {
         when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenReturn(CONTENT);
 
+        testListener.resetStatus();
         String result = contentRetriever.getPageContent(PATH);
 
         assertEquals(CONTENT, result);
         verify(httpClient).execute(any(HttpGet.class), any(BasicResponseHandler.class));
+        assertEquals(ListenerStatus.ELEMENT_ADDED, testListener.getLastStatus());
     }
 
     @Test
     public void skalHenteCachetInnholdFraCache() throws Exception {
-
         cache.put(new Element(URL, CACHED_CONTENT));
         testListener.resetStatus();
         when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenReturn(CONTENT);
@@ -132,7 +161,8 @@ public class EnonicContentRetrieverFullTest {
 
     @Test
     public void shouldNotCallHttpURLIfCacheNotOutdated() throws Exception {
-        when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenThrow(new IOException());
+        when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenReturn(CONTENT);
+
         cache.put(new Element(URL, CACHED_CONTENT));
         testListener.resetStatus();
 
@@ -154,13 +184,6 @@ public class EnonicContentRetrieverFullTest {
         assertNull(result);
         verify(httpClient).execute(any(HttpGet.class), any(BasicResponseHandler.class));
         assertEquals(testListener.getLastStatus(), ListenerStatus.RESET);
-    }
-    //@Test(expected = IllegalStateException.class)
-    public void skalKasteIllegalStateExceptionHvisCacheOgUrlFeiler() throws Exception {
-        //when(cacheManager.getFromCache(URL, REFRESH_INTERVAL)).thenThrow(new NeedsRefreshException(null));
-        when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenThrow(new IOException());
-
-        contentRetriever.getPageContent(PATH);
     }
 
     @Test
@@ -193,9 +216,10 @@ public class EnonicContentRetrieverFullTest {
         assertEquals(testListener.getLastStatus(), ListenerStatus.ELEMENT_ADDED);
     }
 
+
     @Test
     public void skalHenteCachedePropertiesFraCache() throws Exception {
-        when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenReturn(PROPERTIES_CONTENT);
+        when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenReturn(PROPERTIES_CONTENT_2);
         cache.put(new Element(URL, CACHED_PROPERTIES));
         testListener.resetStatus();
 
