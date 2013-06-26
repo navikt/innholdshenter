@@ -14,30 +14,35 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 
-import org.mockito.runners.MockitoJUnitRunner;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.IOException;
 import java.util.Properties;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNull;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import no.nav.innholdshenter.common.EhcacheTestListener.ListenerStatus;
 
 /**
- * Testklasse for EnonicContentRetriever.
+ * Minst mulig Mock Testklasse for EnonicContentRetriever.
  */
-@RunWith(MockitoJUnitRunner.class)
-public class EnonicContentRetrieverTest {
+@RunWith(PowerMockRunner.class)
+public class EnonicContentRetrieverFullTest {
 
-    @Mock
+    private String cacheName = "TestEhcacheCacheName";
+
     private CacheManager cacheManager;
-    @Mock
-    private Element element;
-    @Mock
     private Cache cache;
+    private Element element;
+    private EhcacheTestListener testListener;
     @Mock
     private HttpClient httpClient;
     @Mock
@@ -50,25 +55,25 @@ public class EnonicContentRetrieverTest {
     private static final String SERVER = "http://localhost:9000";
     private static final String PATH = "systemsider/ApplicationFrame";
     private static final String URL = SERVER + "/" + PATH;
-    private static final int REFRESH_INTERVAL = 300;
+    private static final int REFRESH_INTERVAL = 5;
     private static final String CONTENT = "<html><body>Innhold</body></html>";
     private static final String CACHED_CONTENT = "<html><body>Cachet innhold</body></html>";
 
     private static final String PROPERTIES_CONTENT = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-          "<!DOCTYPE properties SYSTEM \"http://java.sun.com/dtd/properties.dtd\">\n" +
-          "<properties>" +
-          "<entry key=\"cv.kontaktdetaljer.kontaktinfo.land\">Land</entry>" +
-          "<entry key=\"kontaktinfo.overskrifter.maalform\">Ã˜nsket mÃ¥lform</entry>" +
-          "</properties>";
+            "<!DOCTYPE properties SYSTEM \"http://java.sun.com/dtd/properties.dtd\">\n" +
+            "<properties>" +
+            "<entry key=\"cv.kontaktdetaljer.kontaktinfo.land\">Land</entry>" +
+            "<entry key=\"kontaktinfo.overskrifter.maalform\">Ønsket målform</entry>" +
+            "</properties>";
 
     private static final Properties PROPERTIES = new Properties();
     private static final Properties CACHED_PROPERTIES = new Properties();
 
     static {
         PROPERTIES.setProperty("cv.kontaktdetaljer.kontaktinfo.land", "Land");
-        PROPERTIES.setProperty("kontaktinfo.overskrifter.maalform", "Ã˜nsket mÃ¥lform");
+        PROPERTIES.setProperty("kontaktinfo.overskrifter.maalform", "Ønsket målform");
         CACHED_PROPERTIES.setProperty("cv.kontaktdetaljer.kontaktinfo.land", "Land (cached)");
-        CACHED_PROPERTIES.setProperty("kontaktinfo.overskrifter.maalform", "Ã˜nsket mÃ¥lform (cached)");
+        CACHED_PROPERTIES.setProperty("kontaktinfo.overskrifter.maalform", "Ønsket målform (cached)");
     }
 
     @Before
@@ -76,8 +81,17 @@ public class EnonicContentRetrieverTest {
         when(httpClient.getParams()).thenReturn(httpParams);
         when(httpClient.getConnectionManager()).thenReturn(connectionManager);
 
-        contentRetriever = new EnonicContentRetriever();
-        contentRetriever.setCache(cacheManager);
+        testListener = new EhcacheTestListener();
+        cacheManager = CacheManager.create();
+        if(cacheManager.cacheExists(cacheName)) {
+            cacheManager.removeCache(cacheName);
+        }
+        cacheManager.addCache(cacheName);
+        cache = cacheManager.getCache(cacheName);
+        cache.getCacheEventNotificationService().registerListener(testListener);
+
+        contentRetriever = new EnonicContentRetriever(cacheName);
+        contentRetriever.setCacheManager(cacheManager);
         contentRetriever.setHttpClient(httpClient);
         contentRetriever.setBaseUrl(SERVER);
         contentRetriever.setRefreshIntervalSeconds(REFRESH_INTERVAL);
@@ -85,51 +99,55 @@ public class EnonicContentRetrieverTest {
 
     @Test
     public void skalHenteIkkeCachetInnholdFraUrl() throws Exception {
-        when(cacheManager.getCache(anyString())).thenReturn(cache);
-        when(cache.get(URL)).thenReturn(null);
         when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenReturn(CONTENT);
 
         String result = contentRetriever.getPageContent(PATH);
 
         assertEquals(CONTENT, result);
         verify(httpClient).execute(any(HttpGet.class), any(BasicResponseHandler.class));
-        verify(cache).put(any(Element.class));
-        //verify(cache, never()).cancelUpdate(URL);
     }
 
     @Test
     public void skalHenteCachetInnholdFraCache() throws Exception {
-        when(cacheManager.getCache(anyString())).thenReturn(cache);
+
+        cache.put(new Element(URL, CACHED_CONTENT));
+        testListener.resetStatus();
         when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenReturn(CONTENT);
-        when(element.getObjectValue()).thenReturn(CACHED_CONTENT);
-        when(element.getCreationTime()).thenReturn(System.currentTimeMillis());
-        when(cache.get(URL)).thenReturn(element);
 
         String result = contentRetriever.getPageContent(PATH);
 
         assertEquals(CACHED_CONTENT, result);
         verify(httpClient, never()).execute(any(HttpGet.class), any(BasicResponseHandler.class));
-        verify(cache, never()).put(any(Element.class));
+        assertEquals(testListener.getLastStatus(), ListenerStatus.RESET);
     }
 
     @Test
     public void skalHenteGammeltInnholdFraCacheHvisUrlFeiler() throws Exception {
-        when(cacheManager.getCache(anyString())).thenReturn(cache);
-        when(cache.get(URL)).thenReturn(element);
-        when(element.getObjectValue()).thenReturn(CACHED_CONTENT);
-        when(element.getCreationTime()).thenReturn(System.currentTimeMillis());
         when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenThrow(new IOException());
+        cache.put(new Element(URL, CACHED_CONTENT));
+        testListener.resetStatus();
 
+        Thread.sleep((REFRESH_INTERVAL+1)*1000);
         String result = contentRetriever.getPageContent(PATH);
 
         assertEquals(CACHED_CONTENT, result);
         verify(httpClient).execute(any(HttpGet.class), any(BasicResponseHandler.class));
-        verify(cache, never()).put(any(Element.class));
+        assertEquals(testListener.getLastStatus(), ListenerStatus.RESET);
     }
 
+    @Test
+    public void shouldReturnNullIfNoCachedCopyAndNoResponseOnURL() throws Exception {
+        when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenThrow(new IOException());
+        testListener.resetStatus();
+
+        String result = contentRetriever.getPageContent(PATH);
+
+        assertNull(result);
+        verify(httpClient).execute(any(HttpGet.class), any(BasicResponseHandler.class));
+        assertEquals(testListener.getLastStatus(), ListenerStatus.RESET);
+    }
     //@Test(expected = IllegalStateException.class)
     public void skalKasteIllegalStateExceptionHvisCacheOgUrlFeiler() throws Exception {
-        when(cacheManager.getCache(anyString())).thenReturn(cache);
         //when(cacheManager.getFromCache(URL, REFRESH_INTERVAL)).thenThrow(new NeedsRefreshException(null));
         when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenThrow(new IOException());
 
@@ -138,8 +156,6 @@ public class EnonicContentRetrieverTest {
 
     @Test
     public void skalReturnereInnholdFraUrlVedSamtidigAksess() throws Exception {
-        when(cacheManager.getCache(anyString())).thenReturn(cache);
-        when(cache.get(anyString())).thenReturn(null);
         contentRetriever.setHttpClient(new DefaultHttpClient());
         contentRetriever.setBaseUrl("http://maven.adeo.no:80");
         contentRetriever.setHttpTimeoutMillis(5000);
@@ -158,30 +174,27 @@ public class EnonicContentRetrieverTest {
 
     @Test
     public void skalHenteIkkeCachedePropertiesFraUrl() throws Exception {
-        when(cacheManager.getCache(anyString())).thenReturn(cache);
-        when(cache.get(URL)).thenReturn(null);
         when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenReturn(PROPERTIES_CONTENT);
 
+        testListener.resetStatus();
         Properties result = contentRetriever.getProperties(PATH);
 
         assertEquals(PROPERTIES, result);
         verify(httpClient).execute(any(HttpGet.class), any(BasicResponseHandler.class));
-        verify(cache).put(any(Element.class));
-        //verify(cacheManager, never()).cancelUpdate(URL);
+        assertEquals(testListener.getLastStatus(), ListenerStatus.ELEMENT_ADDED);
     }
 
     @Test
     public void skalHenteCachedePropertiesFraCache() throws Exception {
-        when(cacheManager.getCache(anyString())).thenReturn(cache);
-        when(element.getObjectValue()).thenReturn(CACHED_PROPERTIES);
-        when(cache.get(URL)).thenReturn(element);
         when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenReturn(PROPERTIES_CONTENT);
+        cache.put(new Element(URL, CACHED_PROPERTIES));
+        testListener.resetStatus();
 
         Properties result = contentRetriever.getProperties(PATH);
 
         assertEquals(CACHED_PROPERTIES, result);
         verify(httpClient, never()).execute(any(HttpGet.class), any(BasicResponseHandler.class));
-        verify(cache, never()).put(any(Element.class));
+        assertEquals(testListener.getLastStatus(), ListenerStatus.RESET);
         //verify(cache, never()).cancelUpdate(URL);
     }
 
