@@ -14,18 +14,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-
+import org.mockito.runners.MockitoJUnitRunner;
 import java.io.IOException;
 import java.util.Properties;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,7 +29,7 @@ import no.nav.innholdshenter.common.EhcacheTestListener.ListenerStatus;
 /**
  * Minst mulig Mock Testklasse for EnonicContentRetriever.
  */
-@RunWith(PowerMockRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class EnonicContentRetrieverFullTest {
 
     private String cacheName = "TestEhcacheCacheName";
@@ -147,8 +142,8 @@ public class EnonicContentRetrieverFullTest {
         assertEquals(CACHED_CONTENT, result);
         verify(httpClient, never()).execute(any(HttpGet.class), any(BasicResponseHandler.class));
         assertEquals(testListener.getLastStatus(), ListenerStatus.RESET);
-
     }
+
     @Test
     public void shouldReturnNullIfNoCachedCopyAndNoResponseOnURL() throws Exception {
         when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenThrow(new IOException());
