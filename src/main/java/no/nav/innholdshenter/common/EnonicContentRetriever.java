@@ -16,30 +16,34 @@ import java.io.IOException;
 import java.util.Properties;
 
 /**
- * Henter innholdet for en gitt URL. Hvis ferskt innhold finnes i cache returneres det derfra.
+ * Henter innholdet for en gitt URL. Hvis ferskt innhold finnes i cacheManager returneres det derfra.
  */
 public class EnonicContentRetriever {
     private static final Logger logger = LoggerFactory.getLogger(EnonicContentRetriever.class);
     private static final String SLASH = "/";
     private static final String LOCALE_UTF_8 = "UTF-8";
     private static final String DEBUG_RETRIEVING_PAGE_CONTENT_FROM_URL = "Retrieving page content from url %s";
-    private static final String CACHENAME = EnonicContentRetriever.class.getName();
 
     private String baseUrl;
 
     private int httpTimeoutMillis;
     private HttpClient httpClient;
     private int refreshIntervalSeconds;
-    private CacheManager cache;
+    private CacheManager cacheManager;
+    private String CACHENAME;
 
     public EnonicContentRetriever() {
         httpClient = new DefaultHttpClient();
+    }
+    public EnonicContentRetriever(String CACHENAME) {
+        this();
+        this.CACHENAME = CACHENAME;
     }
 
     public String getPageContent(String path) {
         final String url = createUrl(path);
 
-        GenericCache<String> genericCache = new GenericCache<String>(cache, refreshIntervalSeconds, url, CACHENAME) {
+        GenericCache<String> genericCache = new GenericCache<String>(cacheManager, refreshIntervalSeconds, url, CACHENAME) {
             protected String getContentFromSource() throws IOException {
                 return getPageContentFromUrl(url);
             }
@@ -51,7 +55,7 @@ public class EnonicContentRetriever {
     public Properties getProperties(String propertiesPath) {
         final String url = createUrl(propertiesPath);
 
-        GenericCache<Properties> genericCache = new GenericCache<Properties>(cache, refreshIntervalSeconds, url, CACHENAME) {
+        GenericCache<Properties> genericCache = new GenericCache<Properties>(cacheManager, refreshIntervalSeconds, url, CACHENAME) {
             protected Properties getContentFromSource() throws IOException {
                 String content = getPageContentFromUrl(url);
                 ByteArrayInputStream propertiesStream = new ByteArrayInputStream(content.getBytes(LOCALE_UTF_8));
@@ -105,8 +109,8 @@ public class EnonicContentRetriever {
         this.refreshIntervalSeconds = refreshIntervalSeconds;
     }
 
-    public void setCache(CacheManager cache) {
-        this.cache = cache;
+    public void setCacheManager(CacheManager cacheManager) {
+        this.cacheManager = cacheManager;
     }
 
     protected void setHttpClient(HttpClient httpClient) {
