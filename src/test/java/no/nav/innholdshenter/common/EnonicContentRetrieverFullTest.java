@@ -136,6 +136,20 @@ public class EnonicContentRetrieverFullTest {
     }
 
     @Test
+    public void shouldNotCallHttpURLIfCacheNotOutdated() throws Exception {
+        when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenThrow(new IOException());
+        cache.put(new Element(URL, CACHED_CONTENT));
+        testListener.resetStatus();
+
+        Thread.sleep((REFRESH_INTERVAL-1)*1000);
+        String result = contentRetriever.getPageContent(PATH);
+
+        assertEquals(CACHED_CONTENT, result);
+        verify(httpClient, never()).execute(any(HttpGet.class), any(BasicResponseHandler.class));
+        assertEquals(testListener.getLastStatus(), ListenerStatus.RESET);
+
+    }
+    @Test
     public void shouldReturnNullIfNoCachedCopyAndNoResponseOnURL() throws Exception {
         when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenThrow(new IOException());
         testListener.resetStatus();
