@@ -14,6 +14,7 @@ public abstract class GenericCache<T> {
     private static final String FEILMEDLING_KLARTE_IKKE_HENTE_INNHOLD_OG_INNHOLDET_FINNES_IKKE_I_CACHE = "Henting fra url %s feilet og innholdet er ikke i cache.";
     private static final String FEILMELDING_KLARTE_HENTE_INNHOLD_MEN_INNHOLDET_VAR_UGYLDIG = "Henting fra url %s gikk gjennom, men innholdet var ikke som forventet. Cache ikke oppdatert.";
     private static final String FEILMELDING_CACHELINJE_ER_UTDATERT = "Cachelinjen er utdatert med key %s";
+    private final String WARN_FLUSHER_CACHEN = "Flusher cachen: %s";
 
     private CacheManager cacheManager;
 
@@ -97,4 +98,10 @@ public abstract class GenericCache<T> {
         return now > expirationTime;
     }
 
+    public void flushCache() {
+        if(cacheManager.cacheExists(cacheName)) {
+            logger.warn( String.format(WARN_FLUSHER_CACHEN, cacheName) );
+            cacheManager.getCache(cacheName).removeAll();
+        }
+    }
 }

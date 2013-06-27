@@ -23,16 +23,18 @@ public class EnonicContentRetriever {
     private static final String SLASH = "/";
     private static final String LOCALE_UTF_8 = "UTF-8";
     private static final String DEBUG_RETRIEVING_PAGE_CONTENT_FROM_URL = "Retrieving page content from url %s";
+    private static final String WARN_MELDING_FLUSHER_CACHEN = "Flusher cachen: %s";
 
     private String baseUrl;
-
     private int httpTimeoutMillis;
     private HttpClient httpClient;
-    private int refreshIntervalSeconds;
+
     private CacheManager cacheManager;
     private String CACHENAME;
+    private int refreshIntervalSeconds;
 
-    public EnonicContentRetriever() {
+
+    private EnonicContentRetriever() {
         httpClient = new DefaultHttpClient();
     }
     public EnonicContentRetriever(String CACHENAME) {
@@ -64,7 +66,6 @@ public class EnonicContentRetriever {
                 return properties;
             }
         };
-
         return genericCache.fetch();
     }
 
@@ -117,4 +118,10 @@ public class EnonicContentRetriever {
         this.httpClient = httpClient;
     }
 
+    public void flushCache() {
+        if(cacheManager.cacheExists(CACHENAME)) {
+            logger.warn( String.format(WARN_MELDING_FLUSHER_CACHEN, CACHENAME) );
+            cacheManager.getCache(CACHENAME).removeAll();
+        }
+    }
 }
