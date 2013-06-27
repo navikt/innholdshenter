@@ -5,7 +5,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnit44Runner;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.List;
@@ -26,7 +25,7 @@ import static org.mockito.Mockito.when;
 public class EnonicHtmlInnholdBeanTest {
 
     @Mock
-    private EnonicContentRetriever vsRetriever;
+    private EnonicContentRetriever ecRetriever;
     @Mock
     private HtmlInnholdListener listener;
 
@@ -34,12 +33,12 @@ public class EnonicHtmlInnholdBeanTest {
 
     @Before
     public void setUp() throws Exception {
-        htmlInnholdBean = new EnonicHtmlInnholdBean(vsRetriever, "path");
+        htmlInnholdBean = new EnonicHtmlInnholdBean(ecRetriever, "path");
     }
 
     @Test
     public void henterListeMedHjelpetekster() {
-        when(vsRetriever.getPageContent("path")).thenReturn("<innholdsliste><htmlinnhold key=\"key.a\" title=\"Tittel A\"/><htmlinnhold key=\"key.b\" title=\"Tittel B\"/></innholdsliste>");
+        when(ecRetriever.getPageContent("path")).thenReturn("<innholdsliste><htmlinnhold key=\"key.a\" title=\"Tittel A\"/><htmlinnhold key=\"key.b\" title=\"Tittel B\"/></innholdsliste>");
         List<HtmlInnhold> hjelpetekster = htmlInnholdBean.getHjelpetekster();
         assertThat(hjelpetekster.size(), is(2));
         assertThat(hjelpetekster.get(0).getKey(), is("key.a"));
@@ -50,7 +49,7 @@ public class EnonicHtmlInnholdBeanTest {
 
     @Test
     public void henterEnEnkeltHjelpetekst() {
-        when(vsRetriever.getPageContent("path?key=key.a")).thenReturn("<htmlinnhold><title>Tittel</title><html><p><strong>asdfasdf</strong></p></html></htmlinnhold>");
+        when(ecRetriever.getPageContent("path?key=key.a")).thenReturn("<htmlinnhold><title>Tittel</title><html><p><strong>asdfasdf</strong></p></html></htmlinnhold>");
         HtmlInnhold htmlInnhold = htmlInnholdBean.getHjelpetekst("key.a");
         assertThat(htmlInnhold.getTitle(), is("Tittel"));
         assertThat(htmlInnhold.getHtml(), is("<p><strong>asdfasdf</strong></p>"));
@@ -59,7 +58,7 @@ public class EnonicHtmlInnholdBeanTest {
     @Test
     public void kallerHjelpetekstListener() {
         HtmlInnhold htmlInnhold = new HtmlInnhold();
-        when(vsRetriever.getPageContent("path?key=key.a")).thenReturn("<htmlinnhold><title>Tittel</title><html><p><strong>asdfasdf</strong></p></html></htmlinnhold>");
+        when(ecRetriever.getPageContent("path?key=key.a")).thenReturn("<htmlinnhold><title>Tittel</title><html><p><strong>asdfasdf</strong></p></html></htmlinnhold>");
         htmlInnholdBean.setHtmlInnholdListeners(asList(listener));
         when(listener.onHtmlInnholdRetrieved(any(HtmlInnhold.class))).thenReturn(htmlInnhold);
 
