@@ -35,6 +35,9 @@ public class EnonicContentRetriever {
 
 
     private EnonicContentRetriever() {
+        if(cacheManager == null) {
+            CacheManager.create();
+        }
         httpClient = new DefaultHttpClient();
     }
     public EnonicContentRetriever(String CACHENAME) {
