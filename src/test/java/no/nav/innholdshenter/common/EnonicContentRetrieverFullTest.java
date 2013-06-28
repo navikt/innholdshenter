@@ -58,7 +58,7 @@ public class EnonicContentRetrieverFullTest {
             "<!DOCTYPE properties SYSTEM \"http://java.sun.com/dtd/properties.dtd\">\n" +
             "<properties>" +
             "<entry key=\"cv.kontaktdetaljer.kontaktinfo.land\">Land</entry>" +
-            "<entry key=\"kontaktinfo.overskrifter.maalform\">Ønsket målform</entry>" +
+            "<entry key=\"kontaktinfo.overskrifter.maalform\">Ã˜nsket mÃ¥lform</entry>" +
             "</properties>";
 
     private static final String PROPERTIES_CONTENT_2 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
@@ -77,9 +77,9 @@ public class EnonicContentRetrieverFullTest {
         PROPERTIES_2.setProperty("cv.kontaktdetaljer.kontaktinfo.tlf", "Telefon");
         PROPERTIES_2.setProperty("cv.kontaktdetaljer.kontaktinfo.epost", "Epost");
         PROPERTIES.setProperty("cv.kontaktdetaljer.kontaktinfo.land", "Land");
-        PROPERTIES.setProperty("kontaktinfo.overskrifter.maalform", "Ønsket målform");
+        PROPERTIES.setProperty("kontaktinfo.overskrifter.maalform", "Ã˜nsket mÃ¥lform");
         CACHED_PROPERTIES.setProperty("cv.kontaktdetaljer.kontaktinfo.land", "Land (cached)");
-        CACHED_PROPERTIES.setProperty("kontaktinfo.overskrifter.maalform", "Ønsket målform (cached)");
+        CACHED_PROPERTIES.setProperty("kontaktinfo.overskrifter.maalform", "Ã˜nsket mÃ¥lform (cached)");
         CACHED_PROPERTIES_2.setProperty("cv.kontaktdetaljer.kontaktinfo.tlf", "Telefon  (cached)");
         CACHED_PROPERTIES_2.setProperty("cv.kontaktdetaljer.kontaktinfo.epost", "Epost (cached)");
 
