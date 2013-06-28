@@ -13,8 +13,10 @@ public abstract class GenericCache<T> {
     private static final String FEILMELDING_KLARTE_IKKE_HENTE_INNHOLD_FOR_CACHE_KEY = "Klarte ikke hente innhold for cache key %s. Bruker cache. Feilmelding: %s";
     private static final String FEILMEDLING_KLARTE_IKKE_HENTE_INNHOLD_OG_INNHOLDET_FINNES_IKKE_I_CACHE = "Henting fra url %s feilet og innholdet er ikke i cache.";
     private static final String FEILMELDING_KLARTE_HENTE_INNHOLD_MEN_INNHOLDET_VAR_UGYLDIG = "Henting fra url %s gikk gjennom, men innholdet var ikke som forventet. Cache ikke oppdatert.";
-    private static final String FEILMELDING_CACHELINJE_ER_UTDATERT = "Cachelinjen er utdatert med key %s";
-    private final String WARN_FLUSHER_CACHEN = "Flusher cachen: %s";
+    private static final String FEILMELDING_CACHELINJE_ER_UTDATERT = "Cachelinjen er utdatert med key: %s TimeToLive: %d seconds";
+    private static final String INFO_CACHELINJEN_FANTES_IKKE_I_CACHE = "Cachelinjen fantes ikke i cache.";
+    private static final String WARN_FLUSHER_CACHEN = "Flusher cachen: %s";
+    private static final String INFO_CACHEHIT = "Cachehit for: %s TTL: %d sec.";
 
     private CacheManager cacheManager;
 
@@ -40,36 +42,45 @@ public abstract class GenericCache<T> {
 
     @SuppressWarnings("unchecked")
     public T fetch() {
-        T cacheContent;
         Cache c = cacheManager.getCache(cacheName);
         Element element = c.get(cacheKey);
 
         if (elementIsOutdatedOrMissing(element)) {
-            try {
-                cacheContent = getContentFromSource();
-                if(!isContentValid(cacheContent)) {
-                    logger.warn(String.format(FEILMELDING_KLARTE_HENTE_INNHOLD_MEN_INNHOLDET_VAR_UGYLDIG, cacheKey));
-                    throw new IOException();
-                }
-                element = new Element(cacheKey, cacheContent);
-                element.setEternal(true);
-
-                c.put(element);
-            } catch (IOException e) {
-                logger.warn(String.format(FEILMELDING_KLARTE_IKKE_HENTE_INNHOLD_FOR_CACHE_KEY, cacheKey, e.getMessage()), e);
-
-            }
+            element = fetchNewCacheContent(element, c);
+        } else {
+            logger.info(String.format(INFO_CACHEHIT, cacheKey, refreshIntervalSeconds));
         }
         if(element == null) {
             logger.error(String.format(FEILMEDLING_KLARTE_IKKE_HENTE_INNHOLD_OG_INNHOLDET_FINNES_IKKE_I_CACHE, cacheKey));
             return null;
         }
-        cacheContent = (T) element.getObjectValue();
+        T cacheContent = (T) element.getObjectValue();
         return cacheContent;
     }
 
+    private Element fetchNewCacheContent(Element element, Cache c) {
+        T cacheContent;
+        try {
+            cacheContent = getContentFromSource();
+            if(!isContentValid(cacheContent)) {
+                logger.warn(String.format(FEILMELDING_KLARTE_HENTE_INNHOLD_MEN_INNHOLDET_VAR_UGYLDIG, cacheKey));
+                throw new IOException();
+            }
+            element = new Element(cacheKey, cacheContent);
+            element.setEternal(true);
+
+            c.put(element);
+        } catch (IOException e) {
+            logger.warn(String.format(FEILMELDING_KLARTE_IKKE_HENTE_INNHOLD_FOR_CACHE_KEY, cacheKey, e.getMessage()), e);
+        }
+        return element;
+    }
     private boolean elementIsOutdatedOrMissing(Element element) {
-        return element == null || isExpired(element);
+        if (element == null) {
+            logger.info(String.format(INFO_CACHELINJEN_FANTES_IKKE_I_CACHE));
+            return true;
+        }
+        return isExpired(element);
     }
 
     protected abstract T getContentFromSource() throws IOException;
@@ -92,10 +103,13 @@ public abstract class GenericCache<T> {
 
     }
     private boolean isExpired(Element element) {
-        logger.debug(String.format(FEILMELDING_CACHELINJE_ER_UTDATERT, element.getObjectKey()) );
         long now = System.currentTimeMillis();
         long expirationTime = element.getCreationTime()+(this.refreshIntervalSeconds*1000);
-        return now > expirationTime;
+        if(now > expirationTime) {
+            logger.info(String.format(FEILMELDING_CACHELINJE_ER_UTDATERT, element.getObjectKey(), refreshIntervalSeconds));
+            return true;
+        }
+        return false;
     }
 
     public void flushCache() {
