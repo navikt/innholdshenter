@@ -1,9 +1,11 @@
 package no.nav.innholdshenter.common;
 
 import net.sf.ehcache.CacheManager;
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpConnectionParams;
@@ -13,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Properties;
 
 /**
@@ -24,6 +27,7 @@ public class EnonicContentRetriever {
     private static final String LOCALE_UTF_8 = "UTF-8";
     private static final String DEBUG_RETRIEVING_PAGE_CONTENT_FROM_URL = "Retrieving page content from url %s";
     private static final String WARN_MELDING_FLUSHER_CACHEN = "Flusher cachen: %s";
+    private static final String INFO_LAGE_NY_UNIK_URL_FEILET = "Feilet å lage ny unik url, url: %s.";
 
     private String baseUrl;
     private int httpTimeoutMillis;
@@ -43,6 +47,7 @@ public class EnonicContentRetriever {
     public EnonicContentRetriever(String CACHENAME) {
         this();
         this.CACHENAME = CACHENAME;
+        this.setCacheName(CACHENAME);
     }
 
     public String getPageContent(String path) {
@@ -77,13 +82,26 @@ public class EnonicContentRetriever {
     }
 
     private synchronized String getPageContentFromUrl(String url) throws IOException {
+        String randomUrl = makeRandomUrl(url);
         logger.debug(String.format(DEBUG_RETRIEVING_PAGE_CONTENT_FROM_URL, url));
         HttpParams httpParams = httpClient.getParams();
         HttpConnectionParams.setSoTimeout(httpParams, httpTimeoutMillis);
         HttpConnectionParams.setConnectionTimeout(httpParams, httpTimeoutMillis);
-        HttpGet httpGet = new HttpGet(url);
+        HttpGet httpGet = new HttpGet(randomUrl);
         ResponseHandler<String> responseHandler = new BasicResponseHandler();
         return httpClient.execute(httpGet, responseHandler);
+    }
+
+    private String makeRandomUrl(String url) {
+        String sidToAvoidServerCache = RandomStringUtils.randomAlphanumeric(15);
+        try {
+            URIBuilder uriBuilder = new URIBuilder(url);
+            uriBuilder.addParameter("sid", sidToAvoidServerCache);
+            return uriBuilder.build().toString();
+        } catch (URISyntaxException e) {
+            logger.info(String.format(INFO_LAGE_NY_UNIK_URL_FEILET, url));
+        }
+        return url;
     }
 
     public void setBaseUrl(String baseUrl) {
@@ -117,6 +135,18 @@ public class EnonicContentRetriever {
         this.cacheManager = cacheManager;
     }
 
+    public void setCacheName(String cacheName) {
+        if (!cacheManager.cacheExists(CACHENAME)) {
+            logger.debug(String.format("Removing cache: ", CACHENAME));
+            cacheManager.removeCache(CACHENAME);
+        }
+        CACHENAME = cacheName;
+        if (!cacheManager.cacheExists(CACHENAME)) {
+            logger.debug(String.format("Creating cache: ", CACHENAME));
+            cacheManager.addCacheIfAbsent(cacheName);
+        }
+    }
+
     protected void setHttpClient(HttpClient httpClient) {
         this.httpClient = httpClient;
     }
@@ -128,6 +158,6 @@ public class EnonicContentRetriever {
         }
     }
     public void refreshCache() {
-        
+        this.flushCache();
     }
 }
