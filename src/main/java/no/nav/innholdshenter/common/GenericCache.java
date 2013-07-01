@@ -76,7 +76,7 @@ public abstract class GenericCache<T> {
         return element;
     }
     private boolean elementIsOutdatedOrMissing(Element element) {
-        if (element == null) {
+        if (element == null || element.getObjectValue() == null) {
             logger.info(String.format(INFO_CACHELINJEN_FANTES_IKKE_I_CACHE));
             return true;
         }
@@ -111,6 +111,7 @@ public abstract class GenericCache<T> {
         }
         return false;
     }
+
 
     public void flushCache() {
         if(cacheManager.cacheExists(cacheName)) {

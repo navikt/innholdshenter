@@ -127,4 +127,7 @@ public class EnonicContentRetriever {
             cacheManager.getCache(CACHENAME).removeAll();
         }
     }
+    public void refreshCache() {
+        
+    }
 }
