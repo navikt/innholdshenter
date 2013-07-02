@@ -88,7 +88,7 @@ public class EnonicContentRetriever {
 
     private synchronized String getPageContentFromUrl(String url) throws IOException {
         String randomUrl = makeRandomUrl(url);
-        logger.debug(String.format(DEBUG_RETRIEVING_PAGE_CONTENT_FROM_URL, url));
+        logger.debug(String.format(DEBUG_RETRIEVING_PAGE_CONTENT_FROM_URL, randomUrl));
         HttpParams httpParams = httpClient.getParams();
         HttpConnectionParams.setSoTimeout(httpParams, httpTimeoutMillis);
         HttpConnectionParams.setConnectionTimeout(httpParams, httpTimeoutMillis);
