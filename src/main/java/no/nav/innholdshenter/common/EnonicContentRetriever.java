@@ -1,6 +1,8 @@
 package no.nav.innholdshenter.common;
 
+import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Element;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
@@ -16,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * Henter innholdet for en gitt URL. Hvis ferskt innhold finnes i cacheManager returneres det derfra.
@@ -38,7 +40,7 @@ public class EnonicContentRetriever {
     private int refreshIntervalSeconds;
 
 
-    private EnonicContentRetriever() {
+    public EnonicContentRetriever() {
         if(cacheManager == null) {
             cacheManager = CacheManager.create();
         }
@@ -157,7 +159,21 @@ public class EnonicContentRetriever {
             cacheManager.getCache(CACHENAME).removeAll();
         }
     }
+
     public void refreshCache() {
         this.flushCache();
+    }
+
+    public synchronized List getAllElements () {
+        if(!cacheManager.cacheExists(this.CACHENAME)) {
+            return new ArrayList();
+        }
+        List liste = new LinkedList();
+        Cache c = cacheManager.getCache(this.CACHENAME);
+        List<Element> keys = c.getKeys();
+        for (Object o: keys) {
+            liste.add(c.getQuiet(o));
+        }
+        return liste;
     }
 }
