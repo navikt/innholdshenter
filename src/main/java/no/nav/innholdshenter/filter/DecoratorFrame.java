@@ -28,7 +28,7 @@ public class DecoratorFrame {
     private String breadcrumbComponentEndTag;
     private String breadcrumbComponentMergePoint;
 
-    private boolean includeQueryStringInDecoration = true;
+    private boolean includeQueryStringInDecoration = false;
     private List<String> includeQueryStringInDecorationPatterns;
     private List<String> excludeQueryStringFromDecorationPatterns;
 
@@ -143,6 +143,7 @@ public class DecoratorFrame {
             innerUrl = alternativUrlBasedOnHtmlMetaTag;
         } else {
             innerUrl = request.getRequestURI();
+
         }
 
         urlToCall += innerUrl;
