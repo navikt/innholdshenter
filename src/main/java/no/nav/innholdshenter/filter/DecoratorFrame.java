@@ -169,24 +169,16 @@ public class DecoratorFrame {
         if (request.getQueryString() != null) {
             String url = getFullRequestUrlFromRequest(request);
 
+            if (includeQueryStringInDecoration && hasExcludePatterns() && !(urlMatchesPatternInList(url, excludeQueryStringFromDecorationPatterns))){
+                return true;
 
-            if (includeQueryStringInDecoration) {
-                if (hasExcludePatterns()) {
-                    if (!(urlMatchesPatternInList(url, excludeQueryStringFromDecorationPatterns))) {
-                        return true;
-                    }
-                } else {
-                    return true;
-                }
-            } else {
-                if (hasIncludePatterns()) {
-                    if (urlMatchesPatternInList(url, includeQueryStringInDecorationPatterns)) {
-                        return true;
-                    }
-                }
+            }else if(includeQueryStringInDecoration && !hasExcludePatterns()){
+                return true;
+
+            }else if (hasIncludePatterns() && urlMatchesPatternInList(url, includeQueryStringInDecorationPatterns)){
+                return true;
             }
         }
-
         return false;
     }
 

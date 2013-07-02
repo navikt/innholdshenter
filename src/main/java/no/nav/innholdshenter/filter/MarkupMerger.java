@@ -58,15 +58,21 @@ public final class MarkupMerger {
 
         if (mergePointIsFoundInBothDecorationTemplateAndPageToBeRewritten(breadbrumbComponentMergePoint, breadcrumbsFromApplicationStrippedTags, breadcrumbsFromVerticalSiteStrippedTags)) {
             newBreadCrumb = newBreadCrumb.substring(0, breadcrumbsFromVerticalSiteStrippedTags.indexOf(breadbrumbComponentMergePoint));
-            newBreadCrumb += breadcrumbsFromApplicationStrippedTags.substring(breadcrumbsFromApplicationStrippedTags.indexOf(breadbrumbComponentMergePoint), breadcrumbsFromApplicationStrippedTags.length());
+            int breadcrumpsFromApplicationIndex = breadcrumbsFromApplicationStrippedTags.indexOf(breadbrumbComponentMergePoint);
+            int length = breadcrumbsFromApplicationStrippedTags.length();
+            newBreadCrumb += breadcrumbsFromApplicationStrippedTags.substring(breadcrumpsFromApplicationIndex, length);
             return newBreadCrumb;
         } else {
            return breadcrumbsFromApplicationStrippedTags;
         }
     }
 
-   private static boolean mergePointIsFoundInBothDecorationTemplateAndPageToBeRewritten(String breadbrumbComponentMergePoint, String breadcrumbsFromApplicationStrippedTags, String breadcrumbsFromVerticalSiteStrippedTags) {
-      return breadbrumbComponentMergePoint != null && breadcrumbsFromApplicationStrippedTags.indexOf(breadbrumbComponentMergePoint) >= 0 && breadcrumbsFromVerticalSiteStrippedTags.indexOf(breadbrumbComponentMergePoint) >=0;
+   private static boolean mergePointIsFoundInBothDecorationTemplateAndPageToBeRewritten(String breadbrumbComponentMergePoint,
+                                                                                        String breadcrumbsFromApplicationStrippedTags,
+                                                                                        String breadcrumbsFromVerticalSiteStrippedTags) {
+       int breadCrumpsFromVerticalSiteIndex = breadcrumbsFromVerticalSiteStrippedTags.indexOf(breadbrumbComponentMergePoint);
+       int breadCrumpsFromApplicationIndex = breadcrumbsFromApplicationStrippedTags.indexOf(breadbrumbComponentMergePoint);
+       return breadbrumbComponentMergePoint != null && breadCrumpsFromApplicationIndex >= 0 && breadCrumpsFromVerticalSiteIndex >=0;
    }
 
    private static String stripTags(String stringToStrip, String startTag, String endTag)

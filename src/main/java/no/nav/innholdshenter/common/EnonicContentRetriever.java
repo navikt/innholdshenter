@@ -39,7 +39,7 @@ public class EnonicContentRetriever {
     private HttpClient httpClient;
 
     private CacheManager cacheManager;
-    private String CACHENAME;
+    private String cachename;
     private int refreshIntervalSeconds;
 
 
@@ -49,16 +49,16 @@ public class EnonicContentRetriever {
         }
         httpClient = new DefaultHttpClient();
     }
-    public EnonicContentRetriever(String CACHENAME) {
+    public EnonicContentRetriever(String cachename) {
         this();
-        this.CACHENAME = CACHENAME;
-        this.setCacheName(CACHENAME);
+        this.cachename = cachename;
+        this.setCacheName(cachename);
     }
 
     public String getPageContent(String path) {
         final String url = createUrl(path);
 
-        GenericCache<String> genericCache = new GenericCache<String>(cacheManager, refreshIntervalSeconds, url, CACHENAME) {
+        GenericCache<String> genericCache = new GenericCache<String>(cacheManager, refreshIntervalSeconds, url, cachename) {
             protected String getContentFromSource() throws IOException {
                 return getPageContentFromUrl(url);
             }
@@ -70,7 +70,7 @@ public class EnonicContentRetriever {
     public Properties getProperties(String propertiesPath) {
         final String url = createUrl(propertiesPath);
 
-        GenericCache<Properties> genericCache = new GenericCache<Properties>(cacheManager, refreshIntervalSeconds, url, CACHENAME) {
+        GenericCache<Properties> genericCache = new GenericCache<Properties>(cacheManager, refreshIntervalSeconds, url, cachename) {
             protected Properties getContentFromSource() throws IOException {
                 String content = getPageContentFromUrl(url);
                 ByteArrayInputStream propertiesStream = new ByteArrayInputStream(content.getBytes(LOCALE_UTF_8));
@@ -113,11 +113,11 @@ public class EnonicContentRetriever {
         this.baseUrl = appendSlashIfNotPresent(baseUrl);
     }
 
-    private String appendSlashIfNotPresent(String baseUrl) {
-        if (!SLASH.equals(baseUrl.substring(baseUrl.length() - 1))) {
-            baseUrl += SLASH;
+    private String appendSlashIfNotPresent(String inputBaseUrl) {
+        if (!SLASH.equals(inputBaseUrl.substring(inputBaseUrl.length() - 1))) {
+            inputBaseUrl += SLASH;
         }
-        return baseUrl;
+        return inputBaseUrl;
     }
 
     public int getHttpTimeoutMillis() {
@@ -141,13 +141,13 @@ public class EnonicContentRetriever {
     }
 
     public void setCacheName(String cacheName) {
-        if (!cacheManager.cacheExists(CACHENAME)) {
-            logger.debug(String.format("Removing cache: ", CACHENAME));
-            cacheManager.removeCache(CACHENAME);
+        if (!cacheManager.cacheExists(cachename)) {
+            logger.debug(String.format("Removing cache: ", cachename));
+            cacheManager.removeCache(cachename);
         }
-        CACHENAME = cacheName;
-        if (!cacheManager.cacheExists(CACHENAME)) {
-            logger.debug(String.format("Creating cache: ", CACHENAME));
+        cachename = cacheName;
+        if (!cacheManager.cacheExists(cachename)) {
+            logger.debug(String.format("Creating cache: ", cachename));
             cacheManager.addCacheIfAbsent(cacheName);
         }
     }
@@ -157,9 +157,9 @@ public class EnonicContentRetriever {
     }
 
     public void flushCache() {
-        if(cacheManager.cacheExists(CACHENAME)) {
-            logger.warn( String.format(WARN_MELDING_FLUSHER_CACHEN, CACHENAME) );
-            cacheManager.getCache(CACHENAME).removeAll();
+        if(cacheManager.cacheExists(cachename)) {
+            logger.warn( String.format(WARN_MELDING_FLUSHER_CACHEN, cachename) );
+            cacheManager.getCache(cachename).removeAll();
         }
     }
 
@@ -168,11 +168,11 @@ public class EnonicContentRetriever {
     }
 
     public synchronized List getAllElements () {
-        if(!cacheManager.cacheExists(this.CACHENAME)) {
+        if(!cacheManager.cacheExists(this.cachename)) {
             return new ArrayList();
         }
         List liste = new LinkedList();
-        Cache c = cacheManager.getCache(this.CACHENAME);
+        Cache c = cacheManager.getCache(this.cachename);
         List<Element> keys = c.getKeys();
         for (Object o: keys) {
             liste.add(c.getQuiet(o));
