@@ -132,7 +132,7 @@ public class DecoratorFrame {
             return new HtmlPage(pageFrame);
         } catch (IllegalStateException e) {
             logger.error(FEIL_VED_HENTING_AV_DEKORERINGSRAMME + e.getMessage());
-            return getErrorPage(pageUrl);
+            return getErrorPage();
         }
     }
 
@@ -236,7 +236,7 @@ public class DecoratorFrame {
         return false;
     }
 
-    private HtmlPage getErrorPage(String pageUrl) {
+    private HtmlPage getErrorPage() {
         StringBuilder pageContent = new StringBuilder();
         pageContent.append("<html>");
         pageContent.append("<head><title>NAV - Feilside</title></head>");
