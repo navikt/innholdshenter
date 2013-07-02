@@ -173,7 +173,7 @@ public class EnonicContentRetriever {
         }
         List liste = new LinkedList();
         Cache c = cacheManager.getCache(this.cachename);
-        List<Element> keys = c.getKeys();
+        List keys = c.getKeys();
         for (Object o: keys) {
             liste.add(c.getQuiet(o));
         }
