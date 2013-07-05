@@ -58,29 +58,28 @@ public class EnonicContentRetriever {
 
     public String getPageContent(String path) {
         final String url = createUrl(path);
+        return getPageContentFullUrl(url, getRefreshIntervalSeconds());
+    }
 
-        GenericCache<String> genericCache = new GenericCache<String>(cacheManager, refreshIntervalSeconds, url, cachename) {
+    private String getPageContentFullUrl(final String url, int TTLSeconds) {
+        GenericCache<String> genericCache = new GenericCache<String>(cacheManager, TTLSeconds, url, cachename) {
             protected String getContentFromSource() throws IOException {
                 return getPageContentFromUrl(url);
             }
         };
-
         return genericCache.fetch();
     }
-
     public Properties getProperties(String propertiesPath) {
         final String url = createUrl(propertiesPath);
-
-        GenericCache<Properties> genericCache = new GenericCache<Properties>(cacheManager, refreshIntervalSeconds, url, cachename) {
-            protected Properties getContentFromSource() throws IOException {
-                String content = getPageContentFromUrl(url);
-                ByteArrayInputStream propertiesStream = new ByteArrayInputStream(content.getBytes(LOCALE_UTF_8));
-                Properties properties = new Properties();
-                properties.loadFromXML(propertiesStream);
-                return properties;
-            }
-        };
-        return genericCache.fetch();
+        String content = getPageContentFullUrl(url, getRefreshIntervalSeconds());
+        Properties properties = new Properties();
+        try {
+            ByteArrayInputStream propertiesStream = new ByteArrayInputStream(content.getBytes(LOCALE_UTF_8));
+            properties.loadFromXML(propertiesStream);
+        } catch (IOException e) {
+            logger.error("Feil i konvertering fra xml til Properties objekt.");
+        }
+        return properties;
     }
 
     private String createUrl(String path) {
@@ -165,18 +164,14 @@ public class EnonicContentRetriever {
     }
 
     public void refreshCache() {
-        if(cacheManager.cacheExists(cachename)) {
-            logger.warn( String.format(WARN_MELDING_REFRESH_CACHE, cachename) );
+        int hardcode_TTL_to_ensure_cache_is_updated = -1;
+        if (cacheManager.cacheExists(cachename)) {
+            logger.warn(String.format(WARN_MELDING_REFRESH_CACHE, cachename));
             Cache c = cacheManager.getCache(cachename);
-            for(Object key : c.getKeys()) {
+            for (Object key : c.getKeys()) {
                 final String url = (String) key;
-                int hardcode_TTL_to_ensure_cache_is_updated = -1;
-                GenericCache<String> genericCache = new GenericCache<String>(cacheManager, hardcode_TTL_to_ensure_cache_is_updated, url, cachename) {
-                    protected String getContentFromSource() throws IOException {
-                        return getPageContentFromUrl(url);
-                    }
-                };
-                genericCache.fetch();
+                Element element = c.get(key);
+                getPageContentFullUrl(url, hardcode_TTL_to_ensure_cache_is_updated);
             }
         }
     }

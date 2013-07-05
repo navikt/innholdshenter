@@ -60,6 +60,12 @@ public class EnonicContentRetrieverFullTest {
             "<entry key=\"cv.kontaktdetaljer.kontaktinfo.land\">Land</entry>" +
             "<entry key=\"kontaktinfo.overskrifter.maalform\">Ønsket målform</entry>" +
             "</properties>";
+    private static final String PROPERTIES_CONTENT_CACHED = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+            "<!DOCTYPE properties SYSTEM \"http://java.sun.com/dtd/properties.dtd\">\n" +
+            "<properties>" +
+            "<entry key=\"cv.kontaktdetaljer.kontaktinfo.land\">Land (cached)</entry>" +
+            "<entry key=\"kontaktinfo.overskrifter.maalform\">Ønsket målform (cached)</entry>" +
+            "</properties>";
 
     private static final String PROPERTIES_CONTENT_2 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
             "<!DOCTYPE properties SYSTEM \"http://java.sun.com/dtd/properties.dtd\">\n" +
@@ -220,7 +226,7 @@ public class EnonicContentRetrieverFullTest {
     @Test
     public void skalHenteCachedePropertiesFraCache() throws Exception {
         when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenReturn(PROPERTIES_CONTENT_2);
-        cache.put(new Element(URL, CACHED_PROPERTIES));
+        cache.put(new Element(URL, PROPERTIES_CONTENT_CACHED));
         testListener.resetStatus();
 
         Properties result = contentRetriever.getProperties(PATH);
