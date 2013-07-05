@@ -32,6 +32,7 @@ public class EnonicContentRetriever {
     private static final String LOCALE_UTF_8 = "UTF-8";
     private static final String DEBUG_RETRIEVING_PAGE_CONTENT_FROM_URL = "Retrieving page content from url %s";
     private static final String WARN_MELDING_FLUSHER_CACHEN = "Flusher cachen: %s";
+    private static final String WARN_MELDING_REFRESH_CACHE = "Refresh cachen: %s";
     private static final String INFO_LAGE_NY_UNIK_URL_FEILET = "Feilet å lage ny unik url, url: %s.";
 
     private String baseUrl;
@@ -97,7 +98,7 @@ public class EnonicContentRetriever {
         return httpClient.execute(httpGet, responseHandler);
     }
 
-    private String makeRandomUrl(String url) {
+    public static String makeRandomUrl(String url) {
         String sidToAvoidServerCache = RandomStringUtils.randomAlphanumeric(15);
         try {
             URIBuilder uriBuilder = new URIBuilder(url);
@@ -164,7 +165,20 @@ public class EnonicContentRetriever {
     }
 
     public void refreshCache() {
-        this.flushCache();
+        if(cacheManager.cacheExists(cachename)) {
+            logger.warn( String.format(WARN_MELDING_REFRESH_CACHE, cachename) );
+            Cache c = cacheManager.getCache(cachename);
+            for(Object key : c.getKeys()) {
+                final String url = (String) key;
+                int hardcode_TTL_to_ensure_cache_is_updated = -1;
+                GenericCache<String> genericCache = new GenericCache<String>(cacheManager, hardcode_TTL_to_ensure_cache_is_updated, url, cachename) {
+                    protected String getContentFromSource() throws IOException {
+                        return getPageContentFromUrl(url);
+                    }
+                };
+                genericCache.fetch();
+            }
+        }
     }
 
     public synchronized List getAllElements () {
