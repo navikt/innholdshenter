@@ -1,8 +1,6 @@
 package no.nav.innholdshenter.common;
 
-import junit.framework.Assert;
 import org.apache.commons.lang.RandomStringUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,7 +14,6 @@ import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.anyInt;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
-import static org.mockito.Mockito.verify;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(RandomStringUtils.class)
