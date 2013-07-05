@@ -32,7 +32,6 @@ import no.nav.innholdshenter.common.EhcacheTestListener.ListenerStatus;
 @RunWith(MockitoJUnitRunner.class)
 public class EnonicContentRetrieverFullTest {
 
-    private String cacheName = "TestEhcacheCacheName";
 
     private CacheManager cacheManager;
     private Cache cache;
@@ -47,6 +46,7 @@ public class EnonicContentRetrieverFullTest {
 
     private EnonicContentRetriever contentRetriever;
 
+    private static final String cacheName = "TestEhcacheCacheName";
     private static final String SERVER = "http://localhost:9000";
     private static final String PATH = "systemsider/ApplicationFrame";
     private static final String URL = SERVER + "/" + PATH;

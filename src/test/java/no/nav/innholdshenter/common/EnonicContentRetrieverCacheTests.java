@@ -22,9 +22,7 @@ import java.util.Properties;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EnonicContentRetrieverCacheTests {
@@ -37,10 +35,6 @@ public class EnonicContentRetrieverCacheTests {
     private EhcacheTestListener testListener;
     @Mock
     private HttpClient httpClient;
-    @Mock
-    private HttpClient httpClient2;
-    @Mock
-    private HttpClient httpClient3;
 
     @Mock
     private HttpParams httpParams;
@@ -51,6 +45,7 @@ public class EnonicContentRetrieverCacheTests {
     private EnonicContentRetriever contentRetriever;
 
     private static final String SERVER = "http://localhost:9000";
+    private static final String PATH2 = "systemsider/ledetekster";
     private static final String PATH = "systemsider/ApplicationFrame";
     private static final String URL = SERVER + "/" + PATH;
     private static final int REFRESH_INTERVAL = 5;
@@ -94,10 +89,6 @@ public class EnonicContentRetrieverCacheTests {
     public void setUp() {
         when(httpClient.getParams()).thenReturn(httpParams);
         when(httpClient.getConnectionManager()).thenReturn(connectionManager);
-        when(httpClient2.getParams()).thenReturn(httpParams);
-        when(httpClient2.getConnectionManager()).thenReturn(connectionManager);
-        when(httpClient3.getParams()).thenReturn(httpParams);
-        when(httpClient3.getConnectionManager()).thenReturn(connectionManager);
 
 
         testListener = new EhcacheTestListener();
@@ -129,9 +120,9 @@ public class EnonicContentRetrieverCacheTests {
 
 
         testListener.resetStatus();
-        result = contentRetriever.getPageContent(PATH);
+        String result2 = contentRetriever.getPageContent(PATH);
         assertEquals(ListenerStatus.RESET, testListener.getLastStatus());
-        assertEquals(CONTENT, result);
+        assertEquals(CONTENT, result2);
 
         testListener.resetStatus();
         contentRetriever.flushCache();
@@ -146,9 +137,10 @@ public class EnonicContentRetrieverCacheTests {
 
     @Test
     public void reset_cache_should_give_a_populated_cache_and_fetching_an_element_should_return_the_updated_content() throws Exception {
-        when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenReturn(OLD_CONTENT);
-        when(httpClient2.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenReturn(NEW_CONTENT);
-        when(httpClient3.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenReturn(CACHED_CONTENT);
+        when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class)))
+                .thenReturn(OLD_CONTENT)
+                .thenReturn(NEW_CONTENT)
+                .thenReturn(CACHED_CONTENT);
 
         testListener.resetStatus();
         String result = contentRetriever.getPageContent(PATH);
@@ -157,24 +149,23 @@ public class EnonicContentRetrieverCacheTests {
         verify(httpClient).execute(any(HttpGet.class), any(BasicResponseHandler.class));
 
         testListener.resetStatus();
-        contentRetriever.setHttpClient(httpClient2);
         contentRetriever.refreshCache();
-        verify(httpClient2).execute(any(HttpGet.class), any(BasicResponseHandler.class));
+        verify(httpClient, times(2)).execute(any(HttpGet.class), any(BasicResponseHandler.class));
         assertEquals(ListenerStatus.ELEMENT_UPDATED, testListener.getLastStatus());
 
         testListener.resetStatus();
-        contentRetriever.setHttpClient(httpClient3);
         result = contentRetriever.getPageContent(PATH);
         assertEquals(NEW_CONTENT, result);
         assertEquals(ListenerStatus.RESET, testListener.getLastStatus());
-        verify(httpClient3, never()).execute(any(HttpGet.class), any(BasicResponseHandler.class));
+        verify(httpClient, times(2)).execute(any(HttpGet.class), any(BasicResponseHandler.class));
     }
 
     @Test
     public void reset_cache_should_still_give_old_content_when_update_fails() throws Exception {
-        when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenReturn(OLD_CONTENT);
-        when(httpClient2.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenThrow(new IOException());
-        when(httpClient3.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenReturn(CACHED_CONTENT);
+        when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class)))
+                .thenReturn(OLD_CONTENT)
+                .thenThrow(new IOException())
+                .thenReturn(CACHED_CONTENT);
 
         testListener.resetStatus();
         String result = contentRetriever.getPageContent(PATH);
@@ -183,16 +174,47 @@ public class EnonicContentRetrieverCacheTests {
         verify(httpClient).execute(any(HttpGet.class), any(BasicResponseHandler.class));
 
         testListener.resetStatus();
-        contentRetriever.setHttpClient(httpClient2);
         contentRetriever.refreshCache();
-        verify(httpClient2).execute(any(HttpGet.class), any(BasicResponseHandler.class));
+        verify(httpClient, times(2)).execute(any(HttpGet.class), any(BasicResponseHandler.class));
         assertEquals(ListenerStatus.RESET, testListener.getLastStatus());
 
         testListener.resetStatus();
-        contentRetriever.setHttpClient(httpClient3);
         result = contentRetriever.getPageContent(PATH);
         assertEquals(OLD_CONTENT, result);
         assertEquals(ListenerStatus.RESET, testListener.getLastStatus());
-        verify(httpClient3, never()).execute(any(HttpGet.class), any(BasicResponseHandler.class));
+        verify(httpClient, times(2)).execute(any(HttpGet.class), any(BasicResponseHandler.class));
+    }
+
+    @Test
+    public void reset_cache_should_update_all_even_if_first_url_fails() throws Exception {
+        when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class)))
+                .thenReturn(OLD_CONTENT)
+                .thenReturn(CACHED_CONTENT)
+                .thenThrow(new IOException())
+                .thenReturn(NEW_CONTENT);
+
+        testListener.resetStatus();
+        String result = contentRetriever.getPageContent(PATH);
+        assertEquals(ListenerStatus.ELEMENT_ADDED, testListener.getLastStatus());
+        assertEquals(OLD_CONTENT, result);
+        verify(httpClient).execute(any(HttpGet.class), any(BasicResponseHandler.class));
+
+        testListener.resetStatus();
+        result = contentRetriever.getPageContent(PATH2);
+        verify(httpClient, times(2)).execute(any(HttpGet.class), any(BasicResponseHandler.class));
+        assertEquals(ListenerStatus.ELEMENT_ADDED, testListener.getLastStatus());
+        assertEquals(CACHED_CONTENT, result);
+
+        testListener.resetStatus();
+        contentRetriever.refreshCache();
+
+        result = contentRetriever.getPageContent(PATH);
+        assertEquals(OLD_CONTENT, result);
+        verify(httpClient, times(4)).execute(any(HttpGet.class), any(BasicResponseHandler.class));
+
+        String result2 = contentRetriever.getPageContent(PATH2);
+        assertEquals(NEW_CONTENT, result2);
+        assertEquals(ListenerStatus.ELEMENT_UPDATED, testListener.getLastStatus());
+        verify(httpClient, times(4)).execute(any(HttpGet.class), any(BasicResponseHandler.class));
     }
 }

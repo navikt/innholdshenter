@@ -29,7 +29,7 @@ public abstract class GenericCache<T> {
     private boolean neverExpireCacheLines = true;
 
 
-    public GenericCache(CacheManager cacheManager, int refreshIntervalSeconds, String cacheKey) {
+   public GenericCache(CacheManager cacheManager, int refreshIntervalSeconds, String cacheKey) {
         this.cacheManager = cacheManager;
         this.refreshIntervalSeconds = refreshIntervalSeconds;
         this.cacheKey = cacheKey;
