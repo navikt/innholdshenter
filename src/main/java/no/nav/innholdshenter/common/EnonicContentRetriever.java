@@ -34,7 +34,7 @@ public class EnonicContentRetriever {
     private static final String INFO_LAGE_NY_UNIK_URL_FEILET = "Feilet å lage ny unik url, url: %s.";
     private static final String FEILMELDING_KLARTE_HENTE_INNHOLD_MEN_INNHOLDET_VAR_UGYLDIG = "Henting fra url %s gikk gjennom, men innholdet var ikke som forventet. Cache ikke oppdatert.";
     private static final String HTTP_STATUS_FEIL = "Http-kall feilet, status: %d, grunn: %s";
-    private static final int MIN_VALID_CONTENT_LENGTH = 20;
+    private static final int MIN_VALID_CONTENT_LENGTH = 60;
     private List feilmeldinger;
 
     private String baseUrl;
@@ -124,7 +124,7 @@ public class EnonicContentRetriever {
             }
         }
         if(innhold.length() > MIN_VALID_CONTENT_LENGTH) {
-            //return true;
+            return true;
         }
         return false;
     }
