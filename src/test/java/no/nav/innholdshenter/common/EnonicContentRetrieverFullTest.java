@@ -4,6 +4,7 @@ import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.impl.client.BasicResponseHandler;
@@ -16,10 +17,12 @@ import org.mockito.Mock;
 
 import org.mockito.runners.MockitoJUnitRunner;
 import java.io.IOException;
+import java.util.List;
 import java.util.Properties;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -113,6 +116,20 @@ public class EnonicContentRetrieverFullTest {
         contentRetriever.setBaseUrl(SERVER);
         contentRetriever.setRefreshIntervalSeconds(REFRESH_INTERVAL);
     }
+
+    @Test
+    public void feil_skal_lage_feilmelding_i_listen() throws Exception{
+        when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class)))
+                .thenThrow(new HttpResponseException(404, "Not found"));
+
+        String result = contentRetriever.getPageContent(PATH);
+        List<CacheStatusFeilmelding> feil = contentRetriever.getFeilmeldinger();
+        assertTrue(feil.size()>=1);
+        int errorcode = feil.get(0).getStatusCode();
+        assertTrue(errorcode == 404);
+        assertEquals("Not found", feil.get(0).getFeilmelding());
+    }
+
     @Test
     public void skal_ikke_legge_inn_ugyldig_innhold() throws Exception {
         when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class)))
