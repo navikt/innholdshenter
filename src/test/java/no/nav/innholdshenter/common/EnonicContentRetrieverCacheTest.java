@@ -137,7 +137,7 @@ public class EnonicContentRetrieverCacheTest {
     }
 
     @Test
-    public void reset_cache_should_give_a_populated_cache_and_fetching_an_element_should_return_the_updated_content() throws Exception {
+    public void refresh_cache_should_give_a_populated_cache_and_fetching_an_element_should_return_the_updated_content() throws Exception {
         when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class)))
                 .thenReturn(OLD_CONTENT)
                 .thenReturn(NEW_CONTENT)
@@ -162,7 +162,7 @@ public class EnonicContentRetrieverCacheTest {
     }
 
     @Test
-    public void reset_cache_should_still_give_old_content_when_update_fails() throws Exception {
+    public void refresh_cache_should_still_give_old_content_when_update_fails() throws Exception {
         when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class)))
                 .thenReturn(OLD_CONTENT)
                 .thenThrow(new IOException())
@@ -187,7 +187,7 @@ public class EnonicContentRetrieverCacheTest {
     }
 
     @Test
-    public void reset_cache_should_update_all_even_if_first_url_fails() throws Exception {
+    public void refresh_cache_should_update_all_even_if_first_url_fails() throws Exception {
         when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class)))
                 .thenReturn(OLD_CONTENT)
                 .thenReturn(CACHED_CONTENT)
@@ -208,6 +208,7 @@ public class EnonicContentRetrieverCacheTest {
 
         testListener.resetStatus();
         contentRetriever.refreshCache();
+        assertEquals(ListenerStatus.ELEMENT_UPDATED, testListener.getLastStatus());
 
         result = contentRetriever.getPageContent(PATH);
         assertEquals(OLD_CONTENT, result);
@@ -215,7 +216,11 @@ public class EnonicContentRetrieverCacheTest {
 
         String result2 = contentRetriever.getPageContent(PATH2);
         assertEquals(NEW_CONTENT, result2);
-        assertEquals(ListenerStatus.ELEMENT_UPDATED, testListener.getLastStatus());
         verify(httpClient, times(4)).execute(any(HttpGet.class), any(BasicResponseHandler.class));
+    }
+
+    @Test
+    public void cache_should_be_able_to_refresh_and_retrieve_both_properties_and_strings() {
+        
     }
 }
