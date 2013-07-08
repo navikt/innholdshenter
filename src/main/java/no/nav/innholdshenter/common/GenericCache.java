@@ -3,10 +3,14 @@ package no.nav.innholdshenter.common;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.List;
 
 public abstract class GenericCache<T> {
     private static final Logger logger = LoggerFactory.getLogger(GenericCache.class);
@@ -31,7 +35,32 @@ public abstract class GenericCache<T> {
    public GenericCache(CacheManager cacheManager, int refreshIntervalSeconds, String cacheKey) {
         this.cacheManager = cacheManager;
         this.refreshIntervalSeconds = refreshIntervalSeconds;
-        this.cacheKey = cacheKey;
+        this.cacheKey = this.sanitizeUrlCacheKey(cacheKey);
+    }
+
+    private String sanitizeUrlCacheKey(String cacheKey) {
+        URIBuilder uriBuilder = null;
+        try {
+            uriBuilder = new URIBuilder(cacheKey);
+            List<NameValuePair> params = uriBuilder.getQueryParams();
+            for(NameValuePair nameValuePair : params) {
+                if (nameValuePair.getName().startsWith("urlPath")) {
+                    String urlpath = sanitizeUrlPath(nameValuePair.getValue());
+                    uriBuilder.setParameter("urlPath", urlpath);
+                }
+            }
+        } catch (URISyntaxException e) {
+            logger.debug(e.getMessage());
+            return cacheKey;
+        }
+        return uriBuilder.toString();
+    }
+
+    private String sanitizeUrlPath(String urlParam) {
+        if (urlParam != null && !urlParam.isEmpty()) {
+            return urlParam.split(",")[0];
+        }
+        return urlParam;
     }
 
     public GenericCache(CacheManager cacheManager, int refreshIntervalSeconds, String cacheKey, String cacheName) {

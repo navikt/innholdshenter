@@ -28,7 +28,7 @@ public class DecoratorFrame {
     private String breadcrumbComponentEndTag;
     private String breadcrumbComponentMergePoint;
 
-    private boolean includeQueryStringInDecoration = false;
+    private boolean includeQueryStringInDecoration = true;
     private List<String> includeQueryStringInDecorationPatterns;
     private List<String> excludeQueryStringFromDecorationPatterns;
 
