@@ -12,7 +12,6 @@ public abstract class GenericCache<T> {
     private static final Logger logger = LoggerFactory.getLogger(GenericCache.class);
     private static final String FEILMELDING_KLARTE_IKKE_HENTE_INNHOLD_FOR_CACHE_KEY = "Klarte ikke hente innhold for cache key %s. Bruker cache. Feilmelding: %s";
     private static final String FEILMEDLING_KLARTE_IKKE_HENTE_INNHOLD_OG_INNHOLDET_FINNES_IKKE_I_CACHE = "Henting fra url %s feilet og innholdet er ikke i cache.";
-    private static final String FEILMELDING_KLARTE_HENTE_INNHOLD_MEN_INNHOLDET_VAR_UGYLDIG = "Henting fra url %s gikk gjennom, men innholdet var ikke som forventet. Cache ikke oppdatert.";
     private static final String FEILMELDING_CACHELINJE_ER_UTDATERT = "Cachelinjen er utdatert med key: %s TimeToLive: %d seconds";
     private static final String INFO_CACHELINJEN_FANTES_IKKE_I_CACHE = "Cachelinjen fantes ikke i cache.";
     private static final String WARN_FLUSHER_CACHEN = "Flusher cachen: %s";
@@ -62,10 +61,6 @@ public abstract class GenericCache<T> {
         T cacheContent;
         try {
             cacheContent = getContentFromSource();
-            if(!isContentValid(cacheContent)) {
-                logger.warn(String.format(FEILMELDING_KLARTE_HENTE_INNHOLD_MEN_INNHOLDET_VAR_UGYLDIG, cacheKey));
-                throw new IOException();
-            }
             element = new Element(cacheKey, cacheContent);
             element.setEternal(true);
 
@@ -84,12 +79,6 @@ public abstract class GenericCache<T> {
     }
 
     protected abstract T getContentFromSource() throws IOException;
-
-    protected boolean isContentValid(T content) throws IOException {
-        // if we have content, is it valid?
-        // TODO: actually test content
-        return true;
-    }
 
     public String getCacheName() {
         return cacheName;
