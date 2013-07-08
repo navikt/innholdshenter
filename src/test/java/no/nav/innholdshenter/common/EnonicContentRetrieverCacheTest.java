@@ -220,7 +220,28 @@ public class EnonicContentRetrieverCacheTest {
     }
 
     @Test
-    public void cache_should_be_able_to_refresh_and_retrieve_both_properties_and_strings() {
-        
+    public void cache_should_be_able_to_refresh_and_retrieve_both_properties_and_strings() throws Exception {
+        when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class)))
+                .thenReturn(OLD_CONTENT)
+                .thenReturn(PROPERTIES_CONTENT)
+                .thenThrow(new IOException())
+                .thenReturn(PROPERTIES_CONTENT_2);
+
+        testListener.resetStatus();
+        String innhold = contentRetriever.getPageContent(PATH);
+        Properties nokler = contentRetriever.getProperties(PATH2);
+        assertEquals(OLD_CONTENT, innhold);
+        assertEquals(PROPERTIES, nokler);
+        verify(httpClient, times(2)).execute(any(HttpGet.class), any(BasicResponseHandler.class));
+
+        testListener.resetStatus();
+        contentRetriever.refreshCache();
+
+        verify(httpClient, times(4)).execute(any(HttpGet.class), any(BasicResponseHandler.class));
+        innhold = contentRetriever.getPageContent(PATH);
+        nokler = contentRetriever.getProperties(PATH2);
+        assertEquals(OLD_CONTENT, innhold);
+        assertEquals(PROPERTIES_2, nokler);
+
     }
 }
