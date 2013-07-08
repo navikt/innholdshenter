@@ -21,9 +21,8 @@ import java.util.Properties;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+
 import no.nav.innholdshenter.common.EhcacheTestListener.ListenerStatus;
 
 /**
@@ -74,6 +73,8 @@ public class EnonicContentRetrieverFullTest {
             "<entry key=\"cv.kontaktdetaljer.kontaktinfo.epost\">Epost</entry>" +
             "</properties>";
 
+    private static final String UGYLDIG_INNHOLD = "html>404</html>";
+
     private static final Properties PROPERTIES = new Properties();
     private static final Properties PROPERTIES_2 = new Properties();
     private static final Properties CACHED_PROPERTIES = new Properties();
@@ -111,6 +112,24 @@ public class EnonicContentRetrieverFullTest {
         contentRetriever.setHttpClient(httpClient);
         contentRetriever.setBaseUrl(SERVER);
         contentRetriever.setRefreshIntervalSeconds(REFRESH_INTERVAL);
+    }
+    @Test
+    public void skal_ikke_legge_inn_ugyldig_innhold() throws Exception {
+        when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class)))
+                .thenReturn(CONTENT)
+                .thenReturn(UGYLDIG_INNHOLD);
+
+        String result = contentRetriever.getPageContent(PATH);
+        assertEquals(CONTENT, result);
+
+        Thread.sleep((REFRESH_INTERVAL+1)*1000);
+
+        testListener.resetStatus();
+        result = contentRetriever.getPageContent(PATH);
+
+        verify(httpClient, times(2)).execute(any(HttpGet.class), any(BasicResponseHandler.class));
+        assertEquals(CONTENT, result);
+        assertEquals(ListenerStatus.RESET, testListener.getLastStatus());
     }
     @Test
     public void skal_Oppdatere_Utdaterte_Cachede_Properties_I_Cache_fra_URL() throws Exception {
