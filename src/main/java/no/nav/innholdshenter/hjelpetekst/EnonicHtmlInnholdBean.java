@@ -28,7 +28,7 @@ public class EnonicHtmlInnholdBean {
     private static final String INNHOLDSLISTE_ELEMENT = "innholdsliste";
     private static final String KEY_ATTRIBUTE = "key";
     private static final String KEY_URL_QUERY_PATH = "?key=";
-    private static final String FEILMELDING_FEIL_VED_HENTING_AV_HTMLINNHOLD_MED_KEY = "Feil ved henting av htmlinnhold med key '%s': %s";
+    private static final String FEILMELDING_FEIL_VED_HENTING_AV_HTMLINNHOLD_MED_KEY = "Feil ved henting av htmlinnhold med key '{}': {}";
 
     private String helptextPath;
 
@@ -55,7 +55,7 @@ public class EnonicHtmlInnholdBean {
                 htmlInnhold = processHtmlInnhold(htmlInnhold);
             }
         } catch (IllegalStateException e) {
-            logger.error(String.format(FEILMELDING_FEIL_VED_HENTING_AV_HTMLINNHOLD_MED_KEY, key, e.getMessage()));
+            logger.error(FEILMELDING_FEIL_VED_HENTING_AV_HTMLINNHOLD_MED_KEY, key, e.getMessage());
         }
         return htmlInnhold;
     }
@@ -93,7 +93,7 @@ public class EnonicHtmlInnholdBean {
                 }
             }
         } catch (IllegalStateException e) {
-            logger.error("Feil ved henting av hjelpetekster fra url " + helptextPath);
+            logger.error("Feil ved henting av hjelpetekster fra url {}", helptextPath);
         }
 
         return hjelpetekster;

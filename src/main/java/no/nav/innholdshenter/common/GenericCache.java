@@ -14,12 +14,12 @@ import java.util.List;
 
 public abstract class GenericCache<T> {
     private static final Logger logger = LoggerFactory.getLogger(GenericCache.class);
-    private static final String FEILMELDING_KLARTE_IKKE_HENTE_INNHOLD_FOR_CACHE_KEY = "Klarte ikke hente innhold for cache key %s. Bruker cache. Feilmelding: %s";
-    private static final String FEILMEDLING_KLARTE_IKKE_HENTE_INNHOLD_OG_INNHOLDET_FINNES_IKKE_I_CACHE = "Henting fra url %s feilet og innholdet er ikke i cache.";
-    private static final String FEILMELDING_CACHELINJE_ER_UTDATERT = "Cachelinjen er utdatert med key: %s TimeToLive: %d seconds";
+    private static final String FEILMELDING_KLARTE_IKKE_HENTE_INNHOLD_FOR_CACHE_KEY = "Klarte ikke hente innhold for cache key {}. Bruker cache. Feilmelding: {}";
+    private static final String FEILMEDLING_KLARTE_IKKE_HENTE_INNHOLD_OG_INNHOLDET_FINNES_IKKE_I_CACHE = "Henting fra url {} feilet og innholdet er ikke i cache.";
+    private static final String FEILMELDING_CACHELINJE_ER_UTDATERT = "Cachelinjen er utdatert med key: {} TimeToLive: {} seconds";
     private static final String INFO_CACHELINJEN_FANTES_IKKE_I_CACHE = "Cachelinjen fantes ikke i cache.";
-    private static final String WARN_FLUSHER_CACHEN = "Flusher cachen: %s";
-    private static final String INFO_CACHEHIT = "Cachehit for: %s TTL: %d sec.";
+    private static final String WARN_FLUSHER_CACHEN = "Flusher cachen: {}";
+    private static final String INFO_CACHEHIT = "Cachehit for: {} TTL: {} sec.";
 
     private CacheManager cacheManager;
 
@@ -76,10 +76,10 @@ public abstract class GenericCache<T> {
         if (elementIsOutdatedOrMissing(element)) {
             element = fetchNewCacheContent(element, c);
         } else {
-            logger.info(String.format(INFO_CACHEHIT, cacheKey, refreshIntervalSeconds));
+            logger.info(INFO_CACHEHIT, cacheKey, refreshIntervalSeconds);
         }
         if(element == null) {
-            logger.error(String.format(FEILMEDLING_KLARTE_IKKE_HENTE_INNHOLD_OG_INNHOLDET_FINNES_IKKE_I_CACHE, cacheKey));
+            logger.error(FEILMEDLING_KLARTE_IKKE_HENTE_INNHOLD_OG_INNHOLDET_FINNES_IKKE_I_CACHE, cacheKey);
             return null;
         }
         T cacheContent = (T) element.getObjectValue();
@@ -95,13 +95,13 @@ public abstract class GenericCache<T> {
 
             c.put(element);
         } catch (IOException e) {
-            logger.warn(String.format(FEILMELDING_KLARTE_IKKE_HENTE_INNHOLD_FOR_CACHE_KEY, cacheKey, e.getMessage()), e);
+            logger.warn(FEILMELDING_KLARTE_IKKE_HENTE_INNHOLD_FOR_CACHE_KEY, cacheKey, e.getMessage(), e);
         }
         return element;
     }
     private boolean elementIsOutdatedOrMissing(Element element) {
         if (element == null || element.getObjectValue() == null) {
-            logger.info(String.format(INFO_CACHELINJEN_FANTES_IKKE_I_CACHE));
+            logger.info(INFO_CACHELINJEN_FANTES_IKKE_I_CACHE);
             return true;
         }
         return isExpired(element);
@@ -124,7 +124,7 @@ public abstract class GenericCache<T> {
         long now = System.currentTimeMillis();
         long expirationTime = element.getCreationTime()+(this.refreshIntervalSeconds*1000);
         if(now > expirationTime) {
-            logger.info(String.format(FEILMELDING_CACHELINJE_ER_UTDATERT, element.getObjectKey(), refreshIntervalSeconds));
+            logger.info( FEILMELDING_CACHELINJE_ER_UTDATERT, element.getObjectKey(), refreshIntervalSeconds);
             return true;
         }
         return false;
@@ -133,7 +133,7 @@ public abstract class GenericCache<T> {
 
     public void flushCache() {
         if(cacheManager.cacheExists(cacheName)) {
-            logger.warn( String.format(WARN_FLUSHER_CACHEN, cacheName) );
+            logger.warn( WARN_FLUSHER_CACHEN, cacheName );
             cacheManager.getCache(cacheName).removeAll();
         }
     }

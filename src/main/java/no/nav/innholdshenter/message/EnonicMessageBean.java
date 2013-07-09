@@ -22,7 +22,7 @@ public class EnonicMessageBean extends FixedSizeMap {
     private static final long serialVersionUID = -7473169095493321572L;
 
     private static final Logger logger = LoggerFactory.getLogger(EnonicMessageBean.class);
-    private static final String FEILMELDING_FEIL_VED_HENTING_AV_PROPERTY_MED_KEY = "Feil ved henting av property med key '%s': %s";
+    private static final String FEILMELDING_FEIL_VED_HENTING_AV_PROPERTY_MED_KEY = "Feil ved henting av property med key '{}': {}";
     private static final String MISSING_KEY_TEMPLATE = "<b>[%s]</b>";
 
     private String propertiesPath;
@@ -46,7 +46,7 @@ public class EnonicMessageBean extends FixedSizeMap {
             Properties properties = enonicContentRetriever.getProperties(propertiesPath);
             propertyValue = properties.getProperty(key.toString().trim());
         } catch (IllegalStateException e) {
-            logger.error(String.format(FEILMELDING_FEIL_VED_HENTING_AV_PROPERTY_MED_KEY, key, e.getMessage()));
+            logger.error(FEILMELDING_FEIL_VED_HENTING_AV_PROPERTY_MED_KEY, key, e.getMessage());
             errorTriggered = true;
         }
         if (propertyValue != null) {
@@ -58,7 +58,7 @@ public class EnonicMessageBean extends FixedSizeMap {
                 propertyValue = String.format(MISSING_KEY_TEMPLATE, key);
             } else {
                 if (!errorTriggered && !disregardUnknownPropertyKeys) {
-                    logger.error(String.format(FEILMELDING_FEIL_VED_HENTING_AV_PROPERTY_MED_KEY, key, ""));
+                    logger.error(FEILMELDING_FEIL_VED_HENTING_AV_PROPERTY_MED_KEY, key, "");
                 }
                 propertyValue = "";
             }

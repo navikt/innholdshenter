@@ -30,7 +30,7 @@ public class EnonicStringRetriever implements StringRetriever {
             Properties properties = enonicContentRetriever.getProperties(path);
             return properties.getProperty(key.trim());
         } catch (IllegalStateException e) {
-            logger.error(String.format(FEILMELDING_FEIL_VED_HENTING_AV_PROPERTY_MED_KEY, key, locale, variant, e.getMessage()));
+            logger.error(FEILMELDING_FEIL_VED_HENTING_AV_PROPERTY_MED_KEY, key, locale, variant, e.getMessage());
             return null;
         }
     }
