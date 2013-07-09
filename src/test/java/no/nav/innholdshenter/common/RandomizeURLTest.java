@@ -29,7 +29,6 @@ public class RandomizeURLTest {
     @Before
     public void setUp() {
         enonicContentRetriever = new EnonicContentRetriever(cacheName);
-        
     }
     
     @Test

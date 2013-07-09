@@ -35,7 +35,7 @@ public abstract class GenericCache<T> {
    public GenericCache(CacheManager cacheManager, int refreshIntervalSeconds, String cacheKey) {
         this.cacheManager = cacheManager;
         this.refreshIntervalSeconds = refreshIntervalSeconds;
-        this.cacheKey = this.sanitizeUrlCacheKey(cacheKey);
+        this.cacheKey = sanitizeUrlCacheKey(cacheKey);
     }
 
     private String sanitizeUrlCacheKey(String cacheKey) {
@@ -76,7 +76,7 @@ public abstract class GenericCache<T> {
         if (elementIsOutdatedOrMissing(element)) {
             element = fetchNewCacheContent(element, c);
         } else {
-            logger.info(INFO_CACHEHIT, cacheKey, refreshIntervalSeconds);
+            logger.debug(INFO_CACHEHIT, cacheKey, refreshIntervalSeconds);
         }
         if(element == null) {
             logger.error(FEILMEDLING_KLARTE_IKKE_HENTE_INNHOLD_OG_INNHOLDET_FINNES_IKKE_I_CACHE, cacheKey);
@@ -99,19 +99,16 @@ public abstract class GenericCache<T> {
         }
         return element;
     }
+
     private boolean elementIsOutdatedOrMissing(Element element) {
         if (element == null || element.getObjectValue() == null) {
-            logger.info(INFO_CACHELINJEN_FANTES_IKKE_I_CACHE);
+            logger.debug(INFO_CACHELINJEN_FANTES_IKKE_I_CACHE);
             return true;
         }
         return isExpired(element);
     }
 
     protected abstract T getContentFromSource() throws IOException;
-
-    public String getCacheName() {
-        return cacheName;
-    }
 
     public void setCacheName(String cacheName) {
         this.cacheName = cacheName;
@@ -120,16 +117,16 @@ public abstract class GenericCache<T> {
         }
 
     }
+
     private boolean isExpired(Element element) {
         long now = System.currentTimeMillis();
         long expirationTime = element.getCreationTime()+(this.refreshIntervalSeconds*1000);
         if(now > expirationTime) {
-            logger.info( FEILMELDING_CACHELINJE_ER_UTDATERT, element.getObjectKey(), refreshIntervalSeconds);
+            logger.debug( FEILMELDING_CACHELINJE_ER_UTDATERT, element.getObjectKey(), refreshIntervalSeconds );
             return true;
         }
         return false;
     }
-
 
     public void flushCache() {
         if(cacheManager.cacheExists(cacheName)) {

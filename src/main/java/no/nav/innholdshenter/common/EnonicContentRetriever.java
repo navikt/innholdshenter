@@ -51,6 +51,7 @@ public class EnonicContentRetriever {
             cacheManager = CacheManager.create();
         }
         httpClient = new DefaultHttpClient();
+        setHttpTimeoutMillis(3000);
     }
     public EnonicContentRetriever(String cachename) {
         this();
@@ -98,7 +99,7 @@ public class EnonicContentRetriever {
         try {
             innhold = httpClient.execute(httpGet, responseHandler);
         } catch(HttpResponseException exception) {
-            logger.info(HTTP_STATUS_FEIL, exception.getStatusCode(), exception.getMessage());
+            logger.error(HTTP_STATUS_FEIL, exception.getStatusCode(), exception.getMessage());
             feilmeldinger.add(new CacheStatusFeilmelding(exception.getStatusCode(), exception.getMessage(), System.currentTimeMillis()));
             throw new IOException(exception);
         }
