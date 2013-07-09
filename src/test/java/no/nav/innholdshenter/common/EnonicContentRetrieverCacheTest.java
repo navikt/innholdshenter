@@ -99,14 +99,16 @@ public class EnonicContentRetrieverCacheTest {
             cacheManager.removeCache(cacheName);
         }
         cacheManager.addCache(cacheName);
-        cache = cacheManager.getCache(cacheName);
-        cache.getCacheEventNotificationService().registerListener(testListener);
 
         contentRetriever = new EnonicContentRetriever(cacheName);
         contentRetriever.setCacheManager(cacheManager);
         contentRetriever.setHttpClient(httpClient);
         contentRetriever.setBaseUrl(SERVER);
         contentRetriever.setRefreshIntervalSeconds(REFRESH_INTERVAL);
+
+        cache = cacheManager.getCache(cacheName);
+        cache.getCacheEventNotificationService().registerListener(testListener);
+
     }
 
     @Test

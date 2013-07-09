@@ -28,12 +28,12 @@ public class EnonicContentRetriever {
     private static final Logger logger = LoggerFactory.getLogger(EnonicContentRetriever.class);
     private static final String SLASH = "/";
     private static final String LOCALE_UTF_8 = "UTF-8";
-    private static final String DEBUG_RETRIEVING_PAGE_CONTENT_FROM_URL = "Retrieving page content from url %s";
-    private static final String WARN_MELDING_FLUSHER_CACHEN = "Flusher cachen: %s";
-    private static final String WARN_MELDING_REFRESH_CACHE = "Refresh cachen: %s";
-    private static final String INFO_LAGE_NY_UNIK_URL_FEILET = "Feilet å lage ny unik url, url: %s.";
-    private static final String FEILMELDING_KLARTE_HENTE_INNHOLD_MEN_INNHOLDET_VAR_UGYLDIG = "Henting fra url %s gikk gjennom, men innholdet var ikke som forventet. Cache ikke oppdatert.";
-    private static final String HTTP_STATUS_FEIL = "Http-kall feilet, status: %d, grunn: %s";
+    private static final String DEBUG_RETRIEVING_PAGE_CONTENT_FROM_URL = "Retrieving page content from url {}";
+    private static final String WARN_MELDING_FLUSHER_CACHEN = "Flusher cachen: {}";
+    private static final String WARN_MELDING_REFRESH_CACHE = "Refresh cachen: {}";
+    private static final String INFO_LAGE_NY_UNIK_URL_FEILET = "Feilet å lage ny unik url, url: {}.";
+    private static final String FEILMELDING_KLARTE_HENTE_INNHOLD_MEN_INNHOLDET_VAR_UGYLDIG = "Henting fra url {} gikk gjennom, men innholdet var ikke som forventet. Cache ikke oppdatert.";
+    private static final String HTTP_STATUS_FEIL = "Http-kall feilet, status: {}, grunn: {}";
     private static final int MIN_VALID_CONTENT_LENGTH = 60;
     private List feilmeldinger;
 
@@ -81,7 +81,8 @@ public class EnonicContentRetriever {
             ByteArrayInputStream propertiesStream = new ByteArrayInputStream(content.getBytes(LOCALE_UTF_8));
             properties.loadFromXML(propertiesStream);
         } catch (IOException e) {
-            logger.error("Feil i konvertering fra xml til Properties objekt.");
+            logger.error("Feil i konvertering fra xml til Properties objekt.", e);
+            throw new RuntimeException("Feil: Kunne ikke hente data.");
         }
         return properties;
     }
@@ -92,7 +93,7 @@ public class EnonicContentRetriever {
 
     private synchronized String getPageContentFromUrl(String url) throws IOException {
         String randomUrl = makeRandomUrl(url);
-        logger.debug(String.format(DEBUG_RETRIEVING_PAGE_CONTENT_FROM_URL, randomUrl));
+        logger.debug(DEBUG_RETRIEVING_PAGE_CONTENT_FROM_URL, randomUrl);
         HttpParams httpParams = httpClient.getParams();
         HttpConnectionParams.setSoTimeout(httpParams, httpTimeoutMillis);
         HttpConnectionParams.setConnectionTimeout(httpParams, httpTimeoutMillis);
@@ -102,14 +103,14 @@ public class EnonicContentRetriever {
         try {
             innhold = httpClient.execute(httpGet, responseHandler);
         } catch(HttpResponseException exception) {
-            logger.info(String.format(HTTP_STATUS_FEIL, exception.getStatusCode(), exception.getMessage() ));
+            logger.info( HTTP_STATUS_FEIL, exception.getStatusCode(), exception.getMessage() );
             feilmeldinger.add(new CacheStatusFeilmelding(exception.getStatusCode(), exception.getMessage(), System.currentTimeMillis()));
-            throw new IOException();
+            throw new IOException(exception);
         }
 
         if(!isContentValid(innhold)) {
-            logger.warn(String.format(FEILMELDING_KLARTE_HENTE_INNHOLD_MEN_INNHOLDET_VAR_UGYLDIG, url));
-            throw new IOException();
+            logger.warn(FEILMELDING_KLARTE_HENTE_INNHOLD_MEN_INNHOLDET_VAR_UGYLDIG, url);
+            throw new IOException(String.format("Fikk ugyldig innhold på url: %s" , url));
         }
         return innhold;
     }
@@ -136,7 +137,7 @@ public class EnonicContentRetriever {
             uriBuilder.addParameter("sid", sidToAvoidServerCache);
             return uriBuilder.build().toString();
         } catch (URISyntaxException e) {
-            logger.info(String.format(INFO_LAGE_NY_UNIK_URL_FEILET, url));
+            logger.warn(INFO_LAGE_NY_UNIK_URL_FEILET, url, e);
         }
         return url;
     }
@@ -176,13 +177,13 @@ public class EnonicContentRetriever {
     }
 
     public void setCacheName(String cacheName) {
-        if (!cacheManager.cacheExists(cachename)) {
-            logger.debug(String.format("Removing cache: ", cachename));
+        if (cacheManager.cacheExists(cachename)) {
+            logger.debug("Removing cache: {}", cachename);
             cacheManager.removeCache(cachename);
         }
         cachename = cacheName;
         if (!cacheManager.cacheExists(cachename)) {
-            logger.debug(String.format("Creating cache: ", cachename));
+            logger.debug( "Creating cache: {}", cachename );
             cacheManager.addCacheIfAbsent(cacheName);
         }
     }
@@ -193,7 +194,7 @@ public class EnonicContentRetriever {
 
     public void flushCache() {
         if(cacheManager.cacheExists(cachename)) {
-            logger.warn( String.format(WARN_MELDING_FLUSHER_CACHEN, cachename) );
+            logger.warn( WARN_MELDING_FLUSHER_CACHEN, cachename );
             cacheManager.getCache(cachename).removeAll();
         }
     }
@@ -201,7 +202,7 @@ public class EnonicContentRetriever {
     public void refreshCache() {
         int hardcode_TTL_to_ensure_cache_is_updated = -1;
         if (cacheManager.cacheExists(cachename)) {
-            logger.warn(String.format(WARN_MELDING_REFRESH_CACHE, cachename));
+            logger.warn( WARN_MELDING_REFRESH_CACHE, cachename );
             Cache c = cacheManager.getCache(cachename);
             for (Object key : c.getKeys()) {
                 final String url = (String) key;
