@@ -98,7 +98,7 @@ public class EnonicContentRetriever {
         HttpConnectionParams.setConnectionTimeout(httpParams, httpTimeoutMillis);
         HttpGet httpGet = new HttpGet(randomUrl);
         ResponseHandler<String> responseHandler = new BasicResponseHandler();
-        String innhold = null;
+        String innhold;
         try {
             innhold = httpClient.execute(httpGet, responseHandler);
         } catch(HttpResponseException exception) {
