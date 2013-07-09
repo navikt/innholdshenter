@@ -104,7 +104,7 @@ public class EnonicContentRetriever {
         } catch(HttpResponseException exception) {
             logger.info(String.format(HTTP_STATUS_FEIL, exception.getStatusCode(), exception.getMessage() ));
             feilmeldinger.add(new CacheStatusFeilmelding(exception.getStatusCode(), exception.getMessage(), System.currentTimeMillis()));
-            innhold = null;
+            throw new IOException();
         }
 
         if(!isContentValid(innhold)) {
