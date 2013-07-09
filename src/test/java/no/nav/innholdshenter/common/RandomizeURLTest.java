@@ -1,11 +1,11 @@
 package no.nav.innholdshenter.common;
 
+import no.nav.innholdshenter.tools.InnholdshenterTools;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers.*;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -38,7 +38,7 @@ public class RandomizeURLTest {
 
         when(RandomStringUtils.randomAlphanumeric(anyInt())).thenReturn(RANDOMSTRING);
         String url = SERVER + PATH;
-        String randomUrl = enonicContentRetriever.makeRandomUrl(url);
+        String randomUrl = InnholdshenterTools.makeRandomUrl(url);
 
         UrlValidator validator = new UrlValidator();
         assertTrue(validator.isValid(randomUrl));
@@ -51,7 +51,7 @@ public class RandomizeURLTest {
 
         when(RandomStringUtils.randomAlphanumeric(anyInt())).thenReturn(RANDOMSTRING);
         String url = SERVER + PATH + URLPARAMS;
-        String randomUrl = enonicContentRetriever.makeRandomUrl(url);
+        String randomUrl = InnholdshenterTools.makeRandomUrl(url);
 
         assertTrue(randomUrl.contains("sid=" + RANDOMSTRING));
         UrlValidator validator = new UrlValidator();

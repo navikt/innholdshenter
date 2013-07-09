@@ -3,12 +3,11 @@ package no.nav.innholdshenter.common;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
-import org.apache.commons.lang.RandomStringUtils;
+import no.nav.innholdshenter.tools.InnholdshenterTools;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpConnectionParams;
@@ -18,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.*;
 
 /**
@@ -31,10 +29,11 @@ public class EnonicContentRetriever {
     private static final String DEBUG_RETRIEVING_PAGE_CONTENT_FROM_URL = "Retrieving page content from url {}";
     private static final String WARN_MELDING_FLUSHER_CACHEN = "Flusher cachen: {}";
     private static final String WARN_MELDING_REFRESH_CACHE = "Refresh cachen: {}";
-    private static final String INFO_LAGE_NY_UNIK_URL_FEILET = "Feilet å lage ny unik url, url: {}.";
     private static final String FEILMELDING_KLARTE_HENTE_INNHOLD_MEN_INNHOLDET_VAR_UGYLDIG = "Henting fra url {} gikk gjennom, men innholdet var ikke som forventet. Cache ikke oppdatert.";
     private static final String HTTP_STATUS_FEIL = "Http-kall feilet, status: {}, grunn: {}";
+    public static final List<String> GYLDIG_RESPONS_INNHOLD = Arrays.asList("<html", "<xml", "<properties", "<?xml ", "<!DOCTYPE ");
     private static final int MIN_VALID_CONTENT_LENGTH = 60;
+
     private List feilmeldinger;
 
     private String baseUrl;
@@ -44,7 +43,6 @@ public class EnonicContentRetriever {
     private CacheManager cacheManager;
     private String cachename;
     private int refreshIntervalSeconds;
-    public static final List<String> GYLDIG_RESPONS_INNHOLD = Arrays.asList("<html", "<xml", "<properties", "<?xml ", "<!DOCTYPE ");
 
 
     public EnonicContentRetriever() {
@@ -92,18 +90,15 @@ public class EnonicContentRetriever {
     }
 
     private synchronized String getPageContentFromUrl(String url) throws IOException {
-        String randomUrl = makeRandomUrl(url);
+        String randomUrl = InnholdshenterTools.makeRandomUrl(url);
         logger.debug(DEBUG_RETRIEVING_PAGE_CONTENT_FROM_URL, randomUrl);
-        HttpParams httpParams = httpClient.getParams();
-        HttpConnectionParams.setSoTimeout(httpParams, httpTimeoutMillis);
-        HttpConnectionParams.setConnectionTimeout(httpParams, httpTimeoutMillis);
         HttpGet httpGet = new HttpGet(randomUrl);
         ResponseHandler<String> responseHandler = new BasicResponseHandler();
         String innhold;
         try {
             innhold = httpClient.execute(httpGet, responseHandler);
         } catch(HttpResponseException exception) {
-            logger.info( HTTP_STATUS_FEIL, exception.getStatusCode(), exception.getMessage() );
+            logger.info(HTTP_STATUS_FEIL, exception.getStatusCode(), exception.getMessage());
             feilmeldinger.add(new CacheStatusFeilmelding(exception.getStatusCode(), exception.getMessage(), System.currentTimeMillis()));
             throw new IOException(exception);
         }
@@ -130,18 +125,6 @@ public class EnonicContentRetriever {
         return false;
     }
 
-    public static String makeRandomUrl(String url) {
-        String sidToAvoidServerCache = RandomStringUtils.randomAlphanumeric(15);
-        try {
-            URIBuilder uriBuilder = new URIBuilder(url);
-            uriBuilder.addParameter("sid", sidToAvoidServerCache);
-            return uriBuilder.build().toString();
-        } catch (URISyntaxException e) {
-            logger.warn(INFO_LAGE_NY_UNIK_URL_FEILET, url, e);
-        }
-        return url;
-    }
-
     public void setBaseUrl(String baseUrl) {
         this.baseUrl = appendSlashIfNotPresent(baseUrl);
     }
@@ -159,6 +142,10 @@ public class EnonicContentRetriever {
 
     public void setHttpTimeoutMillis(int httpTimeout) {
         this.httpTimeoutMillis = httpTimeout;
+        HttpParams httpParams = getHttpClient().getParams();
+        HttpConnectionParams.setSoTimeout(httpParams, httpTimeoutMillis);
+        HttpConnectionParams.setConnectionTimeout(httpParams, httpTimeoutMillis);
+
     }
 
     public List getFeilmeldinger() {
@@ -190,6 +177,7 @@ public class EnonicContentRetriever {
 
     protected void setHttpClient(HttpClient httpClient) {
         this.httpClient = httpClient;
+        this.setHttpTimeoutMillis(httpTimeoutMillis);
     }
 
     public void flushCache() {
@@ -223,5 +211,9 @@ public class EnonicContentRetriever {
             liste.add(c.getQuiet(o));
         }
         return liste;
+    }
+
+    public HttpClient getHttpClient() {
+        return httpClient;
     }
 }
