@@ -4,6 +4,8 @@ import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.List;
 
@@ -12,6 +14,7 @@ import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
+@RunWith(MockitoJUnitRunner.class)
 public class EnonicContentRetrieverFeilmeldingTest extends EnonicContentRetrieverTestSetup {
 
     @Test
@@ -36,7 +39,7 @@ public class EnonicContentRetrieverFeilmeldingTest extends EnonicContentRetrieve
         List<CacheStatusFeilmelding> feil = contentRetriever.getFeilmeldinger();
         assertTrue(feil.size()>=1);
         int errorcode = feil.get(0).getStatusCode();
-        assertTrue(errorcode == 404);
-        assertEquals("Not found", feil.get(0).getFeilmelding());
+        assertTrue(errorcode == 403);
+        assertEquals("Forbidden", feil.get(0).getFeilmelding());
     }
 }

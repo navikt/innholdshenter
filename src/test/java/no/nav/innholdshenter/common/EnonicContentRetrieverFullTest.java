@@ -120,24 +120,6 @@ public class EnonicContentRetrieverFullTest extends EnonicContentRetrieverTestSe
     }
 
     @Test
-    public void skalReturnereInnholdFraUrlVedSamtidigAksess() throws Exception {
-        contentRetriever.setHttpClient(new DefaultHttpClient());
-        contentRetriever.setBaseUrl("http://maven.adeo.no:80");
-        contentRetriever.setHttpTimeoutMillis(5000);
-
-        Thread thread1 = new Thread(new RetrieverWorker("nexus/content/repositories/central/org/apache/solr/"));
-        Thread thread2 = new Thread(new RetrieverWorker("nexus/content/repositories/central/org/apache/wicket/"));
-
-        thread1.start();
-        thread2.start();
-
-        contentRetriever.getPageContent("nexus/content/repositories/central/org/apache/tomcat/");
-
-        thread1.join();
-        thread2.join();
-    }
-
-    @Test
     public void skalHenteIkkeCachedePropertiesFraUrl() throws Exception {
         when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenReturn(PROPERTIES_CONTENT);
 
@@ -179,4 +161,23 @@ public class EnonicContentRetrieverFullTest extends EnonicContentRetrieverTestSe
             contentRetriever.getPageContent(path);
         }
     }
+
+    @Test
+    public void skalReturnereInnholdFraUrlVedSamtidigAksess() throws Exception {
+        contentRetriever.setHttpClient(new DefaultHttpClient());
+        contentRetriever.setBaseUrl("http://maven.adeo.no:80");
+        contentRetriever.setHttpTimeoutMillis(5000);
+
+        Thread thread1 = new Thread(new RetrieverWorker("nexus/content/repositories/central/org/apache/solr/"));
+        Thread thread2 = new Thread(new RetrieverWorker("nexus/content/repositories/central/org/apache/wicket/"));
+
+        thread1.start();
+        thread2.start();
+
+        contentRetriever.getPageContent("nexus/content/repositories/central/org/apache/tomcat/");
+
+        thread1.join();
+        thread2.join();
+    }
+
 }
