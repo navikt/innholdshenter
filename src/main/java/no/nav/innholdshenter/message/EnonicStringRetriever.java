@@ -21,12 +21,17 @@ public class EnonicStringRetriever implements StringRetriever {
 
     public EnonicStringRetriever(EnonicContentRetriever vsRetriever, String propertiesPath) {
         this.enonicContentRetriever = vsRetriever;
-        this.propertiesPath = propertiesPath;
+        this.propertiesPath = propertiesPath + "?locale=";
     }
 
     public String retrieveString(String key, String locale, String variant) {
         try {
-            String path = getPropertiesPath(locale, variant);
+            String path = propertiesPath;
+            if (variant == null) {
+                path += getString(locale);
+            } else {
+                path += getPropertiesPath(locale, variant);
+            }
             Properties properties = enonicContentRetriever.getProperties(path);
             return properties.getProperty(key.trim());
         } catch (IllegalStateException e) {
@@ -36,7 +41,7 @@ public class EnonicStringRetriever implements StringRetriever {
     }
 
     private String getPropertiesPath(String locale, String variant) {
-        return String.format("%s?locale=%s&variant=%s", propertiesPath, getString(locale), getString(variant));
+        return String.format("%s&variant=%s", getString(locale), getString(variant));
     }
 
     private String getString(String locale) {
