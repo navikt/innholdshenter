@@ -114,10 +114,10 @@ public class DecoratorResponseWrapper extends HttpServletResponseWrapper {
    @Override
    public void setBufferSize(int size) throws IllegalStateException {
       try {
-	    if(stream != null) {
-			stream.setSize(size);
-		}
-	  }	 catch (IOException ioe) {
+        if(stream != null) {
+            stream.setSize(size);
+        }
+      } catch (IOException ioe) {
          throw new IllegalStateException(ioe.getMessage());
       }
    }
