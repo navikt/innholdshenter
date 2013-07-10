@@ -32,7 +32,7 @@ public abstract class GenericCache<T> {
     private boolean neverExpireCacheLines = true;
 
 
-   public GenericCache(CacheManager cacheManager, int refreshIntervalSeconds, String cacheKey) {
+    public GenericCache(CacheManager cacheManager, int refreshIntervalSeconds, String cacheKey) {
         this.cacheManager = cacheManager;
         this.refreshIntervalSeconds = refreshIntervalSeconds;
         this.cacheKey = sanitizeUrlCacheKey(cacheKey);
@@ -43,7 +43,7 @@ public abstract class GenericCache<T> {
         try {
             uriBuilder = new URIBuilder(inputCacheKey);
             List<NameValuePair> params = uriBuilder.getQueryParams();
-            for(NameValuePair nameValuePair : params) {
+            for (NameValuePair nameValuePair : params) {
                 if (nameValuePair.getName().startsWith("urlPath")) {
                     String urlpath = sanitizeUrlPath(nameValuePair.getValue());
                     uriBuilder.setParameter("urlPath", urlpath);
@@ -78,7 +78,7 @@ public abstract class GenericCache<T> {
         } else {
             logger.debug(INFO_CACHEHIT, cacheKey, refreshIntervalSeconds);
         }
-        if(element == null) {
+        if (element == null) {
             logger.error(FEILMEDLING_KLARTE_IKKE_HENTE_INNHOLD_OG_INNHOLDET_FINNES_IKKE_I_CACHE, cacheKey);
             return null;
         }
@@ -112,25 +112,25 @@ public abstract class GenericCache<T> {
 
     public void setCacheName(String cacheName) {
         this.cacheName = cacheName;
-        if(!cacheManager.cacheExists(cacheName)) {
-            cacheManager.addCache( new Cache(cacheName, maxElements, overflowToDisk, neverExpireCacheLines, 0, 0) );
+        if (!cacheManager.cacheExists(cacheName)) {
+            cacheManager.addCache(new Cache(cacheName, maxElements, overflowToDisk, neverExpireCacheLines, 0, 0));
         }
 
     }
 
     private boolean isExpired(Element element) {
         long now = System.currentTimeMillis();
-        long expirationTime = element.getCreationTime()+(this.refreshIntervalSeconds*1000);
-        if(now > expirationTime) {
-            logger.debug( FEILMELDING_CACHELINJE_ER_UTDATERT, element.getObjectKey(), refreshIntervalSeconds );
+        long expirationTime = element.getCreationTime() + (this.refreshIntervalSeconds * 1000);
+        if (now > expirationTime) {
+            logger.debug(FEILMELDING_CACHELINJE_ER_UTDATERT, element.getObjectKey(), refreshIntervalSeconds);
             return true;
         }
         return false;
     }
 
     public void flushCache() {
-        if(cacheManager.cacheExists(cacheName)) {
-            logger.warn( WARN_FLUSHER_CACHEN, cacheName );
+        if (cacheManager.cacheExists(cacheName)) {
+            logger.warn(WARN_FLUSHER_CACHEN, cacheName);
             cacheManager.getCache(cacheName).removeAll();
         }
     }

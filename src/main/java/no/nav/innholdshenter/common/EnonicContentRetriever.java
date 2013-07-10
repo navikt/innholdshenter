@@ -41,8 +41,8 @@ public class EnonicContentRetriever {
     private List feilmeldinger;
 
     private String baseUrl;
-    private int httpTimeoutMillis;
     private HttpClient httpClient;
+    private int httpTimeoutMillis;
 
     private CacheManager cacheManager;
     private String cachename;
@@ -61,6 +61,10 @@ public class EnonicContentRetriever {
         this();
         this.cachename = cachename;
         this.setCacheName(cachename);
+    }
+
+    private String createUrl(String path) {
+        return baseUrl + path;
     }
 
     public String getPageContent(String path) {
@@ -88,10 +92,6 @@ public class EnonicContentRetriever {
             throw new RuntimeException("Feil: Kunne ikke hente data.");
         }
         return properties;
-    }
-
-    private String createUrl(String path) {
-        return baseUrl + path;
     }
 
     private synchronized String getPageContentFromUrl(String url) throws IOException {
