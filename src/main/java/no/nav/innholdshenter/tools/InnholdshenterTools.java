@@ -1,6 +1,5 @@
 package no.nav.innholdshenter.tools;
 
-import no.nav.innholdshenter.common.EnonicContentRetriever;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;

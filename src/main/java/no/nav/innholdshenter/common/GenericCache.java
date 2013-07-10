@@ -38,10 +38,10 @@ public abstract class GenericCache<T> {
         this.cacheKey = sanitizeUrlCacheKey(cacheKey);
     }
 
-    private String sanitizeUrlCacheKey(String cacheKey) {
+    private String sanitizeUrlCacheKey(String inputCacheKey) {
         URIBuilder uriBuilder = null;
         try {
-            uriBuilder = new URIBuilder(cacheKey);
+            uriBuilder = new URIBuilder(inputCacheKey);
             List<NameValuePair> params = uriBuilder.getQueryParams();
             for(NameValuePair nameValuePair : params) {
                 if (nameValuePair.getName().startsWith("urlPath")) {
@@ -51,7 +51,7 @@ public abstract class GenericCache<T> {
             }
         } catch (URISyntaxException e) {
             logger.debug(e.getMessage());
-            return cacheKey;
+            return inputCacheKey;
         }
         return uriBuilder.toString();
     }

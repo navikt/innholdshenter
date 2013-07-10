@@ -2,7 +2,6 @@ package no.nav.innholdshenter.common;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.Element;
 import no.nav.innholdshenter.tools.InnholdshenterTools;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpResponseException;
@@ -17,7 +16,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
+
 
 /**
  * Henter innholdet for en gitt URL. Hvis ferskt innhold finnes i cacheManager returneres det derfra.
@@ -189,14 +193,13 @@ public class EnonicContentRetriever {
     }
 
     public void refreshCache() {
-        int hardcode_TTL_to_ensure_cache_is_updated = -1;
+        int hardcodeTTLtoEnsureCacheIsUpdated = -1;
         if (cacheManager.cacheExists(cachename)) {
             logger.warn( WARN_MELDING_REFRESH_CACHE, cachename );
             Cache c = cacheManager.getCache(cachename);
             for (Object key : c.getKeys()) {
                 final String url = (String) key;
-                Element element = c.get(key);
-                getPageContentFullUrl(url, hardcode_TTL_to_ensure_cache_is_updated);
+                getPageContentFullUrl(url, hardcodeTTLtoEnsureCacheIsUpdated);
             }
         }
     }

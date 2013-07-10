@@ -36,4 +36,11 @@ public class MarkupMergerTest {
         String encodingtag = MarkupMerger.getEncodingTag(frame);
         System.out.println("Encoding tag : " + encodingtag);
     }
+
+    @Test
+    public void testSomething(){
+
+
+
+    }
 }

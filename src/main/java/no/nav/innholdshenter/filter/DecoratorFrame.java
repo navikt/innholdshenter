@@ -85,7 +85,6 @@ public class DecoratorFrame {
         this.breadcrumbComponentEndTag = breadcrumbComponentEndTag;
     }
 
-
     public String getLeftMenuComponentStartTag() {
         return leftMenuComponentStartTag;
     }
@@ -143,7 +142,6 @@ public class DecoratorFrame {
             innerUrl = alternativUrlBasedOnHtmlMetaTag;
         } else {
             innerUrl = request.getRequestURI();
-
         }
 
         urlToCall += innerUrl;
@@ -213,7 +211,6 @@ public class DecoratorFrame {
         return false;
     }
 
-
     private boolean urlMatchesPatternInList(String innerUrl, List<String> list) {
         for (String patternAsString : list) {
             if (patternAsString != null && patternAsString.length() > 0) {
@@ -248,5 +245,4 @@ public class DecoratorFrame {
     public void setTemplateUrl(String templateUrl) {
         this.templateUrl = templateUrl;
     }
-
 }
