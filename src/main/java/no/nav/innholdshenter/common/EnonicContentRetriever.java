@@ -68,8 +68,8 @@ public class EnonicContentRetriever {
         return getPageContentFullUrl(url, getRefreshIntervalSeconds());
     }
 
-    private String getPageContentFullUrl(final String url, int TTLSeconds) {
-        GenericCache<String> genericCache = new GenericCache<String>(cacheManager, TTLSeconds, url, cachename) {
+    private String getPageContentFullUrl(final String url, int timeToLiveSeconds) {
+        GenericCache<String> genericCache = new GenericCache<String>(cacheManager, timeToLiveSeconds, url, cachename) {
             protected String getContentFromSource() throws IOException {
                 return getPageContentFromUrl(url);
             }
