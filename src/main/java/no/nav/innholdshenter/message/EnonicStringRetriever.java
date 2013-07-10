@@ -14,7 +14,7 @@ import java.util.Properties;
 public class EnonicStringRetriever implements StringRetriever {
 
     private static final Logger logger = LoggerFactory.getLogger(EnonicStringRetriever.class);
-    private static final String FEILMELDING_FEIL_VED_HENTING_AV_PROPERTY_MED_KEY = "Feil ved henting av property med key '%s', locale '%s', variant '%s': %s";
+    private static final String FEILMELDING_FEIL_VED_HENTING_AV_PROPERTY_MED_KEY = "Feil ved henting av property med key '{}', locale '{}', variant '{}': {}";
 
     private String propertiesPath;
     private EnonicContentRetriever enonicContentRetriever;
@@ -28,7 +28,7 @@ public class EnonicStringRetriever implements StringRetriever {
         try {
             String path = propertiesPath;
             if (variant == null) {
-                path += getString(locale);
+                path += getString(locale)+"&variant=";
             } else {
                 path += getPropertiesPath(locale, variant);
             }
