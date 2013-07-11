@@ -59,6 +59,13 @@ public class DecoratorFilterTest {
     }
 
     @Test
+    public void shouldSetupFrameCorrectly() {
+        assertTrue(decoratorFrame == decoratorFilter.getDecoratorFrame());
+        verify(decoratorFrame).setContentRetriever(contentRetriever);
+        verify(decoratorFrame).setTemplateUrl(templateurl);
+    }
+
+    @Test
     public void shouldReplacePlaceholders() throws IOException {
         String page = "<html><head><title>ti</title>he</head><body id=\"2\">bo</body></html>";
         String applicationFrame = "<html><head><title><!-- ${title} --></title><!-- ${head} --></head><body id=\"1\"><!-- ${body} --></body></html>";

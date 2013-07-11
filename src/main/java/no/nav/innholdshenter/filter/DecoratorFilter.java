@@ -4,7 +4,13 @@ import no.nav.innholdshenter.common.EnonicContentRetriever;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.*;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletException;
+import javax.servlet.ServletResponse;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.FilterConfig;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -49,6 +55,7 @@ public class DecoratorFilter implements Filter {
     private void setDefaultExcludeHeaders() {
         excludeHeaders = new HashMap<String, String>();
         excludeHeaders.put("X-Requested-With", "XMLHttpRequest");
+        setExcludeHeaders(excludeHeaders);
     }
 
     private void setDefaultIncludeContentTypes() {
@@ -221,7 +228,7 @@ public class DecoratorFilter implements Filter {
         decoratorFrame.setTemplateUrl(templateUrl);
     }
 
-    public DecoratorFrame getDecoratorFrame(DecoratorFrame decoratorFrame) {
+    public DecoratorFrame getDecoratorFrame() {
         return decoratorFrame;
     }
 
