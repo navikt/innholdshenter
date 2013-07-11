@@ -32,40 +32,12 @@ public abstract class GenericCache<T> {
     private boolean neverExpireCacheLines = true;
 
 
-    public GenericCache(CacheManager cacheManager, int refreshIntervalSeconds, String cacheKey) {
+
+    public GenericCache(CacheManager cacheManager, int refreshIntervalSeconds, String cacheKey, String cacheName) {
         this.cacheManager = cacheManager;
         this.refreshIntervalSeconds = refreshIntervalSeconds;
         this.cacheKey = sanitizeUrlCacheKey(cacheKey);
-    }
-
-    private String sanitizeUrlCacheKey(String inputCacheKey) {
-        URIBuilder uriBuilder = null;
-        try {
-            uriBuilder = new URIBuilder(inputCacheKey);
-            List<NameValuePair> params = uriBuilder.getQueryParams();
-            for (NameValuePair nameValuePair : params) {
-                if (nameValuePair.getName().startsWith("urlPath")) {
-                    String urlpath = sanitizeUrlPath(nameValuePair.getValue());
-                    uriBuilder.setParameter("urlPath", urlpath);
-                }
-            }
-        } catch (URISyntaxException e) {
-            logger.debug(e.getMessage());
-            return inputCacheKey;
-        }
-        return uriBuilder.toString();
-    }
-
-    private String sanitizeUrlPath(String urlParam) {
-        if (urlParam != null && !urlParam.isEmpty()) {
-            return urlParam.split(",")[0];
-        }
-        return urlParam;
-    }
-
-    public GenericCache(CacheManager cacheManager, int refreshIntervalSeconds, String cacheKey, String cacheName) {
-        this(cacheManager, refreshIntervalSeconds, cacheKey);
-        this.setCacheName(cacheName);
+        setCacheName(cacheName);
     }
 
     @SuppressWarnings("unchecked")
@@ -110,7 +82,7 @@ public abstract class GenericCache<T> {
 
     protected abstract T getContentFromSource() throws IOException;
 
-    public void setCacheName(String cacheName) {
+    private void setCacheName(String cacheName) {
         this.cacheName = cacheName;
         if (!cacheManager.cacheExists(cacheName)) {
             cacheManager.addCache(new Cache(cacheName, maxElements, overflowToDisk, neverExpireCacheLines, 0, 0));
@@ -128,10 +100,38 @@ public abstract class GenericCache<T> {
         return false;
     }
 
-    public void flushCache() {
-        if (cacheManager.cacheExists(cacheName)) {
-            logger.warn(WARN_FLUSHER_CACHEN, cacheName);
-            cacheManager.getCache(cacheName).removeAll();
+    /**
+    * Sanitize url before storage in cache. This part of the url tends to include session specific data,
+    * so it is often unique, and thrashes the cache.
+    * Use this return value as the index in the cache, and not the full url.
+    *
+    * @param url
+    * @return returns a cleaner url, suitable for the cacheline.
+    *
+    */
+    private String sanitizeUrlCacheKey(String url) {
+        URIBuilder uriBuilder = null;
+        try {
+            uriBuilder = new URIBuilder(url);
+            List<NameValuePair> params = uriBuilder.getQueryParams();
+            for (NameValuePair nameValuePair : params) {
+                if (nameValuePair.getName().startsWith("urlPath")) {
+                    String urlpath = sanitizeUrlPath(nameValuePair.getValue());
+                    uriBuilder.setParameter("urlPath", urlpath);
+                }
+            }
+        } catch (URISyntaxException e) {
+            logger.debug(e.getMessage());
+            return url;
         }
+        return uriBuilder.toString();
     }
+
+    private String sanitizeUrlPath(String urlParam) {
+        if (urlParam != null && !urlParam.isEmpty()) {
+            return urlParam.split(",")[0];
+        }
+        return urlParam;
+    }
+
 }
