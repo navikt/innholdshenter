@@ -232,7 +232,7 @@ public class EnonicContentRetriever {
         return liste;
     }
 
-    public HttpClient getHttpClient() {
+    private HttpClient getHttpClient() {
         return httpClient;
     }
 }

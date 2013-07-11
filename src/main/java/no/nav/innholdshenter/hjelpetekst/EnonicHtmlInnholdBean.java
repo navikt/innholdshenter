@@ -1,7 +1,7 @@
 package no.nav.innholdshenter.hjelpetekst;
 
 import no.nav.innholdshenter.common.EnonicContentRetriever;
-import no.nav.innholdshenter.common.EnonicDocumentRetriever;
+import no.nav.innholdshenter.hjelpetekst.EnonicDocumentRetriever;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.output.XMLOutputter;
