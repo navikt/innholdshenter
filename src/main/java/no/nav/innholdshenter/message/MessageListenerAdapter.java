@@ -14,6 +14,10 @@ public class MessageListenerAdapter implements StringRetriever{
         this.stringRetriever = stringRetriever;
     }
 
+    public String retrieveString(String key, String locale) {
+        return retrieveString(key, locale, null);
+    }
+
     public String retrieveString(String key, String locale, String variant) {
         String value = stringRetriever.retrieveString(key, locale, variant);
         if(value!= null){
