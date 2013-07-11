@@ -193,21 +193,19 @@ public class DecoratorFilter implements Filter {
     }
 
     public boolean canHandleContentType(String contentType) {
-        if (contentType != null) {
-            for (String includeContentType : includeContentTypes) {
-                if (contentType.toLowerCase().contains(includeContentType)) {
-                    return true;
-                }
+        if (contentType == null) {
+            return false;
+        }
+        for (String includeContentType : includeContentTypes) {
+            if (contentType.toLowerCase().contains(includeContentType)) {
+                return true;
             }
         }
         return false;
     }
 
     public static boolean requestHeaderHasValue(HttpServletRequest request, String header, String value) {
-        if (request.getHeader(header) != null) {
-            return request.getHeader(header).equalsIgnoreCase(value);
-        }
-        return false;
+        return (request.getHeader(header) == null) ? false : request.getHeader(header).equalsIgnoreCase(value);
     }
 
     public void setExcludeHeaders(Map<String, String> excludeHeaders) {
