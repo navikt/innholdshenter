@@ -3,7 +3,7 @@ package no.nav.innholdshenter.filter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class HtmlPage {
+class HtmlPage {
 
     private static final String BODY_TAG = "body";
     private static final String TITLE_TAG = "title";

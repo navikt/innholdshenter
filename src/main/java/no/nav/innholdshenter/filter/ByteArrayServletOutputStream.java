@@ -11,7 +11,7 @@ import java.io.UnsupportedEncodingException;
 /**
  * Keeps the response from server. Used by response wrapper
  */
-public class ByteArrayServletOutputStream extends ServletOutputStream {
+class ByteArrayServletOutputStream extends ServletOutputStream {
 
     private static final Logger logger = LoggerFactory.getLogger(ByteArrayServletOutputStream.class);
     private static final String FEILMELDING_UNABLE_TO_CONVERT_STREAM_TO_STRING = "Unable to convert stream to string. Unsupported encoding used in request.";

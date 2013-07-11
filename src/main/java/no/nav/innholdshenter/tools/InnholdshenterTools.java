@@ -1,6 +1,5 @@
 package no.nav.innholdshenter.tools;
 
-import no.nav.innholdshenter.filter.HtmlPage;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
@@ -26,18 +25,6 @@ public class InnholdshenterTools {
             logger.warn(INFO_LAGE_NY_UNIK_URL_FEILET, url, e);
         }
         return url;
-    }
-
-    public static HtmlPage getErrorPage() {
-        StringBuilder pageContent = new StringBuilder();
-        pageContent.append("<html>");
-        pageContent.append("<head><title>NAV - Feilside</title></head>");
-        pageContent.append("<body><h2>Tjenesten er utilgjengelig på grunn av teknisk feil.</h2>");
-        pageContent.append("</body>");
-        pageContent.append("</html>");
-        HtmlPage errorPage = new HtmlPage(pageContent.toString());
-        errorPage.setErrorPage(true);
-        return errorPage;
     }
 
     public static boolean urlMatchesPatternInList(String innerUrl, List<String> list) {

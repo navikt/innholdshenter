@@ -13,7 +13,7 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
 /**
  * Henter rammen som skal brukes til dekorering og omskriver lenkene denne inneholder.
  */
-public class DecoratorFrame {
+class DecoratorFrame {
 
     private static final Logger logger = LoggerFactory.getLogger(DecoratorFrame.class);
 
@@ -49,7 +49,7 @@ public class DecoratorFrame {
             return new HtmlPage(pageFrame);
         } catch (IllegalStateException e) {
             logger.error(FEIL_VED_HENTING_AV_DEKORERINGSRAMME + e.getMessage());
-            return InnholdshenterTools.getErrorPage();
+            return getErrorPage();
         }
     }
 
@@ -213,5 +213,17 @@ public class DecoratorFrame {
 
     public void setBreadcrumbComponentMergePoint(String breadcrumbComponentMergePoint) {
         this.breadcrumbComponentMergePoint = breadcrumbComponentMergePoint;
+    }
+
+    protected static HtmlPage getErrorPage() {
+        StringBuilder pageContent = new StringBuilder();
+        pageContent.append("<html>");
+        pageContent.append("<head><title>NAV - Feilside</title></head>");
+        pageContent.append("<body><h2>Tjenesten er utilgjengelig på grunn av teknisk feil.</h2>");
+        pageContent.append("</body>");
+        pageContent.append("</html>");
+        HtmlPage errorPage = new HtmlPage(pageContent.toString());
+        errorPage.setErrorPage(true);
+        return errorPage;
     }
 }
