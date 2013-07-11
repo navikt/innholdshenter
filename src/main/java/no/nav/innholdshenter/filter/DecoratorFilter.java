@@ -232,4 +232,37 @@ public class DecoratorFilter implements Filter {
         this.templateUrl = templateUrl;
         decoratorFrame.setTemplateUrl(templateUrl);
     }
+
+    public void setLeftMenuComponentEndTag(String leftMenuComponentEndTag) {
+        decoratorFrame.setLeftMenuComponentEndTag(leftMenuComponentEndTag);
+    }
+
+    public void setLeftMenuComponentStartTag(String leftMenuComponentStartTag) {
+        decoratorFrame.setLeftMenuComponentStartTag(leftMenuComponentStartTag);
+    }
+
+    public void setHeaderBarComponentEndTag(String headerBarComponentEndTag) {
+        decoratorFrame.setHeaderBarComponentEndTag(headerBarComponentEndTag);
+    }
+
+    public void setHeaderBarComponentStartTag(String headerBarComponentStartTag) {
+        decoratorFrame.setHeaderBarComponentStartTag(headerBarComponentStartTag);
+    }
+
+    public void setIncludeQueryStringInDecoration(boolean includeQueryStringInDecoration) {
+        decoratorFrame.setIncludeQueryStringInDecoration(includeQueryStringInDecoration);
+    }
+
+    public void setBreadcrumbComponentStartTag(String breadcrumbComponentStartTag) {
+        decoratorFrame.setBreadcrumbComponentStartTag(breadcrumbComponentStartTag);
+    }
+
+    public void setBreadcrumbComponentEndTag(String breadcrumbComponentEndTag) {
+        decoratorFrame.setBreadcrumbComponentEndTag(breadcrumbComponentEndTag);
+    }
+
+    public void setBreadcrumbComponentMergePoint(String breadcrumbComponentMergePoint) {
+        decoratorFrame.setBreadcrumbComponentMergePoint(breadcrumbComponentMergePoint);
+    }
+
 }

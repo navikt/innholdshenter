@@ -1,11 +1,15 @@
 package no.nav.innholdshenter.tools;
 
+import no.nav.innholdshenter.filter.HtmlPage;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URISyntaxException;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class InnholdshenterTools {
     private static final Logger logger = LoggerFactory.getLogger(InnholdshenterTools.class);
@@ -24,4 +28,28 @@ public class InnholdshenterTools {
         return url;
     }
 
+    public static HtmlPage getErrorPage() {
+        StringBuilder pageContent = new StringBuilder();
+        pageContent.append("<html>");
+        pageContent.append("<head><title>NAV - Feilside</title></head>");
+        pageContent.append("<body><h2>Tjenesten er utilgjengelig på grunn av teknisk feil.</h2>");
+        pageContent.append("</body>");
+        pageContent.append("</html>");
+        HtmlPage errorPage = new HtmlPage(pageContent.toString());
+        errorPage.setErrorPage(true);
+        return errorPage;
+    }
+
+    public static boolean urlMatchesPatternInList(String innerUrl, List<String> list) {
+        for (String patternAsString : list) {
+            if (patternAsString != null && patternAsString.length() > 0) {
+                Pattern pattern = Pattern.compile(patternAsString);
+                Matcher matcher = pattern.matcher(innerUrl);
+                if (matcher.find()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }

@@ -1,13 +1,12 @@
 package no.nav.innholdshenter.filter;
 
 import no.nav.innholdshenter.common.EnonicContentRetriever;
+import no.nav.innholdshenter.tools.InnholdshenterTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
@@ -50,7 +49,7 @@ public class DecoratorFrame {
             return new HtmlPage(pageFrame);
         } catch (IllegalStateException e) {
             logger.error(FEIL_VED_HENTING_AV_DEKORERINGSRAMME + e.getMessage());
-            return getErrorPage();
+            return InnholdshenterTools.getErrorPage();
         }
     }
 
@@ -88,13 +87,13 @@ public class DecoratorFrame {
         }
         String url = request.getRequestURI() + "?" + request.getQueryString();
 
-        if (includeQueryStringInDecoration && hasExcludePatterns() && !(urlMatchesPatternInList(url, excludeQueryStringFromDecorationPatterns))) {
+        if (includeQueryStringInDecoration && hasExcludePatterns() && !(InnholdshenterTools.urlMatchesPatternInList(url, excludeQueryStringFromDecorationPatterns))) {
             return true;
 
         } else if (includeQueryStringInDecoration && !hasExcludePatterns()) {
             return true;
 
-        } else if (hasIncludePatterns() && urlMatchesPatternInList(url, includeQueryStringInDecorationPatterns)) {
+        } else if (hasIncludePatterns() && InnholdshenterTools.urlMatchesPatternInList(url, includeQueryStringInDecorationPatterns)) {
             return true;
         }
         return false;
@@ -156,32 +155,16 @@ public class DecoratorFrame {
         return includeQueryStringInDecoration;
     }
 
-    public void setIncludeQueryStringInDecoration(boolean includeQueryStringInDecoration) {
-        this.includeQueryStringInDecoration = includeQueryStringInDecoration;
-    }
-
     public String getBreadcrumbComponentMergePoint() {
         return breadcrumbComponentMergePoint;
-    }
-
-    public void setBreadcrumbComponentMergePoint(String breadcrumbComponentMergePoint) {
-        this.breadcrumbComponentMergePoint = breadcrumbComponentMergePoint;
     }
 
     public String getBreadcrumbComponentStartTag() {
         return breadcrumbComponentStartTag;
     }
 
-    public void setBreadcrumbComponentStartTag(String breadcrumbComponentStartTag) {
-        this.breadcrumbComponentStartTag = breadcrumbComponentStartTag;
-    }
-
     public String getBreadcrumbComponentEndTag() {
         return breadcrumbComponentEndTag;
-    }
-
-    public void setBreadcrumbComponentEndTag(String breadcrumbComponentEndTag) {
-        this.breadcrumbComponentEndTag = breadcrumbComponentEndTag;
     }
 
     public String getLeftMenuComponentStartTag() {
@@ -192,6 +175,14 @@ public class DecoratorFrame {
         return leftMenuComponentEndTag;
     }
 
+    public String getHeaderBarComponentEndTag() {
+        return headerBarComponentEndTag;
+    }
+
+    public String getHeaderBarComponentStartTag() {
+        return headerBarComponentStartTag;
+    }
+
     public void setLeftMenuComponentEndTag(String leftMenuComponentEndTag) {
         this.leftMenuComponentEndTag = leftMenuComponentEndTag;
     }
@@ -200,46 +191,27 @@ public class DecoratorFrame {
         this.leftMenuComponentStartTag = leftMenuComponentStartTag;
     }
 
-    public String getHeaderBarComponentEndTag() {
-        return headerBarComponentEndTag;
-    }
-
     public void setHeaderBarComponentEndTag(String headerBarComponentEndTag) {
         this.headerBarComponentEndTag = headerBarComponentEndTag;
-    }
-
-    public String getHeaderBarComponentStartTag() {
-        return headerBarComponentStartTag;
     }
 
     public void setHeaderBarComponentStartTag(String headerBarComponentStartTag) {
         this.headerBarComponentStartTag = headerBarComponentStartTag;
     }
 
-    private static HtmlPage getErrorPage() {
-        StringBuilder pageContent = new StringBuilder();
-        pageContent.append("<html>");
-        pageContent.append("<head><title>NAV - Feilside</title></head>");
-        pageContent.append("<body><h2>Tjenesten er utilgjengelig på grunn av teknisk feil.</h2>");
-        pageContent.append("</body>");
-        pageContent.append("</html>");
-        HtmlPage errorPage = new HtmlPage(pageContent.toString());
-        errorPage.setErrorPage(true);
-        return errorPage;
+    public void setIncludeQueryStringInDecoration(boolean includeQueryStringInDecoration) {
+        this.includeQueryStringInDecoration = includeQueryStringInDecoration;
     }
 
-    private static boolean urlMatchesPatternInList(String innerUrl, List<String> list) {
-        for (String patternAsString : list) {
-            if (patternAsString != null && patternAsString.length() > 0) {
-                Pattern pattern = Pattern.compile(patternAsString);
-                Matcher matcher = pattern.matcher(innerUrl);
-                if (matcher.find()) {
-                    return true;
-                }
-            }
-        }
-        return false;
+    public void setBreadcrumbComponentStartTag(String breadcrumbComponentStartTag) {
+        this.breadcrumbComponentStartTag = breadcrumbComponentStartTag;
     }
 
+    public void setBreadcrumbComponentEndTag(String breadcrumbComponentEndTag) {
+        this.breadcrumbComponentEndTag = breadcrumbComponentEndTag;
+    }
 
+    public void setBreadcrumbComponentMergePoint(String breadcrumbComponentMergePoint) {
+        this.breadcrumbComponentMergePoint = breadcrumbComponentMergePoint;
+    }
 }
