@@ -1,5 +1,6 @@
 package no.nav.innholdshenter.filter;
 
+import no.nav.innholdshenter.common.EnonicContentRetriever;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,8 +31,8 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class DecoratorFilterTest {
 
-    private DecoratorFilter decoratorFilter = null;
-
+    private DecoratorFilter decoratorFilter;
+    private String templateurl = "/systemsider/templates/decorator";
     private ByteArrayServletOutputStream stream = new ByteArrayServletOutputStream("UTF-8");
 
     @Mock
@@ -42,6 +43,9 @@ public class DecoratorFilterTest {
     private HttpServletRequest httpServletRequest;
     @Mock
     private DecoratorFrame decoratorFrame;
+    @Mock
+    private EnonicContentRetriever contentRetriever;
+
 
     @Before
     public void setUp() throws IOException {
@@ -50,7 +54,7 @@ public class DecoratorFilterTest {
         PrintWriter out = new PrintWriter(stream);
         when(httpServletResponse.getWriter()).thenReturn(out);
         when(httpServletResponse.getOutputStream()).thenReturn(stream);
-        decoratorFilter = new DecoratorFilter();
+        decoratorFilter = new DecoratorFilter(contentRetriever, templateurl);
         decoratorFilter.setDecoratorFrame(decoratorFrame);
     }
 
@@ -119,8 +123,6 @@ public class DecoratorFilterTest {
 
         verify(decoratorFrame, never()).getHtmlFrame(httpServletRequest, null, null);
     }
-
-
 
 
 }

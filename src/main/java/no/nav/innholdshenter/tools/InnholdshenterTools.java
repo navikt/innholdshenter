@@ -23,4 +23,5 @@ public class InnholdshenterTools {
         }
         return url;
     }
+
 }

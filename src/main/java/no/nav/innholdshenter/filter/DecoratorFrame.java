@@ -17,6 +17,7 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
 public class DecoratorFrame {
 
     private static final Logger logger = LoggerFactory.getLogger(DecoratorFrame.class);
+
     private static final String AMPERSAND = "&";
     private static final String COMMA = ",";
     private EnonicContentRetriever contentRetriever;
@@ -33,10 +34,107 @@ public class DecoratorFrame {
     private List<String> includeQueryStringInDecorationPatterns;
     private List<String> excludeQueryStringFromDecorationPatterns;
 
-
     private static final String URL_PATH = "urlPath";
     private static final String RETRIEVING_CONTENT_WITH_URL = "Retrieving content with url: ";
     private static final String FEIL_VED_HENTING_AV_DEKORERINGSRAMME = "Feil ved henting av dekoreringsramme: ";
+
+
+    public HtmlPage getHtmlFrame(HttpServletRequest request, String alternativUrlBasedOnHtmlMetaTag, String role) {
+        String urlContext = getUrlContextAsParametrizedQueryString(request, alternativUrlBasedOnHtmlMetaTag, role);
+
+        String pageUrl = templateUrl + "?" + urlContext;
+
+        try {
+            logger.debug(RETRIEVING_CONTENT_WITH_URL + pageUrl);
+            String pageFrame = contentRetriever.getPageContent(pageUrl);
+            return new HtmlPage(pageFrame);
+        } catch (IllegalStateException e) {
+            logger.error(FEIL_VED_HENTING_AV_DEKORERINGSRAMME + e.getMessage());
+            return getErrorPage();
+        }
+    }
+
+    private String getUrlContextAsParametrizedQueryString(HttpServletRequest request, String alternativUrlBasedOnHtmlMetaTag, String role) {
+        String urlToCall = URL_PATH + "=";
+        String innerUrl = "";
+        if (alternativUrlBasedOnHtmlMetaTag != null) {
+            innerUrl = alternativUrlBasedOnHtmlMetaTag;
+            innerUrl = alternativUrlBasedOnHtmlMetaTag;
+        } else {
+            innerUrl = request.getRequestURI();
+        }
+
+        urlToCall += innerUrl;
+
+        if (shouldIncludeQueryStringInDecoration(request)) {
+            urlToCall += addQueryStringToDecoration(request);
+        }
+
+        if (!isEmpty(role)) {
+            urlToCall += "&role=" + role;
+        }
+        return urlToCall;
+    }
+
+    private String addQueryStringToDecoration(HttpServletRequest request) {
+        String query = request.getQueryString();
+        query = query.replaceAll(AMPERSAND, COMMA);
+        return COMMA + query;
+    }
+
+    private boolean shouldIncludeQueryStringInDecoration(HttpServletRequest request) {
+        if (request.getQueryString() == null) {
+            return false;
+        }
+        String url = request.getRequestURI() + "?" + request.getQueryString();
+
+        if (includeQueryStringInDecoration && hasExcludePatterns() && !(urlMatchesPatternInList(url, excludeQueryStringFromDecorationPatterns))) {
+            return true;
+
+        } else if (includeQueryStringInDecoration && !hasExcludePatterns()) {
+            return true;
+
+        } else if (hasIncludePatterns() && urlMatchesPatternInList(url, includeQueryStringInDecorationPatterns)) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean hasExcludePatterns() {
+        if (excludeQueryStringFromDecorationPatterns != null && !excludeQueryStringFromDecorationPatterns.isEmpty()) {
+            if (hasContent(excludeQueryStringFromDecorationPatterns)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean hasContent(List<String> list) {
+        for (String pattern : list) {
+            if (pattern != null && pattern.length() > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean hasIncludePatterns() {
+        if (includeQueryStringInDecorationPatterns != null && !includeQueryStringInDecorationPatterns.isEmpty()) {
+            if (hasContent(includeQueryStringInDecorationPatterns)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void setTemplateUrl(String templateUrl) {
+        this.templateUrl = templateUrl;
+    }
+
+    public void setContentRetriever(EnonicContentRetriever contentRetriever) {
+        this.contentRetriever = contentRetriever;
+    }
+
 
     public List<String> getIncludeQueryStringInDecorationPatterns() {
         return includeQueryStringInDecorationPatterns;
@@ -118,116 +216,7 @@ public class DecoratorFrame {
         this.headerBarComponentStartTag = headerBarComponentStartTag;
     }
 
-    public DecoratorFrame() {
-    }
-
-    public HtmlPage getHtmlFrame(HttpServletRequest request, String alternativUrlBasedOnHtmlMetaTag, String role) {
-        String urlContext = getUrlContextAsParametrizedQueryString(request, alternativUrlBasedOnHtmlMetaTag, role);
-
-        String pageUrl = templateUrl + "?" + urlContext;
-
-        try {
-            logger.debug(RETRIEVING_CONTENT_WITH_URL + pageUrl);
-            String pageFrame = contentRetriever.getPageContent(pageUrl);
-            return new HtmlPage(pageFrame);
-        } catch (IllegalStateException e) {
-            logger.error(FEIL_VED_HENTING_AV_DEKORERINGSRAMME + e.getMessage());
-            return getErrorPage();
-        }
-    }
-
-    private String getUrlContextAsParametrizedQueryString(HttpServletRequest request, String alternativUrlBasedOnHtmlMetaTag, String role) {
-        String urlToCall = URL_PATH + "=";
-        String innerUrl = "";
-        if (alternativUrlBasedOnHtmlMetaTag != null) {
-            innerUrl = alternativUrlBasedOnHtmlMetaTag;
-        } else {
-            innerUrl = request.getRequestURI();
-        }
-
-        urlToCall += innerUrl;
-
-        if (shouldIncludeQueryStringInDecoration(request)) {
-            urlToCall += addQueryStringToDecoration(request);
-        }
-
-        if (!isEmpty(role)) {
-            urlToCall += "&role=" + role;
-        }
-        return urlToCall;
-    }
-
-    private String addQueryStringToDecoration(HttpServletRequest request) {
-        String query = request.getQueryString();
-        query = query.replaceAll(AMPERSAND, COMMA);
-        return COMMA + query;
-    }
-
-    private boolean shouldIncludeQueryStringInDecoration(HttpServletRequest request) {
-
-        if (request.getQueryString() != null) {
-            String url = getFullRequestUrlFromRequest(request);
-
-            if (includeQueryStringInDecoration && hasExcludePatterns() && !(urlMatchesPatternInList(url, excludeQueryStringFromDecorationPatterns))) {
-                return true;
-
-            } else if (includeQueryStringInDecoration && !hasExcludePatterns()) {
-                return true;
-
-            } else if (hasIncludePatterns() && urlMatchesPatternInList(url, includeQueryStringInDecorationPatterns)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private String getFullRequestUrlFromRequest(HttpServletRequest request) {
-        return request.getRequestURI() + "?" + request.getQueryString();
-    }
-
-    private boolean hasExcludePatterns() {
-        if (excludeQueryStringFromDecorationPatterns != null && !excludeQueryStringFromDecorationPatterns.isEmpty()) {
-            if (hasContent(excludeQueryStringFromDecorationPatterns)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean hasContent(List<String> list) {
-        for (String pattern : list) {
-            if (pattern != null && pattern.length() > 0) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean hasIncludePatterns() {
-        if (includeQueryStringInDecorationPatterns != null && !includeQueryStringInDecorationPatterns.isEmpty()) {
-            if (hasContent(includeQueryStringInDecorationPatterns)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean urlMatchesPatternInList(String innerUrl, List<String> list) {
-        for (String patternAsString : list) {
-            if (patternAsString != null && patternAsString.length() > 0) {
-                Pattern pattern = Pattern.compile(patternAsString);
-
-                Matcher matcher = pattern.matcher(innerUrl);
-
-                if (matcher.find()) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private HtmlPage getErrorPage() {
+    private static HtmlPage getErrorPage() {
         StringBuilder pageContent = new StringBuilder();
         pageContent.append("<html>");
         pageContent.append("<head><title>NAV - Feilside</title></head>");
@@ -239,11 +228,18 @@ public class DecoratorFrame {
         return errorPage;
     }
 
-    public void setContentRetriever(EnonicContentRetriever contentRetriever) {
-        this.contentRetriever = contentRetriever;
+    private static boolean urlMatchesPatternInList(String innerUrl, List<String> list) {
+        for (String patternAsString : list) {
+            if (patternAsString != null && patternAsString.length() > 0) {
+                Pattern pattern = Pattern.compile(patternAsString);
+                Matcher matcher = pattern.matcher(innerUrl);
+                if (matcher.find()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
-    public void setTemplateUrl(String templateUrl) {
-        this.templateUrl = templateUrl;
-    }
+
 }

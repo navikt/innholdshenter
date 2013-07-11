@@ -1,23 +1,17 @@
 package no.nav.innholdshenter.filter;
 
+import no.nav.innholdshenter.common.EnonicContentRetriever;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Legger ramme rundt applikasjonen som bruker filteret.
@@ -28,6 +22,8 @@ public class DecoratorFilter implements Filter {
     private static final String LOCALE_UTF_8 = "UTF-8";
 
     private DecoratorFrame decoratorFrame;
+    private EnonicContentRetriever contentRetriever;
+    private String templateUrl;
     private boolean decorateOnlyOnce = true;
     private Map<String, String> excludeHeaders;
     private List<String> includeContentTypes;
@@ -42,8 +38,10 @@ public class DecoratorFilter implements Filter {
     private static final String CONTENT_TYPE = " Content-type: ";
 
 
-    public DecoratorFilter() {
+    public DecoratorFilter(EnonicContentRetriever contentRetriever, String templateUrl) {
         decoratorFrame = new DecoratorFrame();
+        setContentRetriever(contentRetriever);
+        setTemplateUrl(templateUrl);
         setDefaultExcludeHeaders();
         setDefaultIncludeContentTypes();
     }
@@ -205,10 +203,6 @@ public class DecoratorFilter implements Filter {
         return false;
     }
 
-    public void setDecoratorFrame(DecoratorFrame decoratorFrame) {
-        this.decoratorFrame = decoratorFrame;
-    }
-
     public void setExcludeHeaders(Map<String, String> excludeHeaders) {
         this.excludeHeaders = excludeHeaders;
     }
@@ -219,5 +213,23 @@ public class DecoratorFilter implements Filter {
 
     public void setDecorateOnlyOnce(boolean decorateOnlyOnce) {
         this.decorateOnlyOnce = decorateOnlyOnce;
+    }
+
+    public void setDecoratorFrame(DecoratorFrame decoratorFrame) {
+        this.decoratorFrame = decoratorFrame;
+    }
+
+    public DecoratorFrame getDecoratorFrame(DecoratorFrame decoratorFrame) {
+        return decoratorFrame;
+    }
+
+    public void setContentRetriever(EnonicContentRetriever contentRetriever) {
+        this.contentRetriever = contentRetriever;
+        decoratorFrame.setContentRetriever(contentRetriever);
+    }
+
+    public void setTemplateUrl(String templateUrl) {
+        this.templateUrl = templateUrl;
+        decoratorFrame.setTemplateUrl(templateUrl);
     }
 }
