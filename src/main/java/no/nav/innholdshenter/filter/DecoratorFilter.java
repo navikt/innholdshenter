@@ -217,6 +217,8 @@ public class DecoratorFilter implements Filter {
 
     public void setDecoratorFrame(DecoratorFrame decoratorFrame) {
         this.decoratorFrame = decoratorFrame;
+        decoratorFrame.setContentRetriever(contentRetriever);
+        decoratorFrame.setTemplateUrl(templateUrl);
     }
 
     public DecoratorFrame getDecoratorFrame(DecoratorFrame decoratorFrame) {
@@ -225,12 +227,12 @@ public class DecoratorFilter implements Filter {
 
     public void setContentRetriever(EnonicContentRetriever contentRetriever) {
         this.contentRetriever = contentRetriever;
-        decoratorFrame.setContentRetriever(contentRetriever);
+        decoratorFrame.setContentRetriever(this.contentRetriever);
     }
 
     public void setTemplateUrl(String templateUrl) {
         this.templateUrl = templateUrl;
-        decoratorFrame.setTemplateUrl(templateUrl);
+        decoratorFrame.setTemplateUrl(this.templateUrl);
     }
 
     public void setLeftMenuComponentEndTag(String leftMenuComponentEndTag) {
