@@ -1,5 +1,6 @@
-package no.nav.innholdshenter.common;
+package no.nav.innholdshenter.hjelpetekst;
 
+import no.nav.innholdshenter.common.EnonicContentRetriever;
 import org.jdom2.Document;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.input.sax.XMLReaderJDOMFactory;
@@ -11,7 +12,7 @@ import java.io.ByteArrayInputStream;
 /**
  * retrieves XML from vertical site and build jdom document
  */
-public class EnonicDocumentRetriever {
+class EnonicDocumentRetriever {
     private static final String LOCALE_UTF_8 = "UTF-8";
     private static final String FEILMELDING_COULD_NOT_LOAD_CONFIG_FROM_URL = "Could not load config from %s";
     private static final String FEILMELDING_COULD_NOT_PARSE_CONFIG_FROM_URL = "Could not parse config from %s";
