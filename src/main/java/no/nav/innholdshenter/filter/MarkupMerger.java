@@ -9,29 +9,29 @@ import java.util.regex.Matcher;
  */
 public class MarkupMerger {
 
-   private static final String EMPTY_STRING = "";
-   private static final String ENCODING_PATTERN_MATCHER = "(<\\?xml\\s*version=\"(.*)\"\\s*encoding=\"([^\"]*)?\">?\\s*\\?>)";
+    private static final String EMPTY_STRING = "";
+    private static final String ENCODING_PATTERN_MATCHER = "(<\\?xml\\s*version=\"(.*)\"\\s*encoding=\"([^\"]*)?\">?\\s*\\?>)";
 
     private static final String HEAD_PLACEHOLDER = "<!-- ${head} -->";
 
-   private static final String BODY_PLACEHOLDER = "<!-- ${body} -->";
-   private static final String TITLE_PLACEHOLDER = "<!-- ${title} -->";
-   private static final String HEADERBAR_COMPONENT_PLACEHOLDER = "<!-- ${headerbarcomponent} -->";
-   private static final String LEFT_MENU_COMPONENT_PLACEHOLDER = "<!-- ${leftmenucomponent} -->";
+    private static final String BODY_PLACEHOLDER = "<!-- ${body} -->";
+    private static final String TITLE_PLACEHOLDER = "<!-- ${title} -->";
+    private static final String HEADERBAR_COMPONENT_PLACEHOLDER = "<!-- ${headerbarcomponent} -->";
+    private static final String LEFT_MENU_COMPONENT_PLACEHOLDER = "<!-- ${leftmenucomponent} -->";
     private static final String BREADCRUMB_FROM_VS_START = "<!--breadcrumbs_start-->";
 
-   private static final String BREADCRUMB_FROM_VS_END = "<!--breadcrumbs_end-->";
-   private static final String BREADCRUMB_PLACEHOLDER = "<!-- ${breadcrumb} -->";
+    private static final String BREADCRUMB_FROM_VS_END = "<!--breadcrumbs_end-->";
+    private static final String BREADCRUMB_PLACEHOLDER = "<!-- ${breadcrumb} -->";
 
-   private MarkupMerger() {
-   }
+    private MarkupMerger() {
+    }
 
     public static HtmlPage mergeHeaderBarComponent(HtmlPage originalPageFromapplication, HtmlPage mergedPage, String headerBarStartTag, String headerBarEndTag) {
         return mergeComponent(originalPageFromapplication, headerBarStartTag, headerBarEndTag, mergedPage, HEADERBAR_COMPONENT_PLACEHOLDER);
     }
 
     public static HtmlPage mergeLeftMenuComponent(HtmlPage page, HtmlPage mergedPage, String menuComponentStartTag, String menuCompoentEndTag) {
-       return mergeComponent(page, menuComponentStartTag, menuCompoentEndTag, mergedPage, LEFT_MENU_COMPONENT_PLACEHOLDER);
+        return mergeComponent(page, menuComponentStartTag, menuCompoentEndTag, mergedPage, LEFT_MENU_COMPONENT_PLACEHOLDER);
     }
 
     public static HtmlPage mergeBreadcrumbComponent(HtmlPage originalPageFromApplication, HtmlPage mergedPage, String breadcrumbComponentStartTag,
@@ -63,22 +63,21 @@ public class MarkupMerger {
             newBreadCrumb += breadcrumbsFromApplicationStrippedTags.substring(breadcrumpsFromApplicationIndex, length);
             return newBreadCrumb;
         } else {
-           return breadcrumbsFromApplicationStrippedTags;
+            return breadcrumbsFromApplicationStrippedTags;
         }
     }
 
-   private static boolean mergePointIsFoundInBothDecorationTemplateAndPageToBeRewritten(String breadbrumbComponentMergePoint,
-                                                                                        String breadcrumbsFromApplicationStrippedTags,
-                                                                                        String breadcrumbsFromVerticalSiteStrippedTags) {
-       int breadCrumpsFromVerticalSiteIndex = breadcrumbsFromVerticalSiteStrippedTags.indexOf(breadbrumbComponentMergePoint);
-       int breadCrumpsFromApplicationIndex = breadcrumbsFromApplicationStrippedTags.indexOf(breadbrumbComponentMergePoint);
-       return breadbrumbComponentMergePoint != null && breadCrumpsFromApplicationIndex >= 0 && breadCrumpsFromVerticalSiteIndex >=0;
-   }
+    private static boolean mergePointIsFoundInBothDecorationTemplateAndPageToBeRewritten(String breadbrumbComponentMergePoint,
+                                                                                         String breadcrumbsFromApplicationStrippedTags,
+                                                                                         String breadcrumbsFromVerticalSiteStrippedTags) {
+        int breadCrumpsFromVerticalSiteIndex = breadcrumbsFromVerticalSiteStrippedTags.indexOf(breadbrumbComponentMergePoint);
+        int breadCrumpsFromApplicationIndex = breadcrumbsFromApplicationStrippedTags.indexOf(breadbrumbComponentMergePoint);
+        return breadbrumbComponentMergePoint != null && breadCrumpsFromApplicationIndex >= 0 && breadCrumpsFromVerticalSiteIndex >= 0;
+    }
 
-   private static String stripTags(String stringToStrip, String startTag, String endTag)
-   {
-      return stringToStrip.replace(startTag, EMPTY_STRING).replace(endTag, EMPTY_STRING);
-   }
+    private static String stripTags(String stringToStrip, String startTag, String endTag) {
+        return stringToStrip.replace(startTag, EMPTY_STRING).replace(endTag, EMPTY_STRING);
+    }
 
     private static HtmlPage mergeComponent(HtmlPage originalPageFromApplication, String startTag, String endTag, HtmlPage mergedPage, String placeHolder) {
         String tmpMarkup;
@@ -109,11 +108,11 @@ public class MarkupMerger {
         return new HtmlPage(tmpMarkup);
     }
 
-   private static boolean noChangesHasBeenMadeToPage(String head, String body, String title) {
-      return head.equals(EMPTY_STRING) && body.equals(EMPTY_STRING) && title.equals(EMPTY_STRING);
-   }
+    private static boolean noChangesHasBeenMadeToPage(String head, String body, String title) {
+        return head.equals(EMPTY_STRING) && body.equals(EMPTY_STRING) && title.equals(EMPTY_STRING);
+    }
 
-   public static String getEncodingTag(String html) {
+    public static String getEncodingTag(String html) {
         Pattern pattern = Pattern.compile(ENCODING_PATTERN_MATCHER, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
         Matcher matcher = pattern.matcher(html);
 

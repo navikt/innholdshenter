@@ -177,7 +177,7 @@ public class DecoratorFilter implements Filter {
             response.setContentLength(pageAsBytes.length);
             stream = response.getOutputStream();
             stream.write(pageAsBytes);
-        } catch (IllegalStateException getWriterHasAlreadyBeenCalled){
+        } catch (IllegalStateException getWriterHasAlreadyBeenCalled) {
             response.getWriter().print(page.getHtml());
         } finally {
             response.flushBuffer();

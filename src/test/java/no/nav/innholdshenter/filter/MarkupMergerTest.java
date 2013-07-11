@@ -29,18 +29,29 @@ public class MarkupMergerTest {
         assertEquals("Content was not merged", outputFrame, page.getHtml());
     }
 
+    @Test
+    public void testMergeHeaderBarComponent() {
+        String frame = encodingTag +"<html><head><title>$1</title> $2</head> <body><!-- headerbar_start -->Ukjent!$3<!-- headerbar_end --> $4</body><html>";
+
+        String inputFrame = String.format(frame, "<!-- ${title} -->", "<!-- ${head} -->", "<!-- ${headerbarcomponent} -->", "<!-- ${body} -->");
+        String html = head + body + title;
+        HtmlPage htmlpage = new HtmlPage(html);
+        HtmlPage mergepage = MarkupMerger.mergeMarkup(inputFrame, htmlpage);
+        mergepage = MarkupMerger.mergeHeaderBarComponent(htmlpage, mergepage, "<!-- headerbar_start -->", "<!-- headerbar_end -->");
+        System.out.print(mergepage.getHtml());
+    }
+
+    @Test
+    public void testEncodingTagExtractionFail() {
+        String frame = "<?xml version=\"1.0\" ?><html>" + head + body + "</html>";
+        String encodingtag = MarkupMerger.getEncodingTag(frame);
+        assertEquals("", encodingtag);
+    }
 
     @Test
     public void testEncodingTagExtraction() {
         String frame = encodingTag + "<html>" + head + body + "</html>";
         String encodingtag = MarkupMerger.getEncodingTag(frame);
-        System.out.println("Encoding tag : " + encodingtag);
-    }
-
-    @Test
-    public void testSomething(){
-
-
-
+        assertEquals(encodingTag, encodingtag);
     }
 }

@@ -10,6 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
+
 /**
  * Henter rammen som skal brukes til dekorering og omskriver lenkene denne inneholder.
  */
@@ -151,7 +152,7 @@ public class DecoratorFrame {
         }
 
         if (!isEmpty(role)) {
-            urlToCall += "&role="+role;
+            urlToCall += "&role=" + role;
         }
         return urlToCall;
     }
@@ -167,13 +168,13 @@ public class DecoratorFrame {
         if (request.getQueryString() != null) {
             String url = getFullRequestUrlFromRequest(request);
 
-            if (includeQueryStringInDecoration && hasExcludePatterns() && !(urlMatchesPatternInList(url, excludeQueryStringFromDecorationPatterns))){
+            if (includeQueryStringInDecoration && hasExcludePatterns() && !(urlMatchesPatternInList(url, excludeQueryStringFromDecorationPatterns))) {
                 return true;
 
-            }else if(includeQueryStringInDecoration && !hasExcludePatterns()){
+            } else if (includeQueryStringInDecoration && !hasExcludePatterns()) {
                 return true;
 
-            }else if (hasIncludePatterns() && urlMatchesPatternInList(url, includeQueryStringInDecorationPatterns)){
+            } else if (hasIncludePatterns() && urlMatchesPatternInList(url, includeQueryStringInDecorationPatterns)) {
                 return true;
             }
         }
