@@ -55,9 +55,9 @@ public class EnonicStringRetrieverTest {
     }
 
     @Test
-    public void skalHentePropertySomIkkeFinnesIDebugModus() throws Exception {
-        DebugAdapter debugAdapter = new DebugAdapter(new EnonicStringRetriever(contentRetriever, PATH));
-        String property = debugAdapter.retrieveString("a", "no_NO", null);
+    public void skalHentePropertySomIkkeFinnes() throws Exception {
+        StringRetriever stringHenter = new EnonicStringRetriever(contentRetriever, PATH);
+        String property = stringHenter.retrieveString("a", "no_NO", null);
         assertEquals("<b>[a locale:no_NO, variant:null]</b>", property);
     }
 

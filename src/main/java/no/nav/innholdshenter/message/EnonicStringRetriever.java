@@ -15,6 +15,7 @@ public class EnonicStringRetriever implements StringRetriever {
 
     private static final Logger logger = LoggerFactory.getLogger(EnonicStringRetriever.class);
     private static final String FEILMELDING_FEIL_VED_HENTING_AV_PROPERTY_MED_KEY = "Feil ved henting av property med key '{}', locale '{}', variant '{}': {}";
+    private static final String MISSING_KEY_TEMPLATE = "<b>[%s locale:%s, variant:%s]</b>";
 
     private String propertiesPath;
     private EnonicContentRetriever enonicContentRetriever;
@@ -22,6 +23,10 @@ public class EnonicStringRetriever implements StringRetriever {
     public EnonicStringRetriever(EnonicContentRetriever vsRetriever, String propertiesPath) {
         this.enonicContentRetriever = vsRetriever;
         this.propertiesPath = propertiesPath + "?locale=";
+    }
+
+    public String retrieveString(String key, String locale) {
+        return retrieveString(key, locale, null);
     }
 
     public String retrieveString(String key, String locale, String variant) {
@@ -33,10 +38,11 @@ public class EnonicStringRetriever implements StringRetriever {
                 path += getPropertiesPath(locale, variant);
             }
             Properties properties = enonicContentRetriever.getProperties(path);
-            return properties.getProperty(key.trim());
+            String value = properties.getProperty(key.trim());
+            return (value != null) ? value : String.format(MISSING_KEY_TEMPLATE, key, locale, variant);
         } catch (IllegalStateException e) {
             logger.error(FEILMELDING_FEIL_VED_HENTING_AV_PROPERTY_MED_KEY, key, locale, variant, e.getMessage());
-            return null;
+            return String.format(MISSING_KEY_TEMPLATE, key, locale, variant);
         }
     }
 
