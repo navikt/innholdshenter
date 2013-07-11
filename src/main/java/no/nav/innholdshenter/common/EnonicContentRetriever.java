@@ -80,18 +80,29 @@ public class EnonicContentRetriever {
         };
         return genericCache.fetch();
     }
-    public Properties getProperties(String propertiesPath) {
-        final String url = createUrl(propertiesPath);
-        String content = getPageContentFullUrl(url, getRefreshIntervalSeconds());
-        Properties properties = new Properties();
-        try {
-            ByteArrayInputStream propertiesStream = new ByteArrayInputStream(content.getBytes(LOCALE_UTF_8));
-            properties.loadFromXML(propertiesStream);
-        } catch (IOException e) {
-            logger.error("Feil i konvertering fra xml til Properties objekt.", e);
-            throw new RuntimeException("Feil: Kunne ikke hente data." + e.toString());
-        }
-        return properties;
+
+    public Properties getProperties(String path) {
+        final String url = createUrl(path);
+        return getPropertiesFullUrl(url, getRefreshIntervalSeconds());
+    }
+
+    public Properties getPropertiesFullUrl(final String url, int timeToLiveSeconds) {
+        GenericCache<Properties> genericCache = new GenericCache<Properties>(cacheManager, timeToLiveSeconds, url, cachename) {
+            @Override
+            protected Properties getContentFromSource() throws IOException {
+                String content = getPageContentFromUrl(url);
+                Properties properties = new Properties();
+                try {
+                    ByteArrayInputStream propertiesStream = new ByteArrayInputStream(content.getBytes(LOCALE_UTF_8));
+                    properties.loadFromXML(propertiesStream);
+                } catch (IOException e) {
+                    logger.error("Feil i konvertering fra xml til Properties objekt.", e);
+                    throw new RuntimeException("Feil: Kunne ikke hente data.", e);
+                }
+                return properties;
+            }
+        };
+        return genericCache.fetch();
     }
 
     private synchronized String getPageContentFromUrl(String url) throws IOException {
@@ -199,7 +210,11 @@ public class EnonicContentRetriever {
             Cache c = cacheManager.getCache(cachename);
             for (Object key : c.getKeys()) {
                 final String url = (String) key;
-                getPageContentFullUrl(url, hardcodeTTLtoEnsureCacheIsUpdated);
+                if(c.getQuiet(key).getObjectValue() instanceof Properties) {
+                    getPropertiesFullUrl(url, hardcodeTTLtoEnsureCacheIsUpdated);
+                } else {
+                    getPageContentFullUrl(url, hardcodeTTLtoEnsureCacheIsUpdated);
+                }
             }
         }
     }

@@ -135,7 +135,7 @@ public class EnonicContentRetrieverFullTest extends EnonicContentRetrieverTestSe
     @Test
     public void skalHenteCachedePropertiesFraCache() throws Exception {
         when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenReturn(PROPERTIES_CONTENT_2);
-        cache.put(new Element(URL, PROPERTIES_CONTENT_CACHED));
+        cache.put(new Element(URL, CACHED_PROPERTIES));
         testListener.resetStatus();
 
         Properties result = contentRetriever.getProperties(PATH);
