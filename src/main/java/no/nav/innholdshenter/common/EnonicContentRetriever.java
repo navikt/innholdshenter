@@ -35,7 +35,7 @@ public class EnonicContentRetriever {
     private static final String WARN_MELDING_REFRESH_CACHE = "Refresh cachen: {}";
     private static final String FEILMELDING_KLARTE_HENTE_INNHOLD_MEN_INNHOLDET_VAR_UGYLDIG = "Henting fra url {} gikk gjennom, men innholdet var ikke som forventet. Cache ikke oppdatert.";
     private static final String HTTP_STATUS_FEIL = "Http-kall feilet, status: {}, grunn: {}";
-    public static final List<String> GYLDIG_RESPONS_INNHOLD = Arrays.asList("<html", "<xml", "<properties", "<?xml ", "<!DOCTYPE ");
+    private static final List<String> GYLDIG_RESPONS_INNHOLD = Arrays.asList("<html", "<xml", "<properties", "<?xml ", "<!DOCTYPE ");
     private static final int MIN_VALID_CONTENT_LENGTH = 60;
 
     private List feilmeldinger;
@@ -205,16 +205,18 @@ public class EnonicContentRetriever {
 
     public void refreshCache() {
         int hardcodeTTLtoEnsureCacheIsUpdated = -1;
-        if (cacheManager.cacheExists(cachename)) {
-            logger.warn( WARN_MELDING_REFRESH_CACHE, cachename );
-            Cache c = cacheManager.getCache(cachename);
-            for (Object key : c.getKeys()) {
-                final String url = (String) key;
-                if(c.getQuiet(key).getObjectValue() instanceof Properties) {
-                    getPropertiesFullUrl(url, hardcodeTTLtoEnsureCacheIsUpdated);
-                } else {
-                    getPageContentFullUrl(url, hardcodeTTLtoEnsureCacheIsUpdated);
-                }
+        if (!cacheManager.cacheExists(cachename)) {
+            logger.warn("refreshCache: ingen cache med navnet {} ble funnet!", cachename);
+            return;
+        }
+        logger.warn( WARN_MELDING_REFRESH_CACHE, cachename );
+        Cache c = cacheManager.getCache(cachename);
+        for (Object key : c.getKeys()) {
+            final String url = (String) key;
+            if(c.getQuiet(key).getObjectValue() instanceof Properties) {
+                getPropertiesFullUrl(url, hardcodeTTLtoEnsureCacheIsUpdated);
+            } else {
+                getPageContentFullUrl(url, hardcodeTTLtoEnsureCacheIsUpdated);
             }
         }
     }
