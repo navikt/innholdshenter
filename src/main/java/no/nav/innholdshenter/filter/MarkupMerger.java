@@ -7,7 +7,7 @@ import java.util.regex.Matcher;
 /**
  * Legger head og body inn i "rammen"
  */
-public class MarkupMerger {
+class MarkupMerger {
 
     private static final String EMPTY_STRING = "";
     private static final String ENCODING_PATTERN_MATCHER = "(<\\?xml\\s*version=\"(.*)\"\\s*encoding=\"([^\"]*)?\">?\\s*\\?>)";

@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponseWrapper;
 /**
  * Wraps the response from the servlet. Used to decorate response.
  */
-public class DecoratorResponseWrapper extends HttpServletResponseWrapper {
+class DecoratorResponseWrapper extends HttpServletResponseWrapper {
 
     private static final String FEILMELDING_GET_WRITER_HAS_ALREADY_BEEN_CALLED = "getWriter() has already been called!";
     private static final String FEILMELDING_GET_OUTPUT_STREAM_HAS_ALREADY_BEEN_CALLED = "getOutputStream() has already been called!";
