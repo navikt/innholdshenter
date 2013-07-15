@@ -28,7 +28,7 @@ public class InnholdshenterGroupCommunicator extends ReceiverAdapter {
     @Override
     public void receive(Message message) {
         logger.error("got message {} from: {}", message.getObject(), message.getSrc());
-        innholdshenter.refreshCache();
+        innholdshenter.refreshCache(false);
     }
 
     /**

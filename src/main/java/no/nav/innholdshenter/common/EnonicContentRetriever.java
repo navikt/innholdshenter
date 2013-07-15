@@ -204,7 +204,17 @@ public class EnonicContentRetriever {
         }
     }
 
-    public void refreshCache() {
+    protected void broadcastRefresh() {
+        if(groupCommunicator != null) {
+            try {
+                this.groupCommunicator.sendUpdateToNodes();
+            } catch (Exception e) {
+                logger.error("Syncing cache refresh with nodes failed: {}", e);
+            }
+        }
+    }
+
+    public void refreshCache(boolean broadcastRefresh) {
         int hardcodeTTLtoEnsureCacheIsUpdated = -1;
         if (!cacheManager.cacheExists(cachename)) {
             logger.warn("refreshCache: ingen cache med navnet {} ble funnet!", cachename);
@@ -220,13 +230,12 @@ public class EnonicContentRetriever {
                 getPageContentFullUrl(url, hardcodeTTLtoEnsureCacheIsUpdated);
             }
         }
-        if(groupCommunicator != null) {
-            try {
-                this.groupCommunicator.sendUpdateToNodes();
-            } catch (Exception e) {
-                logger.error("Syncing cache refresh with nodes failed: {}", e);
-            }
-        }
+        if(broadcastRefresh)
+            broadcastRefresh();
+    }
+
+    public void refreshCache() {
+        refreshCache(true);
     }
 
     public synchronized List getAllElements () {
