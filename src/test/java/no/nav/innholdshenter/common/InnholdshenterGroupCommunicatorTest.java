@@ -49,7 +49,7 @@ public class InnholdshenterGroupCommunicatorTest {
     public void should_call_resetCache_function_message_is_received() {
         Message m = new Message(null, TEST_STRING);
         innholdshenterGroupCommunicator.receive(m);
-        verify(innholdshenter).refreshCache();
+        verify(innholdshenter).refreshCache(false);
     }
 
 }
