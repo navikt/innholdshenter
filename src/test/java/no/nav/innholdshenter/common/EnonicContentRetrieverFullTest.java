@@ -131,6 +131,15 @@ public class EnonicContentRetrieverFullTest extends EnonicContentRetrieverTestSe
         assertEquals(testListener.getLastStatus(), ListenerStatus.ELEMENT_ADDED);
     }
 
+    @Test
+    public void refresh_kaller_group_communicator_hvis_tilgjengelig() throws Exception {
+        InnholdshenterGroupCommunicator groupCommunicator = mock(InnholdshenterGroupCommunicator.class);
+        contentRetriever.setGroupCommunicator(groupCommunicator);
+
+        contentRetriever.refreshCache();
+
+        verify(groupCommunicator).sendUpdateToNodes();
+    }
 
     @Test
     public void skalHenteCachedePropertiesFraCache() throws Exception {
