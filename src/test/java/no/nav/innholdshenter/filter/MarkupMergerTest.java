@@ -38,7 +38,7 @@ public class MarkupMergerTest {
         HtmlPage htmlpage = new HtmlPage(html);
         HtmlPage mergepage = MarkupMerger.mergeMarkup(inputFrame, htmlpage);
         mergepage = MarkupMerger.mergeHeaderBarComponent(htmlpage, mergepage, "<!-- headerbar_start -->", "<!-- headerbar_end -->");
-        System.out.print(mergepage.getHtml());
+        System.out.println(mergepage.getHtml());
     }
 
     @Test
