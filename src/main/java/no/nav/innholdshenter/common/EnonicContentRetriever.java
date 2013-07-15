@@ -38,6 +38,7 @@ public class EnonicContentRetriever {
     private static final List<String> GYLDIG_RESPONS_INNHOLD = Arrays.asList("<html", "<xml", "<properties", "<?xml ", "<!DOCTYPE ");
     private static final int MIN_VALID_CONTENT_LENGTH = 60;
 
+    private InnholdshenterGroupCommunicator groupCommunicator;
     private List feilmeldinger;
 
     private String baseUrl;
@@ -219,6 +220,13 @@ public class EnonicContentRetriever {
                 getPageContentFullUrl(url, hardcodeTTLtoEnsureCacheIsUpdated);
             }
         }
+        if(groupCommunicator != null) {
+            try {
+                this.groupCommunicator.sendUpdateToNodes();
+            } catch (Exception e) {
+                logger.error("Syncing cache refresh with nodes failed: {}", e);
+            }
+        }
     }
 
     public synchronized List getAllElements () {
@@ -232,6 +240,10 @@ public class EnonicContentRetriever {
             liste.add(c.getQuiet(o));
         }
         return liste;
+    }
+
+    public void setGroupCommunicator(InnholdshenterGroupCommunicator groupCommunicator) {
+        this.groupCommunicator = groupCommunicator;
     }
 
     private HttpClient getHttpClient() {
