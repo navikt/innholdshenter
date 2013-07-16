@@ -41,7 +41,6 @@ public class InnholdshenterGroupCommunicator extends ReceiverAdapter {
     }
 
     public void sendUpdateToNodes() throws Exception {
-        //channel = new JChannel("jgroups.xml");
         /* null in first param is a broadcast to all nodes in group */
         channel.send(new Message(null, "test!"));
     }

@@ -37,6 +37,7 @@ public class EnonicContentRetriever {
     private static final String HTTP_STATUS_FEIL = "Http-kall feilet, status: {}, grunn: {}";
     private static final List<String> GYLDIG_RESPONS_INNHOLD = Arrays.asList("<html", "<xml", "<properties", "<?xml ", "<!DOCTYPE ");
     private static final int MIN_VALID_CONTENT_LENGTH = 60;
+    private static boolean nodeSyncing = true;
 
     private InnholdshenterGroupCommunicator groupCommunicator;
     private List feilmeldinger;
@@ -46,7 +47,7 @@ public class EnonicContentRetriever {
     private int httpTimeoutMillis;
 
     private CacheManager cacheManager;
-    private String cachename;
+    private static String uniqueAppName;
     private int refreshIntervalSeconds;
 
 
@@ -58,10 +59,18 @@ public class EnonicContentRetriever {
         httpClient = new DefaultHttpClient();
         setHttpTimeoutMillis(3000);
     }
-    public EnonicContentRetriever(String cachename) {
+    public EnonicContentRetriever(String uniqueAppName) {
         this();
-        this.cachename = cachename;
-        this.setCacheName(cachename);
+        this.uniqueAppName = uniqueAppName;
+        this.setAppName(uniqueAppName);
+    }
+
+    public EnonicContentRetriever(String uniqueAppName, boolean nodeSyncing) throws Exception {
+        this(uniqueAppName);
+        this.nodeSyncing = nodeSyncing;
+        if(nodeSyncing) {
+            setGroupCommunicator(new InnholdshenterGroupCommunicator(uniqueAppName, this));
+        }
     }
 
     private String createUrl(String path) {
@@ -74,7 +83,7 @@ public class EnonicContentRetriever {
     }
 
     private String getPageContentFullUrl(final String url, int timeToLiveSeconds) {
-        GenericCache<String> genericCache = new GenericCache<String>(cacheManager, timeToLiveSeconds, url, cachename) {
+        GenericCache<String> genericCache = new GenericCache<String>(cacheManager, timeToLiveSeconds, url, uniqueAppName) {
             protected String getContentFromSource() throws IOException {
                 return getPageContentFromUrl(url);
             }
@@ -88,7 +97,7 @@ public class EnonicContentRetriever {
     }
 
     public Properties getPropertiesFullUrl(final String url, int timeToLiveSeconds) {
-        GenericCache<Properties> genericCache = new GenericCache<Properties>(cacheManager, timeToLiveSeconds, url, cachename) {
+        GenericCache<Properties> genericCache = new GenericCache<Properties>(cacheManager, timeToLiveSeconds, url, uniqueAppName) {
             @Override
             protected Properties getContentFromSource() throws IOException {
                 String content = getPageContentFromUrl(url);
@@ -180,15 +189,15 @@ public class EnonicContentRetriever {
         this.cacheManager = cacheManager;
     }
 
-    public void setCacheName(String cacheName) {
-        if (cacheManager.cacheExists(cachename)) {
-            logger.debug("Removing cache: {}", cachename);
-            cacheManager.removeCache(cachename);
+    private void setAppName(String uniqueAppName) {
+        if (cacheManager.cacheExists(this.uniqueAppName)) {
+            logger.debug("Removing cache: {}", this.uniqueAppName);
+            cacheManager.removeCache(this.uniqueAppName);
         }
-        cachename = cacheName;
-        if (!cacheManager.cacheExists(cachename)) {
-            logger.debug( "Creating cache: {}", cachename );
-            cacheManager.addCacheIfAbsent(cacheName);
+        this.uniqueAppName = uniqueAppName;
+        if (!cacheManager.cacheExists(this.uniqueAppName)) {
+            logger.debug( "Creating cache: {}", this.uniqueAppName);
+            cacheManager.addCacheIfAbsent(this.uniqueAppName);
         }
     }
 
@@ -198,9 +207,9 @@ public class EnonicContentRetriever {
     }
 
     public void flushCache() {
-        if(cacheManager.cacheExists(cachename)) {
-            logger.warn( WARN_MELDING_FLUSHER_CACHEN, cachename );
-            cacheManager.getCache(cachename).removeAll();
+        if(cacheManager.cacheExists(uniqueAppName)) {
+            logger.warn( WARN_MELDING_FLUSHER_CACHEN, uniqueAppName);
+            cacheManager.getCache(uniqueAppName).removeAll();
         }
     }
 
@@ -216,12 +225,12 @@ public class EnonicContentRetriever {
 
     public void refreshCache(boolean broadcastRefresh) {
         int hardcodeTTLtoEnsureCacheIsUpdated = -1;
-        if (!cacheManager.cacheExists(cachename)) {
-            logger.warn("refreshCache: ingen cache med navnet {} ble funnet!", cachename);
+        if (!cacheManager.cacheExists(uniqueAppName)) {
+            logger.warn("refreshCache: ingen cache med navnet {} ble funnet!", uniqueAppName);
             return;
         }
-        logger.warn( WARN_MELDING_REFRESH_CACHE, cachename );
-        Cache c = cacheManager.getCache(cachename);
+        logger.warn( WARN_MELDING_REFRESH_CACHE, uniqueAppName);
+        Cache c = cacheManager.getCache(uniqueAppName);
         for (Object key : c.getKeys()) {
             final String url = (String) key;
             if(c.getQuiet(key).getObjectValue() instanceof Properties) {
@@ -239,11 +248,11 @@ public class EnonicContentRetriever {
     }
 
     public synchronized List getAllElements () {
-        if(!cacheManager.cacheExists(this.cachename)) {
+        if(!cacheManager.cacheExists(this.uniqueAppName)) {
             return new ArrayList();
         }
         List liste = new LinkedList();
-        Cache c = cacheManager.getCache(this.cachename);
+        Cache c = cacheManager.getCache(this.uniqueAppName);
         List keys = c.getKeys();
         for (Object o: keys) {
             liste.add(c.getQuiet(o));
