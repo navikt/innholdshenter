@@ -58,6 +58,8 @@ public class InnholdshenterGroupCommunicatorTest {
         Message m = new Message(null, TEST_STRING);
         innholdshenterGroupCommunicator.receive(m);
         verify(innholdshenter).refreshCache(false);
+        verify(innholdshenter, never()).refreshCache();
+        verify(innholdshenter, never()).refreshCache(true);
     }
 
     @Test
