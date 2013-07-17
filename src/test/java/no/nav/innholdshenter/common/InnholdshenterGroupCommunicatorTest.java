@@ -19,7 +19,7 @@ import static org.mockito.Mockito.*;
 public class InnholdshenterGroupCommunicatorTest {
 
     private static String identifingGroupName = "innholdshenterCacheSyncGroup";
-    private static String TEST_STRING = "Test!";
+    private static String TEST_STRING = "updateCache";
     InnholdshenterGroupCommunicator innholdshenterGroupCommunicator;
     @Mock
     EnonicContentRetriever innholdshenter;
@@ -38,6 +38,13 @@ public class InnholdshenterGroupCommunicatorTest {
         innholdshenterGroupCommunicator.setJChannel(jc);
         verify(jc).connect(anyString());
         verify(jc).setReceiver(innholdshenterGroupCommunicator);
+    }
+
+    @Test
+    public void should_not_call_update_when_wrong_message_received() {
+        Message m = new Message(null, "feiler "+TEST_STRING);
+        innholdshenterGroupCommunicator.receive(m);
+        verify(innholdshenter, never()).refreshCache(false);
     }
 
     @Test

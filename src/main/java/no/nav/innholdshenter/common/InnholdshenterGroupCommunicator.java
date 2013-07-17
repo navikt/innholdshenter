@@ -28,7 +28,9 @@ public class InnholdshenterGroupCommunicator extends ReceiverAdapter {
     @Override
     public void receive(Message message) {
         logger.error("got message {} from: {}", message.getObject(), message.getSrc());
-        innholdshenter.refreshCache(false);
+        if (message.getObject().equals("updateCache")) {
+            innholdshenter.refreshCache(false);
+        }
     }
 
     /**
@@ -42,7 +44,8 @@ public class InnholdshenterGroupCommunicator extends ReceiverAdapter {
 
     public void sendUpdateToNodes() throws Exception {
         /* null in first param is a broadcast to all nodes in group */
-        channel.send(new Message(null, "test!"));
+        Message m = new Message(null, "updateCache");
+        channel.send(m);
     }
 
     public void setJChannel(JChannel jChannel) throws Exception {
