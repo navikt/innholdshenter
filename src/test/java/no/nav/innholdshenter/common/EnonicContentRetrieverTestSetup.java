@@ -19,7 +19,7 @@ public class EnonicContentRetrieverTestSetup {
 
     protected static final String PATH = "systemsider/ApplicationFrame";
     protected static final String UGYLDIG_INNHOLD = "html>404</html>";
-    protected static final String cacheName = "TestEhcacheCacheName";
+    protected static String cacheName = "TestEhcacheCacheName";
     protected static final String SERVER = "http://localhost:9000";
     protected static final String URL = SERVER + "/" + PATH;
     protected static final int REFRESH_INTERVAL = 5;
@@ -84,13 +84,6 @@ public class EnonicContentRetrieverTestSetup {
 
         testListener = new EhcacheTestListener();
         cacheManager = CacheManager.create();
-        if(cacheManager.cacheExists(cacheName)) {
-            cacheManager.getEhcache(cacheName).removeAll();
-            cacheManager.removeCache(cacheName);
-        }
-        cacheManager.addCache(cacheName);
-        BlockingCache blockingCache = new BlockingCache(cacheManager.getEhcache(cacheName));
-        cacheManager.replaceCacheWithDecoratedCache(cacheManager.getEhcache(cacheName), blockingCache);
 
         contentRetriever = new EnonicContentRetriever(cacheName);
         contentRetriever.setCacheManager(cacheManager);
@@ -98,6 +91,7 @@ public class EnonicContentRetrieverTestSetup {
         contentRetriever.setBaseUrl(SERVER);
         contentRetriever.setRefreshIntervalSeconds(REFRESH_INTERVAL);
 
+        cacheName = contentRetriever.getCacheName();
         cache = cacheManager.getEhcache(cacheName);
         cache.getCacheEventNotificationService().registerListener(testListener);
 
