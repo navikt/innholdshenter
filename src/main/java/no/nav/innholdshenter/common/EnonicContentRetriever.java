@@ -41,6 +41,7 @@ public class EnonicContentRetriever {
     private static final int MIN_VALID_CONTENT_LENGTH = 60;
     private static boolean nodeSyncing = true;
 
+    private List<RefreshListener> refreshListeners;
     private InnholdshenterGroupCommunicator groupCommunicator;
     private List feilmeldinger;
 
@@ -60,6 +61,7 @@ public class EnonicContentRetriever {
 
     protected EnonicContentRetriever() {
         feilmeldinger = new ArrayList<String>();
+        refreshListeners = new LinkedList<RefreshListener>();
         if (cacheManager == null) {
             cacheManager = CacheManager.create();
         }
@@ -245,8 +247,25 @@ public class EnonicContentRetriever {
                 getPageContentFullUrl(url, hardcodeTTLtoEnsureCacheIsUpdated);
             }
         }
-        if(broadcastRefresh)
+        if(broadcastRefresh) {
             broadcastRefresh();
+        } else {
+            for(RefreshListener listener : refreshListeners) {
+                listener.refreshReceived();
+            }
+        }
+    }
+
+    public void addRefreshListener(RefreshListener refreshListener) {
+        if(refreshListeners.contains(refreshListener))
+            return;
+        refreshListeners.add(refreshListener);
+    }
+
+    public void removeRefreshListener(RefreshListener refreshListener) {
+        if(refreshListeners.contains(refreshListener)) {
+            refreshListeners.remove(refreshListener);
+        }
     }
 
     public void refreshCache() {
