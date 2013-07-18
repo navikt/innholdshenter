@@ -2,6 +2,8 @@ package no.nav.innholdshenter.common;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Ehcache;
+import net.sf.ehcache.constructs.blocking.BlockingCache;
 import no.nav.innholdshenter.tools.InnholdshenterTools;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpResponseException;
@@ -47,8 +49,12 @@ public class EnonicContentRetriever {
     private int httpTimeoutMillis;
 
     private CacheManager cacheManager;
-    private static String uniqueAppName;
+    private static String uniqueAppName = "innholdshenter-defaultcache";
     private int refreshIntervalSeconds;
+
+    private int maxElements = 1000;
+    private boolean overflowToDisk = false;
+    private boolean neverExpireCacheLines = true;
 
 
     public EnonicContentRetriever() {
@@ -58,6 +64,7 @@ public class EnonicContentRetriever {
         }
         httpClient = new DefaultHttpClient();
         setHttpTimeoutMillis(3000);
+        this.setAppName(uniqueAppName);
     }
     public EnonicContentRetriever(String uniqueAppName) {
         this();
@@ -189,15 +196,19 @@ public class EnonicContentRetriever {
         this.cacheManager = cacheManager;
     }
 
-    private void setAppName(String uniqueAppName) {
+    private synchronized void setAppName(String uniqueAppName) {
         if (cacheManager.cacheExists(this.uniqueAppName)) {
             logger.debug("Removing cache: {}", this.uniqueAppName);
             cacheManager.removeCache(this.uniqueAppName);
         }
         this.uniqueAppName = uniqueAppName;
         if (!cacheManager.cacheExists(this.uniqueAppName)) {
-            logger.debug( "Creating cache: {}", this.uniqueAppName);
-            cacheManager.addCacheIfAbsent(this.uniqueAppName);
+            cacheManager.addCache(new Cache(this.uniqueAppName, maxElements, overflowToDisk, neverExpireCacheLines, 0, 0));
+            Ehcache oldcache = cacheManager.getEhcache(this.uniqueAppName);
+            BlockingCache blockingCache = new BlockingCache(oldcache);
+
+            logger.debug("Creating cache: {}", this.uniqueAppName);
+            cacheManager.replaceCacheWithDecoratedCache(oldcache, blockingCache);
         }
     }
 
@@ -209,7 +220,7 @@ public class EnonicContentRetriever {
     public void flushCache() {
         if(cacheManager.cacheExists(uniqueAppName)) {
             logger.warn( WARN_MELDING_FLUSHER_CACHEN, uniqueAppName);
-            cacheManager.getCache(uniqueAppName).removeAll();
+            cacheManager.getEhcache(uniqueAppName).removeAll();
         }
     }
 
@@ -230,7 +241,7 @@ public class EnonicContentRetriever {
             return;
         }
         logger.warn( WARN_MELDING_REFRESH_CACHE, uniqueAppName);
-        Cache c = cacheManager.getCache(uniqueAppName);
+        Ehcache c = cacheManager.getEhcache(uniqueAppName);
         for (Object key : c.getKeys()) {
             final String url = (String) key;
             if(c.getQuiet(key).getObjectValue() instanceof Properties) {
@@ -252,7 +263,7 @@ public class EnonicContentRetriever {
             return new ArrayList();
         }
         List liste = new LinkedList();
-        Cache c = cacheManager.getCache(this.uniqueAppName);
+        Ehcache c = cacheManager.getEhcache(this.uniqueAppName);
         List keys = c.getKeys();
         for (Object o: keys) {
             liste.add(c.getQuiet(o));

@@ -2,6 +2,7 @@ package no.nav.innholdshenter.common;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIBuilder;
@@ -27,22 +28,16 @@ abstract class GenericCache<T> {
     private String cacheKey;
     private String cacheName;
 
-    private int maxElements = 1000;
-    private boolean overflowToDisk = false;
-    private boolean neverExpireCacheLines = true;
-
-
-
     public GenericCache(CacheManager cacheManager, int refreshIntervalSeconds, String cacheKey, String cacheName) {
         this.cacheManager = cacheManager;
         this.refreshIntervalSeconds = refreshIntervalSeconds;
         this.cacheKey = sanitizeUrlCacheKey(cacheKey);
-        setCacheName(cacheName);
+        this.cacheName = cacheName;
     }
 
     @SuppressWarnings("unchecked")
     public T fetch() {
-        Cache c = cacheManager.getCache(cacheName);
+        Ehcache c = cacheManager.getEhcache(cacheName);
         Element element = c.get(cacheKey);
 
         if (elementIsOutdatedOrMissing(element)) {
@@ -52,13 +47,13 @@ abstract class GenericCache<T> {
         }
         if (element == null) {
             logger.error(FEILMEDLING_KLARTE_IKKE_HENTE_INNHOLD_OG_INNHOLDET_FINNES_IKKE_I_CACHE, cacheKey);
-            return null;
+            throw new IllegalStateException(FEILMEDLING_KLARTE_IKKE_HENTE_INNHOLD_OG_INNHOLDET_FINNES_IKKE_I_CACHE);
         }
         T cacheContent = (T) element.getObjectValue();
         return cacheContent;
     }
 
-    private Element fetchNewCacheContent(Element element, Cache c) {
+    private Element fetchNewCacheContent(Element element, Ehcache c) {
         T cacheContent;
         try {
             cacheContent = getContentFromSource();
@@ -81,14 +76,6 @@ abstract class GenericCache<T> {
     }
 
     protected abstract T getContentFromSource() throws IOException;
-
-    private void setCacheName(String cacheName) {
-        this.cacheName = cacheName;
-        if (!cacheManager.cacheExists(cacheName)) {
-            cacheManager.addCache(new Cache(cacheName, maxElements, overflowToDisk, neverExpireCacheLines, 0, 0));
-        }
-
-    }
 
     private boolean isExpired(Element element) {
         long now = System.currentTimeMillis();

@@ -2,7 +2,9 @@ package no.nav.innholdshenter.common;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
+import net.sf.ehcache.constructs.blocking.BlockingCache;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.params.HttpParams;
@@ -52,7 +54,7 @@ public class EnonicContentRetrieverTestSetup {
     @Mock
     protected HttpClient httpClient;
 
-    protected Cache cache;
+    protected Ehcache cache;
     protected EhcacheTestListener testListener;
     protected EnonicContentRetriever contentRetriever;
     protected CacheManager cacheManager;
@@ -83,10 +85,12 @@ public class EnonicContentRetrieverTestSetup {
         testListener = new EhcacheTestListener();
         cacheManager = CacheManager.create();
         if(cacheManager.cacheExists(cacheName)) {
-            cacheManager.getCache(cacheName).removeAll();
+            cacheManager.getEhcache(cacheName).removeAll();
             cacheManager.removeCache(cacheName);
         }
         cacheManager.addCache(cacheName);
+        BlockingCache blockingCache = new BlockingCache(cacheManager.getEhcache(cacheName));
+        cacheManager.replaceCacheWithDecoratedCache(cacheManager.getEhcache(cacheName), blockingCache);
 
         contentRetriever = new EnonicContentRetriever(cacheName);
         contentRetriever.setCacheManager(cacheManager);
@@ -94,7 +98,7 @@ public class EnonicContentRetrieverTestSetup {
         contentRetriever.setBaseUrl(SERVER);
         contentRetriever.setRefreshIntervalSeconds(REFRESH_INTERVAL);
 
-        cache = cacheManager.getCache(cacheName);
+        cache = cacheManager.getEhcache(cacheName);
         cache.getCacheEventNotificationService().registerListener(testListener);
 
     }

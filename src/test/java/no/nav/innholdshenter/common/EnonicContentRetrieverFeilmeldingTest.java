@@ -21,8 +21,12 @@ public class EnonicContentRetrieverFeilmeldingTest extends EnonicContentRetrieve
     public void notfound_feil_skal_lage_feilmelding_i_listen() throws Exception{
         when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class)))
                 .thenThrow(new HttpResponseException(404, "Not found"));
-
-        String result = contentRetriever.getPageContent(PATH);
+        String result;
+        try {
+            result = contentRetriever.getPageContent(PATH);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         List<CacheStatusFeilmelding> feil = contentRetriever.getFeilmeldinger();
         assertTrue(feil.size()>=1);
         int errorcode = feil.get(0).getStatusCode();
@@ -35,7 +39,12 @@ public class EnonicContentRetrieverFeilmeldingTest extends EnonicContentRetrieve
         when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class)))
                 .thenThrow(new HttpResponseException(403, "Forbidden"));
 
-        String result = contentRetriever.getPageContent(PATH);
+        String result;
+        try {
+            result = contentRetriever.getPageContent(PATH);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         List<CacheStatusFeilmelding> feil = contentRetriever.getFeilmeldinger();
         assertTrue(feil.size()>=1);
         int errorcode = feil.get(0).getStatusCode();
