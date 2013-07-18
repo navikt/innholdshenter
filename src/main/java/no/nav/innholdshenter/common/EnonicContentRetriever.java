@@ -197,10 +197,6 @@ public class EnonicContentRetriever {
     }
 
     private synchronized void setupCache() {
-        if (cacheManager.cacheExists(cacheName)) {
-            logger.debug("Removing cache: {}", cacheName);
-            cacheManager.removeCache(cacheName);
-        }
         if (!cacheManager.cacheExists(this.cacheName)) {
             cacheManager.addCache(new Cache(this.cacheName, maxElements, overflowToDisk, neverExpireCacheLines, 0, 0));
             Ehcache oldcache = cacheManager.getEhcache(cacheName);
