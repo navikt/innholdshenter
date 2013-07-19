@@ -18,11 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 
 /**
@@ -36,14 +32,14 @@ public class EnonicContentRetriever {
     private static final String WARN_MELDING_FLUSHER_CACHEN = "Flusher cachen: {}";
     private static final String WARN_MELDING_REFRESH_CACHE = "Refresh cachen: {}";
     private static final String FEILMELDING_KLARTE_HENTE_INNHOLD_MEN_INNHOLDET_VAR_UGYLDIG = "Henting fra url {} gikk gjennom, men innholdet var ikke som forventet. Cache ikke oppdatert.";
-    private static final String HTTP_STATUS_FEIL = "Http-kall feilet, status: {}, grunn: {}";
+    private static final String HTTP_STATUS_FEIL = "Http-kall feilet, url: {} status: {} grunn: {}";
     private static final List<String> GYLDIG_RESPONS_INNHOLD = Arrays.asList("<html", "<xml", "<properties", "<?xml ", "<!DOCTYPE ");
     private static final int MIN_VALID_CONTENT_LENGTH = 60;
     private static boolean nodeSyncing = true;
 
     private List<RefreshListener> refreshListeners;
     private InnholdshenterGroupCommunicator groupCommunicator;
-    private List feilmeldinger;
+    private Map feilmeldinger;
 
     private String baseUrl;
     private HttpClient httpClient;
@@ -60,7 +56,7 @@ public class EnonicContentRetriever {
 
 
     protected EnonicContentRetriever() {
-        feilmeldinger = new ArrayList<String>();
+        feilmeldinger = new HashMap<String, CacheStatusFeilmelding>();
         refreshListeners = new LinkedList<RefreshListener>();
         if (cacheManager == null) {
             cacheManager = CacheManager.create();
@@ -133,8 +129,9 @@ public class EnonicContentRetriever {
         try {
             innhold = httpClient.execute(httpGet, responseHandler);
         } catch(HttpResponseException exception) {
-            logger.error(HTTP_STATUS_FEIL, exception.getStatusCode(), exception.getMessage());
-            feilmeldinger.add(new CacheStatusFeilmelding(exception.getStatusCode(), exception.getMessage(), System.currentTimeMillis()));
+            logger.error(HTTP_STATUS_FEIL, url, exception.getStatusCode(), exception.getMessage());
+            CacheStatusFeilmelding c = new CacheStatusFeilmelding(exception.getStatusCode(), exception.getMessage(), System.currentTimeMillis());
+            feilmeldinger.put(url, c);
             throw new IOException(exception);
         }
 
@@ -183,7 +180,7 @@ public class EnonicContentRetriever {
 
     }
 
-    public List getFeilmeldinger() {
+    public Map getFeilmeldinger() {
         return this.feilmeldinger;
     }
     public int getRefreshIntervalSeconds() {
