@@ -37,7 +37,7 @@ public class EnonicContentRetriever {
     private static final int MIN_VALID_CONTENT_LENGTH = 60;
     private static boolean nodeSyncing = true;
 
-    private List<RefreshListener> refreshListeners;
+    private List<CacheRefreshListener> cacheRefreshListeners;
     private InnholdshenterGroupCommunicator groupCommunicator;
     private Map feilmeldinger;
 
@@ -57,7 +57,7 @@ public class EnonicContentRetriever {
 
     protected EnonicContentRetriever() {
         feilmeldinger = new HashMap<String, CacheStatusFeilmelding>();
-        refreshListeners = new LinkedList<RefreshListener>();
+        cacheRefreshListeners = new LinkedList<CacheRefreshListener>();
         if (cacheManager == null) {
             cacheManager = CacheManager.create();
         }
@@ -247,21 +247,21 @@ public class EnonicContentRetriever {
         if(broadcastRefresh) {
             broadcastRefresh();
         } else {
-            for(RefreshListener listener : refreshListeners) {
+            for(CacheRefreshListener listener : cacheRefreshListeners) {
                 listener.refreshReceived();
             }
         }
     }
 
-    public void addRefreshListener(RefreshListener refreshListener) {
-        if(refreshListeners.contains(refreshListener))
+    public void addCacheRefreshListener(CacheRefreshListener cacheRefreshListener) {
+        if(cacheRefreshListeners.contains(cacheRefreshListener))
             return;
-        refreshListeners.add(refreshListener);
+        cacheRefreshListeners.add(cacheRefreshListener);
     }
 
-    public void removeRefreshListener(RefreshListener refreshListener) {
-        if(refreshListeners.contains(refreshListener)) {
-            refreshListeners.remove(refreshListener);
+    public void removeCacheRefreshListener(CacheRefreshListener cacheRefreshListener) {
+        if(cacheRefreshListeners.contains(cacheRefreshListener)) {
+            cacheRefreshListeners.remove(cacheRefreshListener);
         }
     }
 

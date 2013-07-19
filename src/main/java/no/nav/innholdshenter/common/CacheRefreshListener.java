@@ -1,5 +1,5 @@
 package no.nav.innholdshenter.common;
 
-public interface RefreshListener {
+public interface CacheRefreshListener {
     public void refreshReceived();
 }
