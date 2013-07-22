@@ -79,7 +79,7 @@ public class EnonicContentRetriever {
     }
 
     private String createUrl(String path) {
-        return baseUrl + path;
+        return InnholdshenterTools.sanitizeUrlCacheKey(baseUrl + path);
     }
 
     public String getPageContent(String path) {

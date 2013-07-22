@@ -1,6 +1,7 @@
 package no.nav.innholdshenter.tools;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,4 +40,39 @@ public class InnholdshenterTools {
         }
         return false;
     }
+
+    /**
+     * Sanitize url before storage in cache. This part of the url tends to include session specific data,
+     * so it is often unique, and thrashes the cache.
+     * Use this return value as the index in the cache, and not the full url.
+     *
+     * @param url
+     * @return returns a cleaner url, suitable for the cacheline.
+     *
+     */
+    public static String sanitizeUrlCacheKey(String url) {
+        URIBuilder uriBuilder = null;
+        try {
+            uriBuilder = new URIBuilder(url);
+            List<NameValuePair> params = uriBuilder.getQueryParams();
+            for (NameValuePair nameValuePair : params) {
+                if (nameValuePair.getName().startsWith("urlPath")) {
+                    String urlpath = sanitizeUrlPath(nameValuePair.getValue());
+                    uriBuilder.setParameter("urlPath", urlpath);
+                }
+            }
+        } catch (URISyntaxException e) {
+            logger.debug(e.getMessage());
+            return url;
+        }
+        return uriBuilder.toString();
+    }
+
+    private static String sanitizeUrlPath(String urlParam) {
+        if (urlParam != null && !urlParam.isEmpty()) {
+            return urlParam.split(",")[0];
+        }
+        return urlParam;
+    }
+
 }
