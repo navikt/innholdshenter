@@ -128,6 +128,8 @@ public class EnonicContentRetriever {
         String innhold;
         try {
             innhold = httpClient.execute(httpGet, responseHandler);
+            CacheStatusFeilmelding c = new CacheStatusFeilmelding(200, "OK", System.currentTimeMillis());
+            feilmeldinger.put(url, c);
         } catch(HttpResponseException exception) {
             logger.error(HTTP_STATUS_FEIL, url, exception.getStatusCode(), exception.getMessage());
             CacheStatusFeilmelding c = new CacheStatusFeilmelding(exception.getStatusCode(), exception.getMessage(), System.currentTimeMillis());
