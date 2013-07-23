@@ -65,6 +65,7 @@ public class InnholdshenterGroupCommunicatorTest {
     public void should_not_broadcast_refreshCache_when_message_is_received_to_avoid_infinite_loop() throws Exception {
         Message m = new Message(null, TEST_STRING);
         innholdshenterGroupCommunicator.receive(m);
+        verify(innholdshenter).refreshCache(false);
         verify(innholdshenter, never()).refreshCache(true);
         verify(jChannel, never()).send(any(Message.class));
         verify(jChannel, never()).send(any(Address.class),any());
