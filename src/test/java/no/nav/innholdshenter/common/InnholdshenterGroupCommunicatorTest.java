@@ -54,7 +54,7 @@ public class InnholdshenterGroupCommunicatorTest {
     }
 
     @Test
-    public void should_call_resetCache_function_when_message_is_received() {
+    public void should_call_refreshCache_function_when_message_is_received() {
         Message m = new Message(null, TEST_STRING);
         innholdshenterGroupCommunicator.receive(m);
         verify(innholdshenter).refreshCache(false);
@@ -62,7 +62,7 @@ public class InnholdshenterGroupCommunicatorTest {
     }
 
     @Test
-    public void should_not_broadcast_resetCache_when_message_is_received() throws Exception {
+    public void should_not_broadcast_refreshCache_when_message_is_received_to_avoid_infinite_loop() throws Exception {
         Message m = new Message(null, TEST_STRING);
         innholdshenterGroupCommunicator.receive(m);
         verify(innholdshenter, never()).refreshCache(true);
