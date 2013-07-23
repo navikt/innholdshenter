@@ -50,6 +50,12 @@ public class DecoratorFilter implements Filter {
         setTemplateUrl(templateUrl);
         setDefaultExcludeHeaders();
         setDefaultIncludeContentTypes();
+        setDefaultHeaderBarComponents();
+    }
+
+    private void setDefaultHeaderBarComponents() {
+        setHeaderBarComponentStartTag("&lt;!--HEADERBAR_START--&gt;");
+        setHeaderBarComponentEndTag("&lt;!--HEADERBAR_END--&gt;");
     }
 
     private void setDefaultExcludeHeaders() {
