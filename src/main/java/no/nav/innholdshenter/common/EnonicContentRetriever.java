@@ -35,7 +35,7 @@ public class EnonicContentRetriever {
     private static final String HTTP_STATUS_FEIL = "Http-kall feilet, url: {} status: {} grunn: {}";
     private static final List<String> GYLDIG_RESPONS_INNHOLD = Arrays.asList("<html", "<xml", "<properties", "<?xml ", "<!DOCTYPE ");
     private static final int MIN_VALID_CONTENT_LENGTH = 60;
-    private static boolean nodeSyncing = true;
+    private boolean nodeSyncing = true;
 
     private List<CacheRefreshListener> cacheRefreshListeners;
     private InnholdshenterGroupCommunicator groupCommunicator;
@@ -46,7 +46,7 @@ public class EnonicContentRetriever {
     private int httpTimeoutMillis;
 
     private CacheManager cacheManager;
-    private static String uniqueAppName;
+    private String uniqueAppName;
     private int refreshIntervalSeconds;
     private final static String cacheName = "innholdshenter_cache";
 
@@ -73,7 +73,7 @@ public class EnonicContentRetriever {
     public EnonicContentRetriever(String uniqueAppName, boolean nodeSyncing) throws Exception {
         this(uniqueAppName);
         this.nodeSyncing = nodeSyncing;
-        if(nodeSyncing) {
+        if(this.nodeSyncing) {
             this.groupCommunicator = new InnholdshenterGroupCommunicator(uniqueAppName, this);
         }
     }
@@ -213,17 +213,10 @@ public class EnonicContentRetriever {
         this.setHttpTimeoutMillis(httpTimeoutMillis);
     }
 
-    public void flushCache() {
-        if(cacheManager.cacheExists(cacheName)) {
-            logger.warn( WARN_MELDING_FLUSHER_CACHEN, cacheName);
-            cacheManager.getEhcache(cacheName).removeAll();
-        }
-    }
-
     protected void broadcastRefresh() {
         if(groupCommunicator != null) {
             try {
-                this.groupCommunicator.sendUpdateToNodes();
+                groupCommunicator.sendUpdateToNodes();
             } catch (Exception e) {
                 logger.error("Syncing cache refresh with nodes failed: {}", e);
             }
@@ -248,10 +241,10 @@ public class EnonicContentRetriever {
         }
         if(broadcastRefresh) {
             broadcastRefresh();
-        } else {
-            for(CacheRefreshListener listener : cacheRefreshListeners) {
-                listener.refreshReceived();
-            }
+        }
+
+        for(CacheRefreshListener listener : cacheRefreshListeners) {
+            listener.refreshReceived();
         }
     }
 

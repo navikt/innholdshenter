@@ -21,33 +21,6 @@ public class EnonicContentRetrieverCacheTest extends EnonicContentRetrieverTestS
     private static final String PATH2 = "systemsider/ledetekster";
 
     @Test
-    public void flush_cache_should_give_an_empty_cache_and_adding_a_new_element_should_return_this() throws Exception {
-        when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenReturn(CONTENT);
-
-        testListener.resetStatus();
-        String result = contentRetriever.getPageContent(PATH);
-        assertEquals(ListenerStatus.ELEMENT_ADDED, testListener.getLastStatus());
-        assertEquals(CONTENT, result);
-        verify(httpClient).execute(any(HttpGet.class), any(BasicResponseHandler.class));
-
-
-        testListener.resetStatus();
-        String result2 = contentRetriever.getPageContent(PATH);
-        assertEquals(ListenerStatus.RESET, testListener.getLastStatus());
-        assertEquals(CONTENT, result2);
-
-        testListener.resetStatus();
-        contentRetriever.flushCache();
-        assertEquals(ListenerStatus.REMOVED_ALL, testListener.getLastStatus());
-
-        testListener.resetStatus();
-        result = contentRetriever.getPageContent(PATH);
-        assertEquals(ListenerStatus.ELEMENT_ADDED, testListener.getLastStatus());
-        assertEquals(CONTENT, result);
-
-    }
-
-    @Test
     public void refresh_cache_should_give_a_populated_cache_and_fetching_an_element_should_return_the_updated_content() throws Exception {
         when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class)))
                 .thenReturn(OLD_CONTENT)
