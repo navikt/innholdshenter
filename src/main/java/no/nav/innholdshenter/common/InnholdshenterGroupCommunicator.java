@@ -27,7 +27,7 @@ public class InnholdshenterGroupCommunicator extends ReceiverAdapter {
 
     @Override
     public void receive(Message message) {
-        logger.error("got message {} from: {}", message.getObject(), message.getSrc());
+        logger.debug("got message {} from: {}", message.getObject(), message.getSrc());
         if (message.getObject().equals("updateCache")) {
             innholdshenter.refreshCache(false);
         }
@@ -39,7 +39,7 @@ public class InnholdshenterGroupCommunicator extends ReceiverAdapter {
      */
     @Override
     public void viewAccepted (View view) {
-        logger.error("view: {}", view);
+        logger.info("New node entered group. View: {}", view);
     }
 
     public void sendUpdateToNodes() throws Exception {
