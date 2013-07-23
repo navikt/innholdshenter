@@ -58,7 +58,6 @@ public class InnholdshenterGroupCommunicatorTest {
         Message m = new Message(null, TEST_STRING);
         innholdshenterGroupCommunicator.receive(m);
         verify(innholdshenter).refreshCache(false);
-        verify(innholdshenter, never()).refreshCache();
         verify(innholdshenter, never()).refreshCache(true);
     }
 
@@ -66,7 +65,6 @@ public class InnholdshenterGroupCommunicatorTest {
     public void should_not_broadcast_resetCache_when_message_is_received() throws Exception {
         Message m = new Message(null, TEST_STRING);
         innholdshenterGroupCommunicator.receive(m);
-        verify(innholdshenter, never()).refreshCache();
         verify(innholdshenter, never()).refreshCache(true);
         verify(jChannel, never()).send(any(Message.class));
         verify(jChannel, never()).send(any(Address.class),any());

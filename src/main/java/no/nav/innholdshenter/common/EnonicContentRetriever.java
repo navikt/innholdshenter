@@ -74,7 +74,7 @@ public class EnonicContentRetriever {
         this(uniqueAppName);
         this.nodeSyncing = nodeSyncing;
         if(nodeSyncing) {
-            setGroupCommunicator(new InnholdshenterGroupCommunicator(uniqueAppName, this));
+            this.groupCommunicator = new InnholdshenterGroupCommunicator(uniqueAppName, this);
         }
     }
 
@@ -265,10 +265,6 @@ public class EnonicContentRetriever {
         if(cacheRefreshListeners.contains(cacheRefreshListener)) {
             cacheRefreshListeners.remove(cacheRefreshListener);
         }
-    }
-
-    public void refreshCache() {
-        refreshCache(true);
     }
 
     public synchronized List getAllElements () {

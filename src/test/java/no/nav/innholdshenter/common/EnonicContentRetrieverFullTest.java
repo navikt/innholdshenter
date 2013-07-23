@@ -141,7 +141,7 @@ public class EnonicContentRetrieverFullTest extends EnonicContentRetrieverTestSe
         InnholdshenterGroupCommunicator groupCommunicator = mock(InnholdshenterGroupCommunicator.class);
         contentRetriever.setGroupCommunicator(groupCommunicator);
 
-        contentRetriever.refreshCache();
+        contentRetriever.refreshCache(true);
 
         verify(groupCommunicator).sendUpdateToNodes();
     }
