@@ -1,17 +1,12 @@
 package no.nav.innholdshenter.common;
 
-import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.List;
 
 abstract class GenericCache<T> {
     private static final Logger logger = LoggerFactory.getLogger(GenericCache.class);
@@ -19,7 +14,6 @@ abstract class GenericCache<T> {
     private static final String FEILMEDLING_KLARTE_IKKE_HENTE_INNHOLD_OG_INNHOLDET_FINNES_IKKE_I_CACHE = "Henting fra url {} feilet og innholdet er ikke i cache.";
     private static final String FEILMELDING_CACHELINJE_ER_UTDATERT = "Cachelinjen er utdatert med key: {} TimeToLive: {} seconds";
     private static final String INFO_CACHELINJEN_FANTES_IKKE_I_CACHE = "Cachelinjen fantes ikke i cache.";
-    private static final String WARN_FLUSHER_CACHEN = "Flusher cachen: {}";
     private static final String INFO_CACHEHIT = "Cachehit for: {} TTL: {} sec.";
 
     private CacheManager cacheManager;
