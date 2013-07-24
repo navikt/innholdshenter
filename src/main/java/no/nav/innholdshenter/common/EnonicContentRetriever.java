@@ -3,6 +3,7 @@ package no.nav.innholdshenter.common;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
+import net.sf.ehcache.Element;
 import net.sf.ehcache.constructs.blocking.BlockingCache;
 import no.nav.innholdshenter.tools.InnholdshenterTools;
 import org.apache.http.client.HttpClient;
@@ -37,9 +38,8 @@ public class EnonicContentRetriever {
     private static final int MIN_VALID_CONTENT_LENGTH = 60;
     private boolean nodeSyncing = true;
 
-    private List<CacheRefreshListener> cacheRefreshListeners;
     private InnholdshenterGroupCommunicator groupCommunicator;
-    private Map feilmeldinger;
+    private Map<String, CacheStatusFeilmelding> feilmeldinger;
 
     private String baseUrl;
     private HttpClient httpClient;
@@ -57,7 +57,6 @@ public class EnonicContentRetriever {
 
     protected EnonicContentRetriever() {
         feilmeldinger = new HashMap<String, CacheStatusFeilmelding>();
-        cacheRefreshListeners = new LinkedList<CacheRefreshListener>();
         if (cacheManager == null) {
             cacheManager = CacheManager.create();
         }
@@ -182,7 +181,7 @@ public class EnonicContentRetriever {
 
     }
 
-    public Map getFeilmeldinger() {
+    public Map<String, CacheStatusFeilmelding> getFeilmeldinger() {
         return this.feilmeldinger;
     }
     public int getRefreshIntervalSeconds() {
@@ -242,25 +241,9 @@ public class EnonicContentRetriever {
         if(broadcastRefresh) {
             broadcastRefresh();
         }
-
-        for(CacheRefreshListener listener : cacheRefreshListeners) {
-            listener.refreshReceived();
-        }
     }
 
-    public void addCacheRefreshListener(CacheRefreshListener cacheRefreshListener) {
-        if(cacheRefreshListeners.contains(cacheRefreshListener))
-            return;
-        cacheRefreshListeners.add(cacheRefreshListener);
-    }
-
-    public void removeCacheRefreshListener(CacheRefreshListener cacheRefreshListener) {
-        if(cacheRefreshListeners.contains(cacheRefreshListener)) {
-            cacheRefreshListeners.remove(cacheRefreshListener);
-        }
-    }
-
-    public synchronized List getAllElements () {
+    public synchronized List<Element> getAllElements () {
         if(!cacheManager.cacheExists(cacheName)) {
             return new ArrayList();
         }

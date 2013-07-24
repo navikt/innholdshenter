@@ -35,7 +35,7 @@ class DecoratorFrame {
 
     private static final String URL_PATH = "urlPath";
     private static final String RETRIEVING_CONTENT_WITH_URL = "Retrieving content with url: ";
-    private static final String FEIL_VED_HENTING_AV_DEKORERINGSRAMME = "Feil ved henting av dekoreringsramme: ";
+    private static final String FEIL_VED_HENTING_AV_DEKORERINGSRAMME = "Feil ved henting av dekoreringsramme, url: \"{}\" feil: ";
 
 
     public HtmlPage getHtmlFrame(HttpServletRequest request, String alternativUrlBasedOnHtmlMetaTag, String role) {
@@ -44,11 +44,10 @@ class DecoratorFrame {
         String pageUrl = templateUrl + "?" + urlContext;
 
         try {
-            logger.debug(RETRIEVING_CONTENT_WITH_URL + pageUrl);
             String pageFrame = contentRetriever.getPageContent(pageUrl);
             return new HtmlPage(pageFrame);
         } catch (IllegalStateException e) {
-            logger.error(FEIL_VED_HENTING_AV_DEKORERINGSRAMME + e.getMessage());
+            logger.error(FEIL_VED_HENTING_AV_DEKORERINGSRAMME, pageUrl, e);
             return getErrorPage();
         }
     }
@@ -57,7 +56,6 @@ class DecoratorFrame {
         String urlToCall = URL_PATH + "=";
         String innerUrl = "";
         if (alternativUrlBasedOnHtmlMetaTag != null) {
-            innerUrl = alternativUrlBasedOnHtmlMetaTag;
             innerUrl = alternativUrlBasedOnHtmlMetaTag;
         } else {
             innerUrl = request.getRequestURI();
