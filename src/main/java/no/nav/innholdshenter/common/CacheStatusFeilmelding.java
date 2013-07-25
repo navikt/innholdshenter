@@ -1,6 +1,8 @@
 package no.nav.innholdshenter.common;
 
-public class CacheStatusFeilmelding {
+import java.io.Serializable;
+
+public class CacheStatusFeilmelding implements Serializable {
     private int statusCode;
     private String feilmelding;
     private long timestamp;
