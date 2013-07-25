@@ -45,7 +45,7 @@ public class SelfPopulatingServingStaleElementsCache extends SelfPopulatingCache
 
     public boolean isElementExpired(Element element) {
         long now = System.currentTimeMillis();
-        long expirationTime = element.getLastUpdateTime() + (getTimeToLiveSeconds() * 1000);
+        long expirationTime = element.getCreationTime() + (getTimeToLiveSeconds() * 1000);
         return now > expirationTime;
     }
 
