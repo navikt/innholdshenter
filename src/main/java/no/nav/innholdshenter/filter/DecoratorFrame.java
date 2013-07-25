@@ -34,7 +34,6 @@ class DecoratorFrame {
     private List<String> excludeQueryStringFromDecorationPatterns;
 
     private static final String URL_PATH = "urlPath";
-    private static final String RETRIEVING_CONTENT_WITH_URL = "Retrieving content with url: ";
     private static final String FEIL_VED_HENTING_AV_DEKORERINGSRAMME = "Feil ved henting av dekoreringsramme, url: \"{}\" feil: ";
 
 

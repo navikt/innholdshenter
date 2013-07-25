@@ -44,7 +44,7 @@ public class EnonicContentRetriever {
     private String uniqueAppName;
     private int refreshIntervalSeconds;
 
-    private final static String cacheName = "innholdshenterCache";
+    private final static String CACHE_NAME = "innholdshenterCache";
     private int maxElements = 1000;
     private boolean overflowToDisk = false;
     private boolean neverExpireCacheLines = true;
@@ -156,18 +156,18 @@ public class EnonicContentRetriever {
     }
 
     private synchronized void setupCache() {
-        if (cacheManager.cacheExists(this.cacheName)) {
+        if (cacheManager.cacheExists(this.CACHE_NAME)) {
             return;
         }
-        Cache oldCache = new Cache(this.cacheName, maxElements, overflowToDisk, neverExpireCacheLines, 0, 0);
+        Cache oldCache = new Cache(this.CACHE_NAME, maxElements, overflowToDisk, neverExpireCacheLines, 0, 0);
         cacheManager.addCache(oldCache);
         enonicCacheEntryFactory =
                 new EnonicCacheEntryFactory(getHttpClient(), feilmeldinger);
 
-        Ehcache ehcache = cacheManager.getEhcache(cacheName);
+        Ehcache ehcache = cacheManager.getEhcache(CACHE_NAME);
         cache = new SelfPopulatingServingStaleElementsCache(ehcache, enonicCacheEntryFactory, getRefreshIntervalSeconds());
 
-        logger.debug("Creating cache: {}", cacheName);
+        logger.debug("Creating cache: {}", CACHE_NAME);
         cacheManager.replaceCacheWithDecoratedCache(ehcache, cache);
     }
 
@@ -183,10 +183,10 @@ public class EnonicContentRetriever {
 
     public void refreshCache(boolean broadcastRefresh) {
         if (cache == null) {
-            logger.warn("refreshCache: ingen cache med navnet {} ble funnet!", cacheName);
+            logger.warn("refreshCache: ingen cache med navnet {} ble funnet!", CACHE_NAME);
             return;
         }
-        logger.warn( WARN_MELDING_REFRESH_CACHE, cacheName);
+        logger.warn( WARN_MELDING_REFRESH_CACHE, CACHE_NAME);
         try {
             cache.refresh(false);
         } catch (CacheException ce) {
@@ -198,11 +198,11 @@ public class EnonicContentRetriever {
     }
 
     public synchronized List<Element> getAllElements () {
-        if(!cacheManager.cacheExists(cacheName)) {
+        if(!cacheManager.cacheExists(CACHE_NAME)) {
             return new ArrayList();
         }
         List liste = new LinkedList();
-        Ehcache c = cacheManager.getEhcache(cacheName);
+        Ehcache c = cacheManager.getEhcache(CACHE_NAME);
         List keys = c.getKeys();
         for (Object o: keys) {
             liste.add(c.getQuiet(o));
@@ -215,7 +215,7 @@ public class EnonicContentRetriever {
     }
 
     public String getCacheName() {
-        return this.cacheName;
+        return this.CACHE_NAME;
     }
 
     private HttpClient getHttpClient() {

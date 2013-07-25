@@ -16,7 +16,7 @@ public class EnonicContentRetrieverTestSetup {
 
     protected static final String PATH = "systemsider/ApplicationFrame";
     protected static final String UGYLDIG_INNHOLD = "html>404</html>";
-    protected static String cacheName = "innholdshenterCache";
+    protected static final String CACHE_NAME = "innholdshenterCache";
     protected static final String SERVER = "http://localhost:9000";
     protected static final String URL = SERVER + "/" + PATH;
     protected static final int REFRESH_INTERVAL = 5;
@@ -81,10 +81,10 @@ public class EnonicContentRetrieverTestSetup {
 
         testListener = new EhcacheTestListener();
         cacheManager = CacheManager.create();
-        if(cacheManager.cacheExists(cacheName)) {
-            cacheManager.removeCache(cacheName);
+        if(cacheManager.cacheExists(CACHE_NAME)) {
+            cacheManager.removeCache(CACHE_NAME);
         }
-        contentRetriever = new EnonicContentRetriever(cacheName);
+        contentRetriever = new EnonicContentRetriever(CACHE_NAME);
         contentRetriever.setCacheManager(cacheManager);
         contentRetriever.setBaseUrl(SERVER);
         contentRetriever.setRefreshIntervalSeconds(REFRESH_INTERVAL);

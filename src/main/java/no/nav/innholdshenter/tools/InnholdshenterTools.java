@@ -1,6 +1,5 @@
 package no.nav.innholdshenter.tools;
 
-import net.sf.ehcache.Element;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIBuilder;
