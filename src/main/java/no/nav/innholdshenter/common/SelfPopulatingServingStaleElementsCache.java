@@ -8,10 +8,9 @@ import net.sf.ehcache.constructs.blocking.LockTimeoutException;
 import net.sf.ehcache.constructs.blocking.SelfPopulatingCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.io.Serializable;
 
 public class SelfPopulatingServingStaleElementsCache extends SelfPopulatingCache {
-    Logger logger = LoggerFactory.getLogger(SelfPopulatingServingStaleElementsCache.class);
+    private Logger logger = LoggerFactory.getLogger(SelfPopulatingServingStaleElementsCache.class);
     private int timeToLiveSeconds;
 
     public SelfPopulatingServingStaleElementsCache(Ehcache cache, CacheEntryFactory factory, int timeToLiveSeconds) throws CacheException {

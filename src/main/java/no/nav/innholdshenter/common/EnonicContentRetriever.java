@@ -1,13 +1,12 @@
 package no.nav.innholdshenter.common;
 
-import net.sf.ehcache.*;
-import net.sf.ehcache.constructs.blocking.BlockingCache;
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheException;
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Ehcache;
+import net.sf.ehcache.Element;
 import no.nav.innholdshenter.tools.InnholdshenterTools;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
@@ -16,7 +15,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 
 /**
@@ -40,7 +44,7 @@ public class EnonicContentRetriever {
     private String uniqueAppName;
     private int refreshIntervalSeconds;
 
-    private final static String cacheName = "innholdshenter_cache";
+    private final static String cacheName = "innholdshenterCache";
     private int maxElements = 1000;
     private boolean overflowToDisk = false;
     private boolean neverExpireCacheLines = true;
@@ -66,7 +70,7 @@ public class EnonicContentRetriever {
         this(uniqueAppName);
         this.nodeSyncing = nodeSyncing;
         if(this.nodeSyncing) {
-            this.groupCommunicator = new InnholdshenterGroupCommunicator(uniqueAppName, this);
+            this.groupCommunicator = new InnholdshenterGroupCommunicator(this.uniqueAppName, this);
         }
     }
 
@@ -178,7 +182,6 @@ public class EnonicContentRetriever {
     }
 
     public void refreshCache(boolean broadcastRefresh) {
-        int hardcodeTTLtoEnsureCacheIsUpdated = -1;
         if (cache == null) {
             logger.warn("refreshCache: ingen cache med navnet {} ble funnet!", cacheName);
             return;

@@ -16,7 +16,7 @@ public class EnonicContentRetrieverTestSetup {
 
     protected static final String PATH = "systemsider/ApplicationFrame";
     protected static final String UGYLDIG_INNHOLD = "html>404</html>";
-    protected static String cacheName = "innholdshenter_cache";
+    protected static String cacheName = "innholdshenterCache";
     protected static final String SERVER = "http://localhost:9000";
     protected static final String URL = SERVER + "/" + PATH;
     protected static final int REFRESH_INTERVAL = 5;
