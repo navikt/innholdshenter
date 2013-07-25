@@ -231,4 +231,8 @@ public class EnonicContentRetriever {
     public SelfPopulatingServingStaleElementsCache getCache() {
         return cache;
     }
+
+    public boolean isElementExpired(Element element) {
+        return cache.isElementExpired(element);
+    }
 }
