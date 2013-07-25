@@ -50,7 +50,7 @@ public class EnonicContentRetrieverFullTest extends EnonicContentRetrieverTestSe
 
         verify(httpClient).execute(any(HttpGet.class), any(BasicResponseHandler.class));
         assertEquals(PROPERTIES, result);
-        assertEquals(testListener.getLastStatus(), ListenerStatus.ELEMENT_UPDATED);
+        assertEquals(ListenerStatus.ELEMENT_UPDATED, testListener.getLastStatus());
     }
 
     @Test
@@ -89,7 +89,7 @@ public class EnonicContentRetrieverFullTest extends EnonicContentRetrieverTestSe
 
         assertEquals(CACHED_CONTENT, result);
         verify(httpClient).execute(any(HttpGet.class), any(BasicResponseHandler.class));
-        assertEquals(testListener.getLastStatus(), ListenerStatus.RESET);
+        assertEquals(ListenerStatus.RESET, testListener.getLastStatus());
     }
 
     @Test
@@ -102,8 +102,8 @@ public class EnonicContentRetrieverFullTest extends EnonicContentRetrieverTestSe
         Thread.sleep((REFRESH_INTERVAL-1)*1000);
         String result = contentRetriever.getPageContent(PATH);
 
-        assertEquals(CACHED_CONTENT, result);
         verify(httpClient, never()).execute(any(HttpGet.class), any(BasicResponseHandler.class));
+        assertEquals(CACHED_CONTENT, result);
         assertEquals(testListener.getLastStatus(), ListenerStatus.RESET);
     }
 
@@ -112,16 +112,16 @@ public class EnonicContentRetrieverFullTest extends EnonicContentRetrieverTestSe
         when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenThrow(new IOException());
         testListener.resetStatus();
 
-        String result;
+        String result = "";
         try {
             result = contentRetriever.getPageContent(PATH);
         } catch (IllegalStateException e) {
             e.printStackTrace();
         }
 
-        //assertNull(result);
+        assertNull(result);
         verify(httpClient).execute(any(HttpGet.class), any(BasicResponseHandler.class));
-        assertEquals(testListener.getLastStatus(), ListenerStatus.RESET);
+        assertEquals(ListenerStatus.ELEMENT_REMOVED, testListener.getLastStatus());
     }
 
     @Test
@@ -133,7 +133,7 @@ public class EnonicContentRetrieverFullTest extends EnonicContentRetrieverTestSe
 
         assertEquals(PROPERTIES, result);
         verify(httpClient).execute(any(HttpGet.class), any(BasicResponseHandler.class));
-        assertEquals(testListener.getLastStatus(), ListenerStatus.ELEMENT_ADDED);
+        assertEquals(ListenerStatus.ELEMENT_UPDATED, testListener.getLastStatus());
     }
 
     @Test

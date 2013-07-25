@@ -81,8 +81,8 @@ public class EnonicContentRetrieverCacheTest extends EnonicContentRetrieverTestS
         testListener.resetStatus();
         String result = contentRetriever.getPageContent(PATH);
         assertEquals(ListenerStatus.ELEMENT_ADDED, testListener.getLastStatus());
-        assertEquals(OLD_CONTENT, result);
         verify(httpClient).execute(any(HttpGet.class), any(BasicResponseHandler.class));
+        assertEquals(OLD_CONTENT, result);
 
         testListener.resetStatus();
         result = contentRetriever.getPageContent(PATH2);

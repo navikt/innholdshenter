@@ -1,10 +1,7 @@
 package no.nav.innholdshenter.common;
 
-import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
-import net.sf.ehcache.constructs.blocking.BlockingCache;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.params.HttpParams;
@@ -54,7 +51,7 @@ public class EnonicContentRetrieverTestSetup {
     @Mock
     protected HttpClient httpClient;
 
-    protected Ehcache cache;
+    protected SelfPopulatingServingStaleElementsCache cache;
     protected EhcacheTestListener testListener;
     protected EnonicContentRetriever contentRetriever;
     protected CacheManager cacheManager;
@@ -89,13 +86,11 @@ public class EnonicContentRetrieverTestSetup {
         }
         contentRetriever = new EnonicContentRetriever(cacheName);
         contentRetriever.setCacheManager(cacheManager);
-        contentRetriever.setHttpClient(httpClient);
         contentRetriever.setBaseUrl(SERVER);
         contentRetriever.setRefreshIntervalSeconds(REFRESH_INTERVAL);
+        contentRetriever.setHttpClient(httpClient);
 
-        cacheName = contentRetriever.getCacheName();
-        cache = cacheManager.getEhcache(cacheName);
+        cache = contentRetriever.getCache();
         cache.getCacheEventNotificationService().registerListener(testListener);
-
     }
 }

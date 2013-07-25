@@ -1,9 +1,6 @@
 package no.nav.innholdshenter.common;
 
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.Ehcache;
-import net.sf.ehcache.Element;
+import net.sf.ehcache.*;
 import net.sf.ehcache.constructs.blocking.BlockingCache;
 import no.nav.innholdshenter.tools.InnholdshenterTools;
 import org.apache.http.client.HttpClient;
@@ -29,30 +26,26 @@ public class EnonicContentRetriever {
     private static final Logger logger = LoggerFactory.getLogger(EnonicContentRetriever.class);
     private static final String SLASH = "/";
     private static final String LOCALE_UTF_8 = "UTF-8";
-    private static final String DEBUG_RETRIEVING_PAGE_CONTENT_FROM_URL = "Retrieving page content from url {}";
-    private static final String WARN_MELDING_FLUSHER_CACHEN = "Flusher cachen: {}";
     private static final String WARN_MELDING_REFRESH_CACHE = "Refresh cachen: {}";
-    private static final String FEILMELDING_KLARTE_HENTE_INNHOLD_MEN_INNHOLDET_VAR_UGYLDIG = "Henting fra url {} gikk gjennom, men innholdet var ikke som forventet. Cache ikke oppdatert.";
-    private static final String HTTP_STATUS_FEIL = "Http-kall feilet, url: {} status: {} grunn: {}";
-    private static final List<String> GYLDIG_RESPONS_INNHOLD = Arrays.asList("<html", "<xml", "<properties", "<?xml ", "<!DOCTYPE ");
-    private static final int MIN_VALID_CONTENT_LENGTH = 60;
     private boolean nodeSyncing = true;
 
     private InnholdshenterGroupCommunicator groupCommunicator;
     private Map<String, CacheStatusFeilmelding> feilmeldinger;
 
     private String baseUrl;
-    private HttpClient httpClient;
-    private int httpTimeoutMillis;
 
     private CacheManager cacheManager;
+    private SelfPopulatingServingStaleElementsCache cache;
+    private EnonicCacheEntryFactory enonicCacheEntryFactory;
     private String uniqueAppName;
     private int refreshIntervalSeconds;
-    private final static String cacheName = "innholdshenter_cache";
 
+    private final static String cacheName = "innholdshenter_cache";
     private int maxElements = 1000;
     private boolean overflowToDisk = false;
     private boolean neverExpireCacheLines = true;
+    private int httpTimeoutMillis;
+    private HttpClient httpClient;
 
 
     protected EnonicContentRetriever() {
@@ -83,79 +76,41 @@ public class EnonicContentRetriever {
 
     public String getPageContent(String path) {
         final String url = createUrl(path);
-        return getPageContentFullUrl(url, getRefreshIntervalSeconds());
+        return getPageContentFullUrl(url);
     }
 
-    private String getPageContentFullUrl(final String url, int timeToLiveSeconds) {
-        GenericCache<String> genericCache = new GenericCache<String>(cacheManager, timeToLiveSeconds, url, cacheName) {
-            protected String getContentFromSource() throws IOException {
-                return getPageContentFromUrl(url);
-            }
-        };
-        return genericCache.fetch();
+    private String getPageContentFullUrl(final String url) {
+        Element element;
+        try {
+            element = cache.get(url);
+        } catch (RuntimeException e) {
+            return null;
+        }
+        return element.getObjectValue().toString();
     }
 
     public Properties getProperties(String path) {
         final String url = createUrl(path);
-        return getPropertiesFullUrl(url, getRefreshIntervalSeconds());
+        return getPropertiesFullUrl(url);
     }
 
-    public Properties getPropertiesFullUrl(final String url, int timeToLiveSeconds) {
-        GenericCache<Properties> genericCache = new GenericCache<Properties>(cacheManager, timeToLiveSeconds, url, cacheName) {
-            @Override
-            protected Properties getContentFromSource() throws IOException {
-                String content = getPageContentFromUrl(url);
-                Properties properties = new Properties();
-                try {
-                    ByteArrayInputStream propertiesStream = new ByteArrayInputStream(content.getBytes(LOCALE_UTF_8));
-                    properties.loadFromXML(propertiesStream);
-                } catch (IOException e) {
-                    logger.error("Feil i konvertering fra xml til Properties objekt.", e);
-                    throw new RuntimeException("Feil: Kunne ikke hente data.", e);
-                }
-                return properties;
-            }
-        };
-        return genericCache.fetch();
-    }
-
-    private synchronized String getPageContentFromUrl(String url) throws IOException {
-        String randomUrl = InnholdshenterTools.makeRandomUrl(url);
-        logger.debug(DEBUG_RETRIEVING_PAGE_CONTENT_FROM_URL, randomUrl);
-        HttpGet httpGet = new HttpGet(randomUrl);
-        ResponseHandler<String> responseHandler = new BasicResponseHandler();
-        String innhold;
+    public Properties getPropertiesFullUrl(final String url) {
+        Element e = cache.get(url);
+        if(e.getObjectValue() instanceof Properties) {
+            return (Properties) e.getObjectValue();
+        }
+        Properties properties = new Properties();
+        String content = e.getObjectValue().toString();
         try {
-            innhold = httpClient.execute(httpGet, responseHandler);
-            CacheStatusFeilmelding c = new CacheStatusFeilmelding(200, "OK", System.currentTimeMillis());
-            feilmeldinger.put(url, c);
-        } catch(HttpResponseException exception) {
-            logger.error(HTTP_STATUS_FEIL, url, exception.getStatusCode(), exception.getMessage());
-            CacheStatusFeilmelding c = new CacheStatusFeilmelding(exception.getStatusCode(), exception.getMessage(), System.currentTimeMillis());
-            feilmeldinger.put(url, c);
-            throw new IOException(exception);
+            ByteArrayInputStream propertiesStream = new ByteArrayInputStream(content.getBytes(LOCALE_UTF_8));
+            properties.loadFromXML(propertiesStream);
+        } catch (IOException ex) {
+            logger.error("Feil i konvertering fra xml til Properties objekt.", ex);
+            throw new RuntimeException("Feil: Kunne ikke hente data.", ex);
         }
-
-        if(!isContentValid(innhold)) {
-            logger.warn(FEILMELDING_KLARTE_HENTE_INNHOLD_MEN_INNHOLDET_VAR_UGYLDIG, url);
-            throw new IOException(String.format("Fikk ugyldig innhold på url: %s" , url));
-        }
-        return innhold;
-    }
-
-    protected boolean isContentValid(String innhold) throws IOException {
-        if(innhold == null || innhold.isEmpty()) {
-            return false;
-        }
-        for(String streng : GYLDIG_RESPONS_INNHOLD) {
-            if(innhold.startsWith(streng)) {
-                return true;
-            }
-        }
-        if(innhold.length() > MIN_VALID_CONTENT_LENGTH) {
-            return true;
-        }
-        return false;
+        Element element = new Element(url, properties);
+        cache.put(element);
+        return (Properties)element.getObjectValue();
     }
 
     public void setBaseUrl(String baseUrl) {
@@ -178,7 +133,6 @@ public class EnonicContentRetriever {
         HttpParams httpParams = getHttpClient().getParams();
         HttpConnectionParams.setSoTimeout(httpParams, httpTimeoutMillis);
         HttpConnectionParams.setConnectionTimeout(httpParams, httpTimeoutMillis);
-
     }
 
     public Map<String, CacheStatusFeilmelding> getFeilmeldinger() {
@@ -190,6 +144,7 @@ public class EnonicContentRetriever {
 
     public void setRefreshIntervalSeconds(int refreshIntervalSeconds) {
         this.refreshIntervalSeconds = refreshIntervalSeconds;
+        cache.setTimeToLiveSeconds(refreshIntervalSeconds);
     }
 
     public void setCacheManager(CacheManager cacheManager) {
@@ -197,19 +152,19 @@ public class EnonicContentRetriever {
     }
 
     private synchronized void setupCache() {
-        if (!cacheManager.cacheExists(this.cacheName)) {
-            cacheManager.addCache(new Cache(this.cacheName, maxElements, overflowToDisk, neverExpireCacheLines, 0, 0));
-            Ehcache oldcache = cacheManager.getEhcache(cacheName);
-            BlockingCache blockingCache = new BlockingCache(oldcache);
-
-            logger.debug("Creating cache: {}", cacheName);
-            cacheManager.replaceCacheWithDecoratedCache(oldcache, blockingCache);
+        if (cacheManager.cacheExists(this.cacheName)) {
+            return;
         }
-    }
+        Cache oldCache = new Cache(this.cacheName, maxElements, overflowToDisk, neverExpireCacheLines, 0, 0);
+        cacheManager.addCache(oldCache);
+        enonicCacheEntryFactory =
+                new EnonicCacheEntryFactory(getHttpClient(), feilmeldinger);
 
-    protected void setHttpClient(HttpClient httpClient) {
-        this.httpClient = httpClient;
-        this.setHttpTimeoutMillis(httpTimeoutMillis);
+        Ehcache ehcache = cacheManager.getEhcache(cacheName);
+        cache = new SelfPopulatingServingStaleElementsCache(ehcache, enonicCacheEntryFactory, getRefreshIntervalSeconds());
+
+        logger.debug("Creating cache: {}", cacheName);
+        cacheManager.replaceCacheWithDecoratedCache(ehcache, cache);
     }
 
     protected void broadcastRefresh() {
@@ -224,19 +179,15 @@ public class EnonicContentRetriever {
 
     public void refreshCache(boolean broadcastRefresh) {
         int hardcodeTTLtoEnsureCacheIsUpdated = -1;
-        if (!cacheManager.cacheExists(cacheName)) {
+        if (cache == null) {
             logger.warn("refreshCache: ingen cache med navnet {} ble funnet!", cacheName);
             return;
         }
         logger.warn( WARN_MELDING_REFRESH_CACHE, cacheName);
-        Ehcache c = cacheManager.getEhcache(cacheName);
-        for (Object key : c.getKeys()) {
-            final String url = (String) key;
-            if(c.getQuiet(key).getObjectValue() instanceof Properties) {
-                getPropertiesFullUrl(url, hardcodeTTLtoEnsureCacheIsUpdated);
-            } else {
-                getPageContentFullUrl(url, hardcodeTTLtoEnsureCacheIsUpdated);
-            }
+        try {
+            cache.refresh(false);
+        } catch (CacheException ce) {
+            logger.error("feil under refresh av cache", ce);
         }
         if(broadcastRefresh) {
             broadcastRefresh();
@@ -266,5 +217,15 @@ public class EnonicContentRetriever {
 
     private HttpClient getHttpClient() {
         return httpClient;
+    }
+
+    public void setHttpClient(HttpClient httpClient) {
+        this.httpClient = httpClient;
+        setHttpTimeoutMillis(httpTimeoutMillis);
+        enonicCacheEntryFactory.setHttpClient(httpClient);
+    }
+
+    public SelfPopulatingServingStaleElementsCache getCache() {
+        return cache;
     }
 }
