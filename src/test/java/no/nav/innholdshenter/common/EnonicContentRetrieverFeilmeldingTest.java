@@ -7,7 +7,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.List;
 import java.util.Map;
 
 import static junit.framework.Assert.assertEquals;
@@ -28,11 +27,11 @@ public class EnonicContentRetrieverFeilmeldingTest extends EnonicContentRetrieve
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Map<String, CacheStatusFeilmelding> feil = contentRetriever.getFeilmeldinger();
+        Map<String, CacheStatusMelding> feil = contentRetriever.getCacheStatusMeldinger();
         assertTrue(feil.size()>=1);
         int errorcode = feil.get(URL).getStatusCode();
         assertTrue(errorcode == 404);
-        assertEquals("Not found", feil.get(URL).getFeilmelding());
+        assertEquals("Not found", feil.get(URL).getMelding());
     }
 
     @Test
@@ -46,10 +45,10 @@ public class EnonicContentRetrieverFeilmeldingTest extends EnonicContentRetrieve
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Map<String, CacheStatusFeilmelding> feil = contentRetriever.getFeilmeldinger();
+        Map<String, CacheStatusMelding> feil = contentRetriever.getCacheStatusMeldinger();
         assertTrue(feil.size()>=1);
         int errorcode = feil.get(URL).getStatusCode();
         assertTrue(errorcode == 403);
-        assertEquals("Forbidden", feil.get(URL).getFeilmelding());
+        assertEquals("Forbidden", feil.get(URL).getMelding());
     }
 }

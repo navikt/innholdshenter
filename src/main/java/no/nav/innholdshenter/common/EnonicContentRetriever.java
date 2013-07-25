@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -34,7 +35,7 @@ public class EnonicContentRetriever {
     private boolean nodeSyncing = true;
 
     private InnholdshenterGroupCommunicator groupCommunicator;
-    private Map<String, CacheStatusFeilmelding> feilmeldinger;
+    private Map<String, CacheStatusMelding> cacheStatusMeldinger;
 
     private String baseUrl;
 
@@ -53,7 +54,7 @@ public class EnonicContentRetriever {
 
 
     protected EnonicContentRetriever() {
-        feilmeldinger = new HashMap<String, CacheStatusFeilmelding>();
+        cacheStatusMeldinger = new ConcurrentHashMap<String, CacheStatusMelding>();
         if (cacheManager == null) {
             cacheManager = CacheManager.create();
         }
@@ -139,8 +140,8 @@ public class EnonicContentRetriever {
         HttpConnectionParams.setConnectionTimeout(httpParams, httpTimeoutMillis);
     }
 
-    public Map<String, CacheStatusFeilmelding> getFeilmeldinger() {
-        return this.feilmeldinger;
+    public Map<String, CacheStatusMelding> getCacheStatusMeldinger() {
+        return this.cacheStatusMeldinger;
     }
     public int getRefreshIntervalSeconds() {
         return refreshIntervalSeconds;
@@ -162,7 +163,7 @@ public class EnonicContentRetriever {
         Cache oldCache = new Cache(this.CACHE_NAME, maxElements, overflowToDisk, neverExpireCacheLines, 0, 0);
         cacheManager.addCache(oldCache);
         enonicCacheEntryFactory =
-                new EnonicCacheEntryFactory(getHttpClient(), feilmeldinger);
+                new EnonicCacheEntryFactory(getHttpClient(), cacheStatusMeldinger);
 
         Ehcache ehcache = cacheManager.getEhcache(CACHE_NAME);
         cache = new SelfPopulatingServingStaleElementsCache(ehcache, enonicCacheEntryFactory, getRefreshIntervalSeconds());

@@ -27,9 +27,9 @@ public class EnonicCacheEntryFactory implements CacheEntryFactory {
 
     private HttpClient httpClient;
 
-    private Map<String, CacheStatusFeilmelding> statusMeldinger;
+    private Map<String, CacheStatusMelding> statusMeldinger;
 
-    public EnonicCacheEntryFactory(HttpClient httpClient, Map<String, CacheStatusFeilmelding> statusMeldinger) {
+    public EnonicCacheEntryFactory(HttpClient httpClient, Map<String, CacheStatusMelding> statusMeldinger) {
         this.httpClient = httpClient;
         this.statusMeldinger = statusMeldinger;
     }
@@ -55,11 +55,11 @@ public class EnonicCacheEntryFactory implements CacheEntryFactory {
         String innhold;
         try {
             innhold = httpClient.execute(httpGet, responseHandler);
-            CacheStatusFeilmelding c = new CacheStatusFeilmelding(200, "OK", System.currentTimeMillis());
+            CacheStatusMelding c = new CacheStatusMelding(200, "OK", System.currentTimeMillis());
             statusMeldinger.put(url, c);
         } catch (HttpResponseException exception) {
             logger.error(HTTP_STATUS_FEIL, url, exception.getStatusCode(), exception.getMessage());
-            CacheStatusFeilmelding c = new CacheStatusFeilmelding(exception.getStatusCode(), exception.getMessage(), System.currentTimeMillis());
+            CacheStatusMelding c = new CacheStatusMelding(exception.getStatusCode(), exception.getMessage(), System.currentTimeMillis());
             statusMeldinger.put(url, c);
             throw new IOException(exception);
         }
