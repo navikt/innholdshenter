@@ -51,4 +51,22 @@ public class EnonicContentRetrieverFeilmeldingTest extends EnonicContentRetrieve
         assertTrue(errorcode == 403);
         assertEquals("Forbidden", feil.get(URL).getMelding());
     }
+
+    @Test
+    public void ok_request_skal_lage_melding_i_listen() throws Exception{
+        when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class)))
+                .thenReturn(CONTENT);
+
+        String result;
+        try {
+            result = contentRetriever.getPageContent(PATH);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Map<String, CacheStatusMelding> cacheStatusMeldinger = contentRetriever.getCacheStatusMeldinger();
+        assertTrue(cacheStatusMeldinger.size()==1);
+        int statusCode = cacheStatusMeldinger.get(URL).getStatusCode();
+        assertTrue(statusCode == 200);
+        assertEquals("OK", cacheStatusMeldinger.get(URL).getMelding());
+    }
 }
