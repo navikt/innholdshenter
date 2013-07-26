@@ -55,7 +55,7 @@ public class InnholdshenterGroupCommunicator extends ReceiverAdapter {
 
     private void setupChannel() throws Exception {
         if (channel == null) {
-            channel = new JChannel();
+            channel = new JChannel("jgroups.xml");
         }
         channel.setReceiver(this);
         channel.connect(this.identifingGroupName);
