@@ -118,7 +118,7 @@ public class EnonicContentRetriever {
 
     private Properties convertElementToProperties(Element e) {
         Properties properties = new Properties();
-        String content = e.getObjectValue().toString();
+        String content = (String) e.getObjectValue();
         try {
             ByteArrayInputStream propertiesStream = new ByteArrayInputStream(content.getBytes(LOCALE_UTF_8));
             properties.loadFromXML(propertiesStream);
@@ -214,7 +214,7 @@ public class EnonicContentRetriever {
         if (!cacheManager.cacheExists(CACHE_NAME)) {
             return new ArrayList();
         }
-        List liste = new LinkedList();
+        List liste = new LinkedList<Element>();
         Ehcache c = cacheManager.getEhcache(CACHE_NAME);
         List keys = c.getKeys();
         for (Object o : keys) {
