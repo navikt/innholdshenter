@@ -186,6 +186,7 @@ public class EnonicContentRetriever {
 
     protected void broadcastRefresh() {
         if (groupCommunicator != null) {
+            logger.info("Sending refresh sync broadcast.");
             try {
                 groupCommunicator.sendUpdateToNodes();
             } catch (Exception e) {
@@ -199,12 +200,15 @@ public class EnonicContentRetriever {
             logger.warn("refreshCache: ingen cache med navnet {} ble funnet!", CACHE_NAME);
             return;
         }
+
         logger.warn(WARN_MELDING_REFRESH_CACHE, CACHE_NAME);
+
         try {
             cache.refresh(false);
         } catch (CacheException ce) {
             logger.error("feil under refresh av cache", ce);
         }
+
         if (broadcastRefresh) {
             broadcastRefresh();
         }
@@ -212,7 +216,7 @@ public class EnonicContentRetriever {
 
     public synchronized List<Element> getAllElements() {
         if (!cacheManager.cacheExists(CACHE_NAME)) {
-            return new ArrayList();
+            return new LinkedList<Element>();
         }
         List liste = new LinkedList<Element>();
         Ehcache c = cacheManager.getEhcache(CACHE_NAME);
