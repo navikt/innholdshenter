@@ -35,7 +35,7 @@ public class EnonicCacheEntryFactory implements CacheEntryFactory {
     }
 
     @Override
-    public Object createEntry(Object key) throws Exception {
+    public Object createEntry(Object key) throws IOException {
         String url = key.toString();
         String randomUrl = InnholdshenterTools.makeRandomUrl(url);
         logger.debug(DEBUG_RETRIEVING_PAGE_CONTENT_FROM_URL, randomUrl);
@@ -53,6 +53,7 @@ public class EnonicCacheEntryFactory implements CacheEntryFactory {
         HttpGet httpGet = new HttpGet(randomUrl);
         ResponseHandler<String> responseHandler = new BasicResponseHandler();
         String innhold;
+
         try {
             innhold = httpClient.execute(httpGet, responseHandler);
             CacheStatusMelding c = new CacheStatusMelding(200, "OK", System.currentTimeMillis());
@@ -63,21 +64,25 @@ public class EnonicCacheEntryFactory implements CacheEntryFactory {
             statusMeldinger.put(url, c);
             throw new IOException(exception);
         }
+
         return innhold;
     }
 
     protected boolean isContentValid(String innhold) throws IOException {
-        if(innhold == null || innhold.isEmpty()) {
+        if (innhold == null || innhold.isEmpty()) {
             return false;
         }
-        for(String streng : GYLDIG_RESPONS_INNHOLD) {
+
+        for (String streng : GYLDIG_RESPONS_INNHOLD) {
             if(innhold.startsWith(streng)) {
                 return true;
             }
         }
+
         if(innhold.length() > MIN_VALID_CONTENT_LENGTH) {
             return true;
         }
+
         return false;
     }
 
