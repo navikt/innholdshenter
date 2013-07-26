@@ -62,6 +62,7 @@ public class EnonicContentRetriever {
         setHttpTimeoutMillis(3000);
         setupCache();
     }
+
     public EnonicContentRetriever(String uniqueAppName) {
         this();
         this.uniqueAppName = uniqueAppName;
@@ -70,7 +71,7 @@ public class EnonicContentRetriever {
     public EnonicContentRetriever(String uniqueAppName, boolean nodeSyncing) throws Exception {
         this(uniqueAppName);
         this.nodeSyncing = nodeSyncing;
-        if(this.nodeSyncing) {
+        if (this.nodeSyncing) {
             this.groupCommunicator = new InnholdshenterGroupCommunicator(this.uniqueAppName, this);
         }
     }
@@ -100,10 +101,22 @@ public class EnonicContentRetriever {
     }
 
     public Properties getPropertiesFullUrl(final String url) {
-        Element e = cache.get(url);
-        if(e.getObjectValue() instanceof Properties) {
-            return (Properties) e.getObjectValue();
+        Element element = cache.get(url);
+        if (element.getObjectValue() instanceof Properties) {
+            return (Properties) element.getObjectValue();
         }
+        Properties properties = convertElementToProperties(element);
+        Element convertedElement = storeConvertedObject(url, properties);
+        return (Properties) convertedElement.getObjectValue();
+    }
+
+    private Element storeConvertedObject(String key, Object object) {
+        Element newElement = new Element(key, object);
+        cache.put(newElement);
+        return newElement;
+    }
+
+    private Properties convertElementToProperties(Element e) {
         Properties properties = new Properties();
         String content = e.getObjectValue().toString();
         try {
@@ -113,9 +126,7 @@ public class EnonicContentRetriever {
             logger.error("Feil i konvertering fra xml til Properties objekt.", ex);
             throw new RuntimeException("Feil: Kunne ikke hente data.", ex);
         }
-        Element element = new Element(url, properties);
-        cache.put(element);
-        return (Properties)element.getObjectValue();
+        return properties;
     }
 
     public void setBaseUrl(String baseUrl) {
@@ -143,6 +154,7 @@ public class EnonicContentRetriever {
     public Map<String, CacheStatusMelding> getCacheStatusMeldinger() {
         return this.cacheStatusMeldinger;
     }
+
     public int getRefreshIntervalSeconds() {
         return refreshIntervalSeconds;
     }
@@ -173,7 +185,7 @@ public class EnonicContentRetriever {
     }
 
     protected void broadcastRefresh() {
-        if(groupCommunicator != null) {
+        if (groupCommunicator != null) {
             try {
                 groupCommunicator.sendUpdateToNodes();
             } catch (Exception e) {
@@ -187,25 +199,25 @@ public class EnonicContentRetriever {
             logger.warn("refreshCache: ingen cache med navnet {} ble funnet!", CACHE_NAME);
             return;
         }
-        logger.warn( WARN_MELDING_REFRESH_CACHE, CACHE_NAME);
+        logger.warn(WARN_MELDING_REFRESH_CACHE, CACHE_NAME);
         try {
             cache.refresh(false);
         } catch (CacheException ce) {
             logger.error("feil under refresh av cache", ce);
         }
-        if(broadcastRefresh) {
+        if (broadcastRefresh) {
             broadcastRefresh();
         }
     }
 
-    public synchronized List<Element> getAllElements () {
-        if(!cacheManager.cacheExists(CACHE_NAME)) {
+    public synchronized List<Element> getAllElements() {
+        if (!cacheManager.cacheExists(CACHE_NAME)) {
             return new ArrayList();
         }
         List liste = new LinkedList();
         Ehcache c = cacheManager.getEhcache(CACHE_NAME);
         List keys = c.getKeys();
-        for (Object o: keys) {
+        for (Object o : keys) {
             liste.add(c.getQuiet(o));
         }
         return liste;
