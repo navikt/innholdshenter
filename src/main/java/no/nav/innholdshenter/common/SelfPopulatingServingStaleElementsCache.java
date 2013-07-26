@@ -20,32 +20,25 @@ public class SelfPopulatingServingStaleElementsCache extends SelfPopulatingCache
 
     @Override
     public Element get(Object key) throws LockTimeoutException {
-        Element oldElement;
-        try {
-            oldElement = super.get(key);
-        } catch (RuntimeException e) {
-            logger.info("Feil ved henting av key {}", key, e);
-            throw e;
+        Element element = super.get(key);
+        if(isElementExpired(element)) {
+             element = doElementUpdate(element);
         }
-        Element newElement = doElementUpdate(oldElement);
-        return newElement;
+        return element;
     }
 
     private Element doElementUpdate(Element oldElement) {
-        if(isElementExpired(oldElement)) {
-            try {
-                refreshElement(oldElement, this.getCache());
-            } catch (Exception e) {
-                return oldElement;
-            }
-            return super.get(oldElement.getObjectKey());
+        try {
+            refreshElement(oldElement, this.getCache());
+        } catch (Exception e) {
+            return oldElement;
         }
-        return oldElement;
+        return super.get(oldElement.getObjectKey());
     }
 
     public boolean isElementExpired(Element element) {
         long now = System.currentTimeMillis();
-        long expirationTime = element.getCreationTime() + (getTimeToLiveSeconds() * 1000);
+        long expirationTime = element.getCreationTime() + (timeToLiveSeconds * 1000);
         return now > expirationTime;
     }
 
