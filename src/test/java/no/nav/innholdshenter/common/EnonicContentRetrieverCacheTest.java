@@ -34,7 +34,7 @@ public class EnonicContentRetrieverCacheTest extends EnonicContentRetrieverTestS
         verify(httpClient).execute(any(HttpGet.class), any(BasicResponseHandler.class));
 
         testListener.resetStatus();
-        contentRetriever.refreshCache(true);
+        contentRetriever.refreshCache(false);
         verify(httpClient, times(2)).execute(any(HttpGet.class), any(BasicResponseHandler.class));
         assertEquals(ListenerStatus.ELEMENT_UPDATED, testListener.getLastStatus());
 
@@ -59,7 +59,7 @@ public class EnonicContentRetrieverCacheTest extends EnonicContentRetrieverTestS
         verify(httpClient).execute(any(HttpGet.class), any(BasicResponseHandler.class));
 
         testListener.resetStatus();
-        contentRetriever.refreshCache(true);
+        contentRetriever.refreshCache(false);
         verify(httpClient, times(2)).execute(any(HttpGet.class), any(BasicResponseHandler.class));
         assertEquals(ListenerStatus.RESET, testListener.getLastStatus());
 
@@ -91,7 +91,7 @@ public class EnonicContentRetrieverCacheTest extends EnonicContentRetrieverTestS
         assertEquals(CACHED_CONTENT, result);
 
         testListener.resetStatus();
-        contentRetriever.refreshCache(true);
+        contentRetriever.refreshCache(false);
         assertEquals(ListenerStatus.ELEMENT_UPDATED, testListener.getLastStatus());
 
         result = contentRetriever.getPageContent(PATH);
@@ -119,7 +119,7 @@ public class EnonicContentRetrieverCacheTest extends EnonicContentRetrieverTestS
         verify(httpClient, times(2)).execute(any(HttpGet.class), any(BasicResponseHandler.class));
 
         testListener.resetStatus();
-        contentRetriever.refreshCache(true);
+        contentRetriever.refreshCache(false);
 
         verify(httpClient, times(4)).execute(any(HttpGet.class), any(BasicResponseHandler.class));
         innhold = contentRetriever.getPageContent(PATH);

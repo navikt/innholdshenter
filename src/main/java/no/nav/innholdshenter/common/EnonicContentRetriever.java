@@ -198,15 +198,14 @@ public class EnonicContentRetriever {
 
     public void refreshCache(boolean broadcastRefresh) {
         logger.warn(WARN_MELDING_REFRESH_CACHE, CACHE_NAME);
-
-        try {
-            cache.refresh(false);
-        } catch (CacheException ce) {
-            logger.error("feil under refresh av cache", ce);
-        }
-
-        if (broadcastRefresh) {
+        if (broadcastRefresh && nodeSyncing) {
             broadcastRefresh();
+        } else {
+            try {
+                cache.refresh(false);
+            } catch (CacheException ce) {
+                logger.error("feil under refresh av cache", ce);
+            }
         }
     }
 
