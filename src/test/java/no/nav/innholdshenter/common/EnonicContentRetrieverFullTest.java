@@ -1,11 +1,13 @@
 package no.nav.innholdshenter.common;
 
+import net.sf.ehcache.CacheException;
 import net.sf.ehcache.Element;
 import no.nav.innholdshenter.common.EhcacheTestListener.ListenerStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -107,17 +109,13 @@ public class EnonicContentRetrieverFullTest extends EnonicContentRetrieverTestSe
         assertEquals(testListener.getLastStatus(), ListenerStatus.RESET);
     }
 
-    @Test
+    @Test(expected = CacheException.class)
     public void shouldReturnNullIfNoCachedCopyAndNoResponseOnURL() throws Exception {
         when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenThrow(new IOException());
         testListener.resetStatus();
 
         String result = "";
-        try {
-            result = contentRetriever.getPageContent(PATH);
-        } catch (IllegalStateException e) {
-            e.printStackTrace();
-        }
+        result = contentRetriever.getPageContent(PATH);
 
         assertNull(result);
         verify(httpClient).execute(any(HttpGet.class), any(BasicResponseHandler.class));

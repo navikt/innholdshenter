@@ -86,13 +86,8 @@ public class EnonicContentRetriever {
     }
 
     private String getPageContentFullUrl(final String url) {
-        Element element;
-        try {
-            element = cache.get(url);
-        } catch (RuntimeException e) {
-            return null;
-        }
-        return element.getObjectValue().toString();
+        Element element = cache.get(url);
+        return (String) element.getObjectValue();
     }
 
     public Properties getProperties(String path) {
@@ -102,11 +97,15 @@ public class EnonicContentRetriever {
 
     public Properties getPropertiesFullUrl(final String url) {
         Element element = cache.get(url);
+        return getPropertiesOrConvertIfNeeded(element);
+    }
+
+    private Properties getPropertiesOrConvertIfNeeded(Element element) {
         if (element.getObjectValue() instanceof Properties) {
             return (Properties) element.getObjectValue();
         }
         Properties properties = convertElementToProperties(element);
-        Element convertedElement = storeConvertedObject(url, properties);
+        Element convertedElement = storeConvertedObject((String) element.getObjectKey(), properties);
         return (Properties) convertedElement.getObjectValue();
     }
 
@@ -191,7 +190,7 @@ public class EnonicContentRetriever {
             try {
                 groupCommunicator.sendUpdateToNodes();
             } catch (Exception e) {
-                logger.error("Syncing cache refresh with nodes failed: {}", e);
+                logger.error("Syncing cache refresh with nodes failed: ", e);
             }
         }
     }
