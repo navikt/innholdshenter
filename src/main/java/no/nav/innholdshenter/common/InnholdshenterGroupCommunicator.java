@@ -35,10 +35,11 @@ public class InnholdshenterGroupCommunicator extends ReceiverAdapter {
 
     /**
      * Called when a new node enters the group.
+     *
      * @param view
      */
     @Override
-    public void viewAccepted (View view) {
+    public void viewAccepted(View view) {
         logger.info("New node entered group. View: {}", view);
     }
 

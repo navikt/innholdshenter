@@ -22,12 +22,12 @@ public class SelfPopulatingServingStaleElementsCache extends SelfPopulatingCache
     public Element get(Object key) throws LockTimeoutException {
         Element element = super.get(key);
         if(isElementExpired(element)) {
-             element = doElementUpdate(element);
+             element = getUpdatedElement(element);
         }
         return element;
     }
 
-    private Element doElementUpdate(Element oldElement) {
+    private Element getUpdatedElement(Element oldElement) {
         try {
             refreshElement(oldElement, this.getCache());
         } catch (Exception e) {
