@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SelfPopulatingServingStaleElementsCache extends SelfPopulatingCache {
-    private Logger logger = LoggerFactory.getLogger(SelfPopulatingServingStaleElementsCache.class);
     private int timeToLiveSeconds;
 
     public SelfPopulatingServingStaleElementsCache(Ehcache cache, CacheEntryFactory factory, int timeToLiveSeconds) throws CacheException {
