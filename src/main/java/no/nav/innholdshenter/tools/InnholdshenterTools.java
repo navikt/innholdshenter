@@ -17,7 +17,7 @@ public class InnholdshenterTools {
 
     private static final String INFO_LAGE_NY_UNIK_URL_FEILET = "Feilet å lage ny unik url, url: {}.";
 
-    public static String makeRandomUrl(String url) {
+    public static String makeUniqueRandomUrl(String url) {
         String sidToAvoidServerCache = RandomStringUtils.randomAlphanumeric(15);
         try {
             URIBuilder uriBuilder = new URIBuilder(url);

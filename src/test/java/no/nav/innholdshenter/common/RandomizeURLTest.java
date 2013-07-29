@@ -37,7 +37,7 @@ public class RandomizeURLTest {
 
         when(RandomStringUtils.randomAlphanumeric(anyInt())).thenReturn(RANDOMSTRING);
         String url = SERVER + PATH;
-        String randomUrl = InnholdshenterTools.makeRandomUrl(url);
+        String randomUrl = InnholdshenterTools.makeUniqueRandomUrl(url);
 
         UrlValidator validator = new UrlValidator();
         assertTrue(validator.isValid(randomUrl));
@@ -50,7 +50,7 @@ public class RandomizeURLTest {
 
         when(RandomStringUtils.randomAlphanumeric(anyInt())).thenReturn(RANDOMSTRING);
         String url = SERVER + PATH + URLPARAMS;
-        String randomUrl = InnholdshenterTools.makeRandomUrl(url);
+        String randomUrl = InnholdshenterTools.makeUniqueRandomUrl(url);
 
         assertTrue(randomUrl.contains("sid=" + RANDOMSTRING));
         UrlValidator validator = new UrlValidator();
