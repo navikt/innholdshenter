@@ -37,10 +37,10 @@ public class EnonicCacheEntryFactory implements CacheEntryFactory {
     @Override
     public Object createEntry(Object key) throws IOException {
         String url = key.toString();
-        String randomUrl = InnholdshenterTools.makeRandomUrl(url);
-        logger.debug(DEBUG_RETRIEVING_PAGE_CONTENT_FROM_URL, randomUrl);
+        String uniqueRandomUrl = InnholdshenterTools.makeUniqueRandomUrl(url);
+        logger.debug(DEBUG_RETRIEVING_PAGE_CONTENT_FROM_URL, uniqueRandomUrl);
 
-        String innhold = doFetch(url, randomUrl);
+        String innhold = getNewContent(url, uniqueRandomUrl);
 
         if (!isContentValid(innhold)) {
             logger.warn(FEILMELDING_KLARTE_HENTE_INNHOLD_MEN_INNHOLDET_VAR_UGYLDIG, url);
@@ -49,23 +49,26 @@ public class EnonicCacheEntryFactory implements CacheEntryFactory {
         return innhold;
     }
 
-    private synchronized String doFetch(String url, String randomUrl) throws IOException {
-        HttpGet httpGet = new HttpGet(randomUrl);
+    private synchronized String getNewContent(String key, String uniqueRandomUrl) throws IOException {
+        HttpGet httpGet = new HttpGet(uniqueRandomUrl);
         ResponseHandler<String> responseHandler = new BasicResponseHandler();
-        String innhold;
+        String content;
 
         try {
-            innhold = httpClient.execute(httpGet, responseHandler);
+            content = httpClient.execute(httpGet, responseHandler);
+
             CacheStatusMelding c = new CacheStatusMelding(200, "OK", System.currentTimeMillis());
-            statusMeldinger.put(url, c);
+            statusMeldinger.put(key, c);
         } catch (HttpResponseException exception) {
-            logger.error(HTTP_STATUS_FEIL, url, exception.getStatusCode(), exception.getMessage());
+            logger.error(HTTP_STATUS_FEIL, key, exception.getStatusCode(), exception.getMessage());
+
             CacheStatusMelding c = new CacheStatusMelding(exception.getStatusCode(), exception.getMessage(), System.currentTimeMillis());
-            statusMeldinger.put(url, c);
+            statusMeldinger.put(key, c);
+
             throw new IOException(exception);
         }
 
-        return innhold;
+        return content;
     }
 
     protected boolean isContentValid(String innhold) throws IOException {
@@ -89,5 +92,4 @@ public class EnonicCacheEntryFactory implements CacheEntryFactory {
     public void setHttpClient(HttpClient httpClient) {
         this.httpClient = httpClient;
     }
-
 }
