@@ -75,7 +75,7 @@ public class EnonicContentRetrieverTestSetup {
     }
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         when(httpClient.getParams()).thenReturn(httpParams);
         when(httpClient.getConnectionManager()).thenReturn(connectionManager);
 
@@ -84,7 +84,7 @@ public class EnonicContentRetrieverTestSetup {
         if(cacheManager.cacheExists(CACHE_NAME)) {
             cacheManager.removeCache(CACHE_NAME);
         }
-        contentRetriever = new EnonicContentRetriever(CACHE_NAME);
+        contentRetriever = new EnonicContentRetriever(CACHE_NAME, true);
         contentRetriever.setCacheManager(cacheManager);
         contentRetriever.setBaseUrl(SERVER);
         contentRetriever.setRefreshIntervalSeconds(REFRESH_INTERVAL);

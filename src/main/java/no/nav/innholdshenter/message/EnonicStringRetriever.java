@@ -40,7 +40,7 @@ public class EnonicStringRetriever implements StringRetriever {
             Properties properties = enonicContentRetriever.getProperties(path);
             String value = properties.getProperty(key.trim());
             return (value != null) ? value : String.format(MISSING_KEY_TEMPLATE, key, locale, variant);
-        } catch (IllegalStateException e) {
+        } catch (RuntimeException e) {
             logger.error(FEILMELDING_FEIL_VED_HENTING_AV_PROPERTY_MED_KEY, key, locale, variant, e.getMessage());
             return String.format(MISSING_KEY_TEMPLATE, key, locale, variant);
         }

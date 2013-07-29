@@ -53,9 +53,7 @@ public class EnonicContentRetriever {
 
     protected EnonicContentRetriever() {
         cacheStatusMeldinger = new ConcurrentHashMap<String, CacheStatusMelding>();
-        if (cacheManager == null) {
-            cacheManager = CacheManager.create();
-        }
+        cacheManager = CacheManager.create();
         httpClient = new DefaultHttpClient();
         setHttpTimeoutMillis(3000);
         setupCache();

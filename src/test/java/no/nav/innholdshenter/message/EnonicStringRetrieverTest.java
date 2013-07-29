@@ -49,14 +49,14 @@ public class EnonicStringRetrieverTest {
     @Test
     public void skalHentePropertySomFinnes() throws Exception {
         EnonicStringRetriever retriever = new EnonicStringRetriever(contentRetriever, PATH);
-        String property = retriever.retrieveString("cv.kontaktdetaljer.kontaktinfo.land", "no_NO", null);
+        String property = retriever.retrieveString("cv.kontaktdetaljer.kontaktinfo.land", "no_NO");
         assertEquals("Land", property);
     }
 
     @Test
     public void skalHentePropertySomIkkeFinnes() throws Exception {
         StringRetriever stringHenter = new EnonicStringRetriever(contentRetriever, PATH);
-        String property = stringHenter.retrieveString("a", "no_NO", null);
+        String property = stringHenter.retrieveString("a", "no_NO");
         assertEquals("<b>[a locale:no_NO, variant:null]</b>", property);
     }
 
@@ -79,7 +79,7 @@ public class EnonicStringRetrieverTest {
 
         EnonicStringRetriever retriever = new EnonicStringRetriever(contentRetriever, PATH);
         assertEquals("Språk", retriever.retrieveString("kontaktinfo.overskrifter.spraak", "no_NO", null));
-        assertEquals("Language", retriever.retrieveString("kontaktinfo.overskrifter.spraak", "en_US", null));
+        assertEquals("Language", retriever.retrieveString("kontaktinfo.overskrifter.spraak", "en_US", ""));
 
     }
 
