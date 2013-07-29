@@ -185,8 +185,9 @@ public class EnonicContentRetriever {
     }
 
     protected void broadcastRefresh() {
-        if (groupCommunicator != null) {
+        if (nodeSyncing) {
             logger.info("Sending refresh sync broadcast.");
+
             try {
                 groupCommunicator.sendUpdateToNodes();
             } catch (Exception e) {
@@ -196,11 +197,6 @@ public class EnonicContentRetriever {
     }
 
     public void refreshCache(boolean broadcastRefresh) {
-        if (cache == null) {
-            logger.warn("refreshCache: ingen cache med navnet {} ble funnet!", CACHE_NAME);
-            return;
-        }
-
         logger.warn(WARN_MELDING_REFRESH_CACHE, CACHE_NAME);
 
         try {
