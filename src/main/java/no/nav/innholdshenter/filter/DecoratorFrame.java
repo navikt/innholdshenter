@@ -1,5 +1,6 @@
 package no.nav.innholdshenter.filter;
 
+import net.sf.ehcache.CacheException;
 import no.nav.innholdshenter.common.EnonicContentRetriever;
 import no.nav.innholdshenter.tools.InnholdshenterTools;
 import org.slf4j.Logger;
@@ -45,7 +46,7 @@ class DecoratorFrame {
         try {
             String pageFrame = contentRetriever.getPageContent(pageUrl);
             return new HtmlPage(pageFrame);
-        } catch (IllegalStateException e) {
+        } catch (CacheException e) {
             logger.error(FEIL_VED_HENTING_AV_DEKORERINGSRAMME, pageUrl, e);
             return getErrorPage();
         }
