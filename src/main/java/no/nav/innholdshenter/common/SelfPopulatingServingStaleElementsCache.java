@@ -6,8 +6,6 @@ import net.sf.ehcache.Element;
 import net.sf.ehcache.constructs.blocking.CacheEntryFactory;
 import net.sf.ehcache.constructs.blocking.LockTimeoutException;
 import net.sf.ehcache.constructs.blocking.SelfPopulatingCache;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SelfPopulatingServingStaleElementsCache extends SelfPopulatingCache {
     private int timeToLiveSeconds;
