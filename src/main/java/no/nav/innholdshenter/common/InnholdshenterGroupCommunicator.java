@@ -1,11 +1,11 @@
 package no.nav.innholdshenter.common;
 
-import org.jgroups.JChannel;
-import org.jgroups.Message;
-import org.jgroups.ReceiverAdapter;
-import org.jgroups.View;
+import org.jgroups.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.LinkedList;
+import java.util.List;
 
 public class InnholdshenterGroupCommunicator extends ReceiverAdapter {
     private static Logger logger = LoggerFactory.getLogger(InnholdshenterGroupCommunicator.class);
@@ -60,5 +60,13 @@ public class InnholdshenterGroupCommunicator extends ReceiverAdapter {
         }
         channel.setReceiver(this);
         channel.connect(this.identifingGroupName);
+    }
+
+    public List<Address> getMembers() {
+        if(!channel.isConnected()) {
+            return new LinkedList<Address>();
+        }
+        View view = channel.getView();
+        return view.getMembers();
     }
 }

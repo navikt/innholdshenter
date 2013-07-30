@@ -10,6 +10,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import org.jgroups.Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -242,5 +243,9 @@ public class EnonicContentRetriever {
 
     public boolean isElementExpired(Element element) {
         return cache.isElementExpired(element);
+    }
+
+    public List<Address> getClusterMembers() {
+        return groupCommunicator.getMembers();
     }
 }
