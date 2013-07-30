@@ -177,6 +177,7 @@ public class EnonicContentRetriever {
 
         logger.debug("Creating cache: {}", CACHE_NAME);
         cacheManager.replaceCacheWithDecoratedCache(ehcache, cache);
+        cache.setStatusMeldinger(cacheStatusMeldinger);
     }
 
     protected void broadcastRefresh() {
