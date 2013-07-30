@@ -246,6 +246,9 @@ public class EnonicContentRetriever {
     }
 
     public List<Address> getClusterMembers() {
+        if(!nodeSyncing) {
+            return new LinkedList<Address>();
+        }
         return groupCommunicator.getMembers();
     }
 }
