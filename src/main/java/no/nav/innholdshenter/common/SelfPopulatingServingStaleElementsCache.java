@@ -61,6 +61,7 @@ public class SelfPopulatingServingStaleElementsCache extends SelfPopulatingCache
 
     public void setTimeToLiveSeconds(int timeToLiveSeconds) {
         this.timeToLiveSeconds = timeToLiveSeconds;
+        fetchTimeoutIntervalMillis = (timeToLiveSeconds * 1000) / 4;
     }
 
     public int getFetchTimeoutIntervalMillis() {
