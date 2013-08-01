@@ -75,4 +75,5 @@ public class SelfPopulatingServingStaleElementsCache extends SelfPopulatingCache
     public void setStatusMeldinger(Map<String, CacheStatusMelding> statusMeldinger) {
         this.statusMeldinger = statusMeldinger;
     }
+
 }

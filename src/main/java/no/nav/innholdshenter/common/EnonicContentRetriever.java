@@ -207,19 +207,6 @@ public class EnonicContentRetriever {
         }
     }
 
-    public synchronized List<Element> getAllElements() {
-        if (!cacheManager.cacheExists(CACHE_NAME)) {
-            return new LinkedList<Element>();
-        }
-        List liste = new LinkedList<Element>();
-        Ehcache c = cacheManager.getEhcache(CACHE_NAME);
-        List keys = c.getKeys();
-        for (Object o : keys) {
-            liste.add(c.getQuiet(o));
-        }
-        return liste;
-    }
-
     public void setGroupCommunicator(InnholdshenterGroupCommunicator groupCommunicator) {
         this.groupCommunicator = groupCommunicator;
     }
@@ -242,10 +229,12 @@ public class EnonicContentRetriever {
         return cache;
     }
 
+    /* brukes av cachestatuspaneler */
     public boolean isElementExpired(Element element) {
         return cache.isElementExpired(element);
     }
 
+    /* brukes av cachestatuspaneler */
     public List<Address> getClusterMembers() {
         if(!nodeSyncing) {
             return new LinkedList<Address>();
@@ -253,11 +242,26 @@ public class EnonicContentRetriever {
         return groupCommunicator.getMembers();
     }
 
+    /* brukes av cachestatuspaneler */
     public Element getContentIfExists(Object key) {
         if(cache.isKeyInCache(key)) {
             return cache.getQuiet(key);
         }
         return new Element(key, "");
+    }
+
+    /* brukes av cachestatuspaneler */
+    public synchronized List<Element> getAllElements() {
+        if (!cacheManager.cacheExists(CACHE_NAME)) {
+            return new LinkedList<Element>();
+        }
+        List liste = new LinkedList<Element>();
+        Ehcache c = cacheManager.getEhcache(CACHE_NAME);
+        List keys = c.getKeys();
+        for (Object o : keys) {
+            liste.add(c.getQuiet(o));
+        }
+        return liste;
     }
 
 }
