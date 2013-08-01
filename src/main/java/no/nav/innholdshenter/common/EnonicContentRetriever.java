@@ -252,4 +252,12 @@ public class EnonicContentRetriever {
         }
         return groupCommunicator.getMembers();
     }
+
+    public Element getContentIfExists(Object key) {
+        if(cache.isKeyInCache(key)) {
+            return cache.getQuiet(key);
+        }
+        return new Element(key, null);
+    }
+
 }
