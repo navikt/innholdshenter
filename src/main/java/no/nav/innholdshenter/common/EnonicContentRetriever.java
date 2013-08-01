@@ -65,6 +65,7 @@ public class EnonicContentRetriever {
         this.uniqueAppName = uniqueAppName;
     }
 
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     public EnonicContentRetriever(String uniqueAppName, boolean nodeSyncing) throws Exception {
         this(uniqueAppName);
         this.nodeSyncing = nodeSyncing;

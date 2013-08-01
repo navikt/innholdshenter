@@ -1,6 +1,10 @@
 package no.nav.innholdshenter.common;
 
-import org.jgroups.*;
+import org.jgroups.Address;
+import org.jgroups.JChannel;
+import org.jgroups.Message;
+import org.jgroups.ReceiverAdapter;
+import org.jgroups.View;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +23,8 @@ public class InnholdshenterGroupCommunicator extends ReceiverAdapter {
      * @param identifyingAppName - group identifier.
      * @param innholdshenter
      */
+
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     public InnholdshenterGroupCommunicator(String identifyingAppName, EnonicContentRetriever innholdshenter) throws Exception {
         this.identifingGroupName += identifyingAppName;
         this.innholdshenter = innholdshenter;
@@ -43,17 +49,20 @@ public class InnholdshenterGroupCommunicator extends ReceiverAdapter {
         logger.info("New node entered group. View: {}", view);
     }
 
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     public void sendUpdateToNodes() throws Exception {
         /* null in first param is a broadcast to all nodes in group */
         Message m = new Message(null, "updateCache");
         channel.send(m);
     }
 
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     public void setJChannel(JChannel jChannel) throws Exception {
         this.channel = jChannel;
         setupChannel();
     }
 
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     private void setupChannel() throws Exception {
         if (channel == null) {
             channel = new JChannel();
