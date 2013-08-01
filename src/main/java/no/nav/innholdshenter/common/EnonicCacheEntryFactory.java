@@ -44,9 +44,15 @@ public class EnonicCacheEntryFactory implements CacheEntryFactory {
 
         if (!isContentValid(innhold)) {
             logger.warn(FEILMELDING_KLARTE_HENTE_INNHOLD_MEN_INNHOLDET_VAR_UGYLDIG, url);
+            logStatus(400, "Invalid content", url);
             throw new IOException(String.format("Fikk ugyldig innhold på url: %s", url));
         }
         return innhold;
+    }
+
+    private void logStatus(int statusCode, String statusMessage, String key) {
+        CacheStatusMelding c = new CacheStatusMelding(statusCode, statusMessage, System.currentTimeMillis());
+        statusMeldinger.put(key, c);
     }
 
     private synchronized String getNewContent(String key, String uniqueRandomUrl) throws IOException {
@@ -56,14 +62,11 @@ public class EnonicCacheEntryFactory implements CacheEntryFactory {
 
         try {
             content = httpClient.execute(httpGet, responseHandler);
+            logStatus(200, "OK", key);
 
-            CacheStatusMelding c = new CacheStatusMelding(200, "OK", System.currentTimeMillis());
-            statusMeldinger.put(key, c);
         } catch (HttpResponseException exception) {
             logger.error(HTTP_STATUS_FEIL, key, exception.getStatusCode(), exception.getMessage());
-
-            CacheStatusMelding c = new CacheStatusMelding(exception.getStatusCode(), exception.getMessage(), System.currentTimeMillis());
-            statusMeldinger.put(key, c);
+            logStatus(exception.getStatusCode(), exception.getMessage(), key);
 
             throw new IOException(exception);
         }
