@@ -257,7 +257,7 @@ public class EnonicContentRetriever {
         if(cache.isKeyInCache(key)) {
             return cache.getQuiet(key);
         }
-        return new Element(key, null);
+        return new Element(key, "");
     }
 
 }
