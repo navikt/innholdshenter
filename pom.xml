@@ -13,14 +13,6 @@
     <version>0.1-SNAPSHOT</version>
     <name>nav-enonic-cms-innholdshenter</name>
 
-    <distributionManagement>
-        <site>
-            <id>nav-utviklerportalen</id>
-            <name>Project website</name>
-            <url>scp://utviklerportalen.adeo.no/var/www/docs/nav-portal/nav-enonic-cms-innholdshenter</url>
-        </site>
-    </distributionManagement>
-
     <scm>
         <connection>scm:svn:https://versjonskontroll.adeo.no/svn/nav-portal/nav-enonic-cms-innholdshenter/trunk</connection>
         <developerConnection>scm:svn:https://versjonskontroll.adeo.no/svn/nav-portal/nav-enonic-cms-innholdshenter/trunk</developerConnection>
