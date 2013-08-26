@@ -10,13 +10,13 @@
     <groupId>no.nav.sbl</groupId>
     <artifactId>innholdshenter</artifactId>
     <packaging>jar</packaging>
-    <version>0.1-SNAPSHOT</version>
+    <version>1.0</version>
     <name>nav-enonic-cms-innholdshenter</name>
 
     <scm>
-        <connection>scm:svn:https://versjonskontroll.adeo.no/svn/nav-sbl/nav-enonic-cms-innholdshenter/trunk</connection>
-        <developerConnection>scm:svn:https://versjonskontroll.adeo.no/svn/nav-sbl/nav-enonic-cms-innholdshenter/trunk</developerConnection>
-        <url>http://versjonskontroll.adeo.no/viewsvn/trunk/?root=nav-sbl/nav-enonic-cms-innholdshenter</url>
+        <connection>scm:svn:https://versjonskontroll.adeo.no/svn/nav-sbl/nav-enonic-cms-innholdshenter/tags/20130826-0819_1.0</connection>
+        <developerConnection>scm:svn:https://versjonskontroll.adeo.no/svn/nav-sbl/nav-enonic-cms-innholdshenter/tags/20130826-0819_1.0</developerConnection>
+        <url>http://versjonskontroll.adeo.no/viewsvn/tags/20130826-0819_1.0?root=nav-sbl/nav-enonic-cms-innholdshenter</url>
     </scm>
 
     <properties>
