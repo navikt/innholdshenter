@@ -7,13 +7,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.Arrays;
-import java.util.List;
-
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InnholdshenterGroupCommunicatorTest {
@@ -25,10 +25,12 @@ public class InnholdshenterGroupCommunicatorTest {
     EnonicContentRetriever innholdshenter;
     @Mock
     JChannel jChannel;
+    private int jGroupsBindPort = 7800;
+    private String jGroupsHosts = "localhost";
 
     @Before
     public void setUp() throws Exception {
-        innholdshenterGroupCommunicator = new InnholdshenterGroupCommunicator(identifingGroupName, innholdshenter);
+        innholdshenterGroupCommunicator = new InnholdshenterGroupCommunicator(identifingGroupName, jGroupsHosts, jGroupsBindPort, innholdshenter);
         innholdshenterGroupCommunicator.setJChannel(jChannel);
     }
 

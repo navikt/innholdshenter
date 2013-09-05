@@ -5,6 +5,7 @@ import org.jgroups.JChannel;
 import org.jgroups.Message;
 import org.jgroups.ReceiverAdapter;
 import org.jgroups.View;
+import org.jgroups.stack.ProtocolStack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,20 +14,21 @@ import java.util.List;
 
 public class InnholdshenterGroupCommunicator extends ReceiverAdapter {
     private static Logger logger = LoggerFactory.getLogger(InnholdshenterGroupCommunicator.class);
+    private final String jGroupsHosts;
+    private final int jGroupsBindPort;
     private EnonicContentRetriever innholdshenter;
     private String identifingGroupName = "innholdshenterCacheSyncGroup-";
     private JChannel channel;
 
     /**
      * identifyingAppName is used to identify the group of apps this app will communicate with.
-     *
-     * @param identifyingAppName - group identifier.
-     * @param innholdshenter
      */
 
     @SuppressWarnings("PMD.SignatureDeclareThrowsException")
-    public InnholdshenterGroupCommunicator(String identifyingAppName, EnonicContentRetriever innholdshenter) throws Exception {
+    public InnholdshenterGroupCommunicator(String identifyingAppName, String jGroupsHosts, int jGroupsBindPort, EnonicContentRetriever innholdshenter) throws Exception {
         this.identifingGroupName += identifyingAppName;
+        this.jGroupsHosts = jGroupsHosts;
+        this.jGroupsBindPort = jGroupsBindPort;
         this.innholdshenter = innholdshenter;
         this.setupChannel();
     }
@@ -41,8 +43,6 @@ public class InnholdshenterGroupCommunicator extends ReceiverAdapter {
 
     /**
      * Called when a new node enters the group.
-     *
-     * @param view
      */
     @Override
     public void viewAccepted(View view) {
@@ -65,7 +65,11 @@ public class InnholdshenterGroupCommunicator extends ReceiverAdapter {
     @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     private void setupChannel() throws Exception {
         if (channel == null) {
-            channel = new JChannel();
+            channel = new JChannel(false);
+            JGroupsConfig jGroupsConfig = new JGroupsConfig(this.jGroupsHosts, this.jGroupsBindPort);
+            ProtocolStack stack = jGroupsConfig.getProtocolStack();
+            channel.setProtocolStack(stack);
+            stack.init();
         }
         channel.setReceiver(this);
         channel.connect(this.identifingGroupName);

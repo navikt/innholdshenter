@@ -31,7 +31,7 @@ public class EnonicContentRetriever {
     private static final String SLASH = "/";
     private static final String LOCALE_UTF_8 = "UTF-8";
     private static final String WARN_MELDING_REFRESH_CACHE = "Refresh cachen: {}";
-    private boolean nodeSyncing = true;
+    private boolean nodeSyncing = false;
 
     private InnholdshenterGroupCommunicator groupCommunicator;
     private Map<String, CacheStatusMelding> cacheStatusMeldinger;
@@ -66,11 +66,11 @@ public class EnonicContentRetriever {
     }
 
     @SuppressWarnings("PMD.SignatureDeclareThrowsException")
-    public EnonicContentRetriever(String uniqueAppName, boolean nodeSyncing) throws Exception {
+    public EnonicContentRetriever(String uniqueAppName, boolean nodeSyncing, String jGroupsHosts, int jGroupsBindPort) throws Exception {
         this(uniqueAppName);
         this.nodeSyncing = nodeSyncing;
         if (this.nodeSyncing) {
-            this.groupCommunicator = new InnholdshenterGroupCommunicator(this.uniqueAppName, this);
+            this.groupCommunicator = new InnholdshenterGroupCommunicator(this.uniqueAppName, jGroupsHosts, jGroupsBindPort , this);
         }
     }
 

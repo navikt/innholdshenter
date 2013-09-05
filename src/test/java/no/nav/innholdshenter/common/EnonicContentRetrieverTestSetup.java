@@ -84,7 +84,7 @@ public class EnonicContentRetrieverTestSetup {
         if(cacheManager.cacheExists(CACHE_NAME)) {
             cacheManager.removeCache(CACHE_NAME);
         }
-        contentRetriever = new EnonicContentRetriever(CACHE_NAME, true);
+        contentRetriever = new EnonicContentRetriever(CACHE_NAME, true, "localhost", 7800);
         contentRetriever.setCacheManager(cacheManager);
         contentRetriever.setBaseUrl(SERVER);
         contentRetriever.setRefreshIntervalSeconds(REFRESH_INTERVAL);

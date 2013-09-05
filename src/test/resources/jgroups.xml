@@ -1,5 +1,0 @@
-<config>
-    <UDP mcast_addr="231.12.21.132"
-         loopback="false"
-         ip_ttl="30"/>
-</config>
