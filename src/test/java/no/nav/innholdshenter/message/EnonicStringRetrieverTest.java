@@ -42,6 +42,7 @@ public class EnonicStringRetrieverTest {
     @Before
     public void setUp() {
         when(contentRetriever.getProperties(PATH+"?locale=no_NO&variant=")).thenReturn(PROPERTIES);
+        when(contentRetriever.getProperties(PATH+"?locale=&variant=")).thenReturn(PROPERTIES);
         when(contentRetriever.getProperties(PATH+"?locale=en_US&variant=")).thenReturn(PROPERTIES_EN);
         when(contentRetriever.getProperties(PATH+"?locale=no_NO&variant=ingendata")).thenReturn(PROPERTIES_INGEN);
     }
@@ -75,8 +76,14 @@ public class EnonicStringRetrieverTest {
     }
 
     @Test
-    public void skalHenteTekstForaGittLocale() {
+    public void skalHentePropertyUtenLocale() {
+        EnonicStringRetriever retriever = new EnonicStringRetriever(contentRetriever, PATH);
+        String property = retriever.retrieveString("cv.kontaktdetaljer.kontaktinfo.land");
+        assertEquals("Land", property);
+    }
 
+    @Test
+    public void skalHenteTekstForaGittLocale() {
         EnonicStringRetriever retriever = new EnonicStringRetriever(contentRetriever, PATH);
         assertEquals("Språk", retriever.retrieveString("kontaktinfo.overskrifter.spraak", "no_NO", null));
         assertEquals("Language", retriever.retrieveString("kontaktinfo.overskrifter.spraak", "en_US", ""));
@@ -85,10 +92,8 @@ public class EnonicStringRetrieverTest {
 
     @Test
     public void skalHenteTekstForaGittVariant() {
-
         EnonicStringRetriever retriever = new EnonicStringRetriever(contentRetriever, PATH);
         assertEquals("Språk", retriever.retrieveString("kontaktinfo.overskrifter.spraak", "no_NO", null));
         assertEquals("Ikke tilgjengelig", retriever.retrieveString("kontaktinfo.overskrifter.spraak", "no_NO", "ingendata"));
-
     }
 }

@@ -25,6 +25,10 @@ public class EnonicStringRetriever implements StringRetriever {
         this.propertiesPath = propertiesPath + "?locale=";
     }
 
+    public String retrieveString(String key) {
+        return retrieveString(key, null, null);
+    }
+
     public String retrieveString(String key, String locale) {
         return retrieveString(key, locale, null);
     }
