@@ -3,7 +3,6 @@ package no.nav.innholdshenter.filter;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
-
 /**
  * Legger head og body inn i "rammen"
  */
@@ -26,12 +25,12 @@ class MarkupMerger {
     private MarkupMerger() {
     }
 
-    public static HtmlPage mergeHeaderBarComponent(HtmlPage originalPageFromapplication, HtmlPage mergedPage, String headerBarStartTag, String headerBarEndTag) {
-        return mergeComponent(originalPageFromapplication, headerBarStartTag, headerBarEndTag, mergedPage, HEADERBAR_COMPONENT_PLACEHOLDER);
+    public static HtmlPage mergeHeaderBarComponent(HtmlPage mergedPage, String headerBarStartTag, String headerBarEndTag) {
+        return mergeComponent(headerBarStartTag, headerBarEndTag, mergedPage, HEADERBAR_COMPONENT_PLACEHOLDER);
     }
 
-    public static HtmlPage mergeLeftMenuComponent(HtmlPage page, HtmlPage mergedPage, String menuComponentStartTag, String menuCompoentEndTag) {
-        return mergeComponent(page, menuComponentStartTag, menuCompoentEndTag, mergedPage, LEFT_MENU_COMPONENT_PLACEHOLDER);
+    public static HtmlPage mergeLeftMenuComponent(HtmlPage mergedPage, String menuComponentStartTag, String menuCompoentEndTag) {
+        return mergeComponent(menuComponentStartTag, menuCompoentEndTag, mergedPage, LEFT_MENU_COMPONENT_PLACEHOLDER);
     }
 
     public static HtmlPage mergeBreadcrumbComponent(HtmlPage originalPageFromApplication, HtmlPage mergedPage, String breadcrumbComponentStartTag,
@@ -79,10 +78,10 @@ class MarkupMerger {
         return stringToStrip.replace(startTag, EMPTY_STRING).replace(endTag, EMPTY_STRING);
     }
 
-    private static HtmlPage mergeComponent(HtmlPage originalPageFromApplication, String startTag, String endTag, HtmlPage mergedPage, String placeHolder) {
+    private static HtmlPage mergeComponent(String startTag, String endTag, HtmlPage mergedPage, String placeHolder) {
         String tmpMarkup;
         tmpMarkup = mergedPage.removeAreaWithinTagsFromHtml(startTag, endTag);
-        String areaWithinTagsFromHtml = originalPageFromApplication.getAreaWithinTagsFromHtml(startTag, endTag);
+        String areaWithinTagsFromHtml = mergedPage.getAreaWithinTagsFromHtml(startTag, endTag);
         tmpMarkup = tmpMarkup.replace(placeHolder, areaWithinTagsFromHtml);
 
         return new HtmlPage(tmpMarkup);

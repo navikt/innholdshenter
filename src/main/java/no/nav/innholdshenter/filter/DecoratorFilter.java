@@ -166,11 +166,11 @@ public class DecoratorFilter implements Filter {
         HtmlPage mergedPage = MarkupMerger.mergeMarkup(verticalSiteFrame, originalPageFromApplication);
 
         if (headerBarComponentStartTag != null && headerBarComponentEndTag != null) {
-            mergedPage = MarkupMerger.mergeHeaderBarComponent(originalPageFromApplication, mergedPage, headerBarComponentStartTag, headerBarComponentEndTag);
+            mergedPage = MarkupMerger.mergeHeaderBarComponent(mergedPage, headerBarComponentStartTag, headerBarComponentEndTag);
         }
 
         if (leftMenuComponentStartTag != null && leftMenuBarComponentEndTag != null) {
-            mergedPage = MarkupMerger.mergeLeftMenuComponent(originalPageFromApplication, mergedPage, leftMenuComponentStartTag, leftMenuBarComponentEndTag);
+            mergedPage = MarkupMerger.mergeLeftMenuComponent(mergedPage, leftMenuComponentStartTag, leftMenuBarComponentEndTag);
         }
 
         if (breadbrumbComponentStartTag != null && breadbrumbComponentEndTag != null) {

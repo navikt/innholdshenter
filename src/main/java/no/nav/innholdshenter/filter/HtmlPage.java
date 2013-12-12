@@ -78,7 +78,9 @@ class HtmlPage {
         Matcher matcher = createTagMatcher(startTag, endTag, htmlContent);
 
         if (matcher.find()) {
-            return matcher.group(1);
+            String areaWithTags = matcher.group(1);
+            String areaWithinTags = areaWithTags.replace(startTag, "").replace(endTag, "");
+            return areaWithinTags;
         } else {
             return EMPTY_STRING;
         }

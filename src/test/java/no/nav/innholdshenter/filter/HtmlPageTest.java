@@ -86,6 +86,6 @@ public class HtmlPageTest {
                 "</div>";
         HtmlPage sut = new HtmlPage(htmlString);
         String result = sut.getAreaWithinTagsFromHtml("<!--START-->", "<!--END-->");
-        assertEquals("<!--START--><div class=\"tittelheader\"><!--END-->", result);
+        assertEquals("<div class=\"tittelheader\">", result);
     }
 }

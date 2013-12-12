@@ -1,10 +1,10 @@
 package no.nav.innholdshenter.filter;
 
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnit44Runner;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Testklasse for MarkupMerger.
@@ -31,14 +31,15 @@ public class MarkupMergerTest {
 
     @Test
     public void testMergeHeaderBarComponent() {
-        String frame = encodingTag +"<html><head><title>$1</title> $2</head> <body><!-- headerbar_start -->Ukjent!$3<!-- headerbar_end --> $4</body><html>";
+        String frame = encodingTag +"<html><head><title>%s</title> %s %s</head><body><!-- headerbar_start -->Ukjent!<!-- headerbar_end --> %s</body><html>";
 
         String inputFrame = String.format(frame, "<!-- ${title} -->", "<!-- ${head} -->", "<!-- ${headerbarcomponent} -->", "<!-- ${body} -->");
         String html = head + body + title;
         HtmlPage htmlpage = new HtmlPage(html);
         HtmlPage mergepage = MarkupMerger.mergeMarkup(inputFrame, htmlpage);
-        mergepage = MarkupMerger.mergeHeaderBarComponent(htmlpage, mergepage, "<!-- headerbar_start -->", "<!-- headerbar_end -->");
+        mergepage = MarkupMerger.mergeHeaderBarComponent(mergepage, "<!-- headerbar_start -->", "<!-- headerbar_end -->");
         System.out.println(mergepage.getHtml());
+        assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><html><head><title>Title</title> this is the head Ukjent!</head><body> this is the body</body><html>", mergepage.getHtml());
     }
 
     @Test
@@ -54,4 +55,5 @@ public class MarkupMergerTest {
         String encodingtag = MarkupMerger.getEncodingTag(frame);
         assertEquals(encodingTag, encodingtag);
     }
+
 }
