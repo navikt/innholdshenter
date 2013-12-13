@@ -69,9 +69,13 @@ class MarkupMerger {
     private static boolean mergePointIsFoundInBothDecorationTemplateAndPageToBeRewritten(String breadbrumbComponentMergePoint,
                                                                                          String breadcrumbsFromApplicationStrippedTags,
                                                                                          String breadcrumbsFromVerticalSiteStrippedTags) {
-        int breadCrumpsFromVerticalSiteIndex = breadcrumbsFromVerticalSiteStrippedTags.indexOf(breadbrumbComponentMergePoint);
-        int breadCrumpsFromApplicationIndex = breadcrumbsFromApplicationStrippedTags.indexOf(breadbrumbComponentMergePoint);
-        return breadbrumbComponentMergePoint != null && breadCrumpsFromApplicationIndex >= 0 && breadCrumpsFromVerticalSiteIndex >= 0;
+        if (breadbrumbComponentMergePoint != null) {
+            int breadCrumpsFromVerticalSiteIndex = breadcrumbsFromVerticalSiteStrippedTags.indexOf(breadbrumbComponentMergePoint);
+            int breadCrumpsFromApplicationIndex = breadcrumbsFromApplicationStrippedTags.indexOf(breadbrumbComponentMergePoint);
+            return breadCrumpsFromApplicationIndex >= 0 && breadCrumpsFromVerticalSiteIndex >= 0;
+        }
+
+        return false;
     }
 
     private static String stripTags(String stringToStrip, String startTag, String endTag) {
