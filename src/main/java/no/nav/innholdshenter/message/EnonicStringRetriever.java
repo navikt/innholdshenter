@@ -1,9 +1,11 @@
 package no.nav.innholdshenter.message;
 
 import no.nav.innholdshenter.common.EnonicContentRetriever;
+import org.apache.commons.collections.map.FixedSizeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.Properties;
 
 
@@ -11,7 +13,7 @@ import java.util.Properties;
  * Henter properties fra EnonicContentRetriever og returnerer en enkelt
  * property.
  */
-public class EnonicStringRetriever implements StringRetriever {
+public class EnonicStringRetriever extends FixedSizeMap implements StringRetriever  {
 
     private static final Logger logger = LoggerFactory.getLogger(EnonicStringRetriever.class);
     private static final String FEILMELDING_FEIL_VED_HENTING_AV_PROPERTY_MED_KEY = "Feil ved henting av property med key '{}', locale '{}', variant '{}': {}";
@@ -21,8 +23,17 @@ public class EnonicStringRetriever implements StringRetriever {
     private EnonicContentRetriever enonicContentRetriever;
 
     public EnonicStringRetriever(EnonicContentRetriever vsRetriever, String propertiesPath) {
+        super(new HashMap<Object, String>());
         this.enonicContentRetriever = vsRetriever;
         this.propertiesPath = propertiesPath + "?locale=";
+    }
+
+    @Override
+    public String get(Object key) {
+        if (key != null) {
+            return retrieveString(key.toString());
+        }
+        return "";
     }
 
     public String retrieveString(String key) {
