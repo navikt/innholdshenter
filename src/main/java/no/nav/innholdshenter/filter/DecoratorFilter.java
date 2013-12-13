@@ -266,6 +266,10 @@ public class DecoratorFilter implements Filter {
         decoratorFrame.setIncludeQueryStringInDecoration(includeQueryStringInDecoration);
     }
 
+    public void setExcludeQueryStringFromDecorationPatterns(List<String> excludeQueryStringFromDecorationPatterns) {
+        decoratorFrame.setExcludeQueryStringFromDecorationPatterns(excludeQueryStringFromDecorationPatterns);
+    }
+
     public void setBreadcrumbComponentStartTag(String breadcrumbComponentStartTag) {
         decoratorFrame.setBreadcrumbComponentStartTag(breadcrumbComponentStartTag);
     }
