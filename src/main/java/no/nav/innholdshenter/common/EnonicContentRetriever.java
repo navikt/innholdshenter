@@ -44,33 +44,47 @@ public class EnonicContentRetriever {
     private String uniqueAppName;
     private int refreshIntervalSeconds;
 
-    private final static String CACHE_NAME = "innholdshenterCache";
+    private String cacheName = "innholdshenterCache";
     private int maxElements = 1000;
     private boolean overflowToDisk = false;
     private boolean neverExpireCacheLines = true;
     private int httpTimeoutMillis;
     private HttpClient httpClient;
 
-
     protected EnonicContentRetriever() {
         cacheStatusMeldinger = new ConcurrentHashMap<String, CacheStatusMelding>();
         cacheManager = CacheManager.create();
         httpClient = new DefaultHttpClient();
         setHttpTimeoutMillis(3000);
-        setupCache();
     }
 
     public EnonicContentRetriever(String uniqueAppName) {
         this();
         this.uniqueAppName = uniqueAppName;
+        setupCache();
     }
 
     @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     public EnonicContentRetriever(String uniqueAppName, boolean nodeSyncing, String jGroupsHosts, int jGroupsBindPort) throws Exception {
-        this(uniqueAppName);
+        this();
+        this.uniqueAppName = uniqueAppName;
+        setupCache();
+        configureJGroups(nodeSyncing, jGroupsHosts, jGroupsBindPort);
+    }
+
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
+    public EnonicContentRetriever(String uniqueAppName, String cacheName, boolean nodeSyncing, String jGroupsHosts, int jGroupsBindPort) throws Exception {
+        this();
+        this.uniqueAppName = uniqueAppName;
+        this.cacheName = cacheName;
+        setupCache();
+        configureJGroups(nodeSyncing, jGroupsHosts, jGroupsBindPort);
+    }
+
+    private void configureJGroups(boolean nodeSyncing, String jGroupsHosts, int jGroupsBindPort) throws Exception {
         this.nodeSyncing = nodeSyncing;
         if (this.nodeSyncing) {
-            this.groupCommunicator = new InnholdshenterGroupCommunicator(this.uniqueAppName, jGroupsHosts, jGroupsBindPort , this);
+            this.groupCommunicator = new InnholdshenterGroupCommunicator(this.uniqueAppName, jGroupsHosts, jGroupsBindPort, this);
         }
     }
 
@@ -83,7 +97,7 @@ public class EnonicContentRetriever {
         return getPageContentFullUrl(url);
     }
 
-    private String getPageContentFullUrl(final String url) {
+    public String getPageContentFullUrl(final String url) {
         Element element = cache.get(url);
         return (String) element.getObjectValue();
     }
@@ -166,18 +180,18 @@ public class EnonicContentRetriever {
     }
 
     private synchronized void setupCache() {
-        if (cacheManager.cacheExists(this.CACHE_NAME)) {
+        if (cacheManager.cacheExists(this.cacheName)) {
             return;
         }
-        Cache oldCache = new Cache(this.CACHE_NAME, maxElements, overflowToDisk, neverExpireCacheLines, 0, 0);
+        Cache oldCache = new Cache(this.cacheName, maxElements, overflowToDisk, neverExpireCacheLines, 0, 0);
         cacheManager.addCache(oldCache);
         enonicCacheEntryFactory =
                 new EnonicCacheEntryFactory(getHttpClient(), cacheStatusMeldinger);
 
-        Ehcache ehcache = cacheManager.getEhcache(CACHE_NAME);
+        Ehcache ehcache = cacheManager.getEhcache(cacheName);
         cache = new SelfPopulatingServingStaleElementsCache(ehcache, enonicCacheEntryFactory, getRefreshIntervalSeconds());
 
-        logger.debug("Creating cache: {}", CACHE_NAME);
+        logger.debug("Creating cache: {}", cacheName);
         cacheManager.replaceCacheWithDecoratedCache(ehcache, cache);
         cache.setStatusMeldinger(cacheStatusMeldinger);
     }
@@ -195,7 +209,7 @@ public class EnonicContentRetriever {
     }
 
     public void refreshCache(boolean broadcastRefresh) {
-        logger.warn(WARN_MELDING_REFRESH_CACHE, CACHE_NAME);
+        logger.warn(WARN_MELDING_REFRESH_CACHE, cacheName);
         if (broadcastRefresh && nodeSyncing) {
             broadcastRefresh();
         } else {
@@ -212,7 +226,7 @@ public class EnonicContentRetriever {
     }
 
     public String getCacheName() {
-        return this.CACHE_NAME;
+        return this.cacheName;
     }
 
     private HttpClient getHttpClient() {
@@ -236,7 +250,7 @@ public class EnonicContentRetriever {
 
     /* brukes av cachestatuspaneler */
     public List<Address> getClusterMembers() {
-        if(!nodeSyncing) {
+        if (!nodeSyncing) {
             return new LinkedList<Address>();
         }
         return groupCommunicator.getMembers();
@@ -244,7 +258,7 @@ public class EnonicContentRetriever {
 
     /* brukes av cachestatuspaneler */
     public Element getContentIfExists(Object key) {
-        if(cache.isKeyInCache(key)) {
+        if (cache.isKeyInCache(key)) {
             return cache.getQuiet(key);
         }
         return new Element(key, "");
@@ -252,11 +266,11 @@ public class EnonicContentRetriever {
 
     /* brukes av cachestatuspaneler */
     public synchronized List<Element> getAllElements() {
-        if (!cacheManager.cacheExists(CACHE_NAME)) {
+        if (!cacheManager.cacheExists(cacheName)) {
             return new LinkedList<Element>();
         }
         List liste = new LinkedList<Element>();
-        Ehcache c = cacheManager.getEhcache(CACHE_NAME);
+        Ehcache c = cacheManager.getEhcache(cacheName);
         List keys = c.getKeys();
         for (Object o : keys) {
             liste.add(c.getQuiet(o));
