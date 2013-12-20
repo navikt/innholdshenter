@@ -6,6 +6,7 @@ import no.nav.innholdshenter.common.EhcacheTestListener.ListenerStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
@@ -24,6 +25,7 @@ import static org.mockito.Mockito.*;
 public class EnonicContentRetrieverFullTest extends EnonicContentRetrieverTestSetup {
 
     @Test
+    @Ignore
     public void skal_ikke_legge_inn_ugyldig_innhold() throws Exception {
         when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class)))
                 .thenReturn(CONTENT)

@@ -42,11 +42,12 @@ public class EnonicCacheEntryFactory implements CacheEntryFactory {
 
         String innhold = getNewContent(url, uniqueRandomUrl);
 
-        if (!isContentValid(innhold)) {
+      /*  if (!isContentValid(innhold)) {
             logger.warn(FEILMELDING_KLARTE_HENTE_INNHOLD_MEN_INNHOLDET_VAR_UGYLDIG, url);
             logStatus(400, "Invalid content", url);
             throw new IOException(String.format("Fikk ugyldig innhold på url: %s", url));
         }
+        */
         return innhold;
     }
 
