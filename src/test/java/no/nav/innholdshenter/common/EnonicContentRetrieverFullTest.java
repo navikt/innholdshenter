@@ -6,9 +6,7 @@ import no.nav.innholdshenter.common.EhcacheTestListener.ListenerStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -18,31 +16,15 @@ import java.util.Properties;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 
 @RunWith(MockitoJUnitRunner.class)
 public class EnonicContentRetrieverFullTest extends EnonicContentRetrieverTestSetup {
 
-    @Test
-    @Ignore
-    public void skal_ikke_legge_inn_ugyldig_innhold() throws Exception {
-        when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class)))
-                .thenReturn(CONTENT)
-                .thenReturn(UGYLDIG_INNHOLD);
-
-        String result = contentRetriever.getPageContent(PATH);
-        assertEquals(CONTENT, result);
-
-        Thread.sleep((REFRESH_INTERVAL+1)*1000);
-
-        testListener.resetStatus();
-        result = contentRetriever.getPageContent(PATH);
-
-        verify(httpClient, times(2)).execute(any(HttpGet.class), any(BasicResponseHandler.class));
-        assertEquals(CONTENT, result);
-        assertEquals(ListenerStatus.RESET, testListener.getLastStatus());
-    }
     @Test
     public void skal_Oppdatere_Utdaterte_Cachede_Properties_I_Cache_fra_URL() throws Exception {
         when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenReturn(PROPERTIES_CONTENT);
@@ -116,7 +98,7 @@ public class EnonicContentRetrieverFullTest extends EnonicContentRetrieverTestSe
         when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenThrow(new IOException());
         testListener.resetStatus();
 
-        String result = "";
+        String result;
         result = contentRetriever.getPageContent(PATH);
 
         assertNull(result);
