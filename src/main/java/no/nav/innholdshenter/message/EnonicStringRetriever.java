@@ -48,7 +48,7 @@ public class EnonicStringRetriever extends FixedSizeMap implements StringRetriev
         try {
             String path = propertiesPath;
             if (variant == null) {
-                path += getString(locale) + "&variant=";
+                path += emptyStringIfNull(locale) + "&variant=";
             } else {
                 path += getPropertiesPath(locale, variant);
             }
@@ -62,10 +62,10 @@ public class EnonicStringRetriever extends FixedSizeMap implements StringRetriev
     }
 
     private String getPropertiesPath(String locale, String variant) {
-        return String.format("%s&variant=%s", getString(locale), getString(variant));
+        return String.format("%s&variant=%s", emptyStringIfNull(locale), emptyStringIfNull(variant));
     }
 
-    private String getString(String locale) {
-        return locale == null ? "" : locale;
+    private String emptyStringIfNull(String string) {
+        return string == null ? "" : string;
     }
 }
