@@ -30,7 +30,7 @@ public class RandomizeURLTest {
     public void setUp() {
         enonicContentRetriever = new EnonicContentRetriever(cacheName);
     }
-    
+
     @Test
     public void testGenerateRandomURL() {
         mockStatic(RandomStringUtils.class);

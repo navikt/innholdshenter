@@ -12,13 +12,16 @@ public class EhcacheTestListener implements CacheEventListener {
     public static enum ListenerStatus {
         RESET, DISPOSED, ELEMENT_EVICTED, ELEMENT_EXPIRED, ELEMENT_ADDED,
         ELEMENT_REMOVED, ELEMENT_UPDATED, REMOVED_ALL, ELEMENT_RETURNED,
-    };
+    }
+
+    ;
 
     public ListenerStatus lastStatus;
 
     public ListenerStatus getLastStatus() {
         return lastStatus;
     }
+
     @Override
     public void notifyElementRemoved(Ehcache cache, Element element) throws CacheException {
         this.lastStatus = ListenerStatus.ELEMENT_REMOVED;
@@ -59,7 +62,7 @@ public class EhcacheTestListener implements CacheEventListener {
         return new EhcacheTestListener();
     }
 
-    public void resetStatus(){
+    public void resetStatus() {
         this.lastStatus = ListenerStatus.RESET;
     }
 }

@@ -67,7 +67,7 @@ public class DecoratorFrameQueryStringTest extends TestCase {
     }
 
     private String generateUrlWithRoleQueryString() {
-        return TEMPLATE_URL + "?urlPath=" + REQUEST_URL_PATH_NO_QS + "&" +REQUEST_ROLE;
+        return TEMPLATE_URL + "?urlPath=" + REQUEST_URL_PATH_NO_QS + "&" + REQUEST_ROLE;
     }
 
     @Test

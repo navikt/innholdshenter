@@ -18,9 +18,9 @@ import java.util.List;
 /**
  * Klasse som programatisk konfigurerer JGroups for blant annet
  * å kunne sette initial_hosts og bind_port dynamisk
- *
+ * <p/>
  * Tilsvarer følgende xml:
- *
+ * <p/>
  * <pre>
  * {@code
  *     <config>
@@ -38,7 +38,7 @@ import java.util.List;
  *     </config>
  * }
  * </pre>
- **/
+ */
 public class JGroupsConfig {
 
     private static Logger logger = LoggerFactory.getLogger(JGroupsConfig.class);
@@ -53,6 +53,7 @@ public class JGroupsConfig {
     /**
      * Genererer og returnerer en <code>ProtocolStack</code>
      * som kan settes på en JChannel
+     *
      * @return <code>ProtocolStack</code>
      * @throws UnknownHostException
      */

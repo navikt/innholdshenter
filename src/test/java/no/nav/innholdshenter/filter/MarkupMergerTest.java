@@ -31,7 +31,7 @@ public class MarkupMergerTest {
 
     @Test
     public void testMergeHeaderBarComponent() {
-        String frame = encodingTag +"<html><head><title>%s</title> %s %s</head><body><!-- headerbar_start -->Ukjent!<!-- headerbar_end --> %s</body><html>";
+        String frame = encodingTag + "<html><head><title>%s</title> %s %s</head><body><!-- headerbar_start -->Ukjent!<!-- headerbar_end --> %s</body><html>";
 
         String inputFrame = String.format(frame, "<!-- ${title} -->", "<!-- ${head} -->", "<!-- ${headerbarcomponent} -->", "<!-- ${body} -->");
         String html = head + body + title;

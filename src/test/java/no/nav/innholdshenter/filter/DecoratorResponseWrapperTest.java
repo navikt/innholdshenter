@@ -18,55 +18,55 @@ public class DecoratorResponseWrapperTest {
     private static final String ISO_8859_1 = "iso-8859-1";
 
     @Test
-   public void shouldKeepOutputForStream() throws IOException {
-      HttpServletResponse response = mock(HttpServletResponse.class);
-      when(response.getCharacterEncoding()).thenReturn(ISO_8859_1);
+    public void shouldKeepOutputForStream() throws IOException {
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        when(response.getCharacterEncoding()).thenReturn(ISO_8859_1);
 
-      DecoratorResponseWrapper sut = new DecoratorResponseWrapper(response);
+        DecoratorResponseWrapper sut = new DecoratorResponseWrapper(response);
 
-      ServletOutputStream out = sut.getOutputStream();
-      out.write("oneæøå".getBytes(ISO_8859_1));
-      out.write("twoæøå".getBytes(ISO_8859_1));
+        ServletOutputStream out = sut.getOutputStream();
+        out.write("oneæøå".getBytes(ISO_8859_1));
+        out.write("twoæøå".getBytes(ISO_8859_1));
 
-      assertEquals("oneæøåtwoæøå", sut.getOutputAsString());
-   }
+        assertEquals("oneæøåtwoæøå", sut.getOutputAsString());
+    }
 
-   @Test
-   public void shouldKeepOutputForWriter() throws IOException {
-      HttpServletResponse response = mock(HttpServletResponse.class);
+    @Test
+    public void shouldKeepOutputForWriter() throws IOException {
+        HttpServletResponse response = mock(HttpServletResponse.class);
 
-      when(response.getCharacterEncoding()).thenReturn(ISO_8859_1);
+        when(response.getCharacterEncoding()).thenReturn(ISO_8859_1);
 
-      DecoratorResponseWrapper sut = new DecoratorResponseWrapper(response);
+        DecoratorResponseWrapper sut = new DecoratorResponseWrapper(response);
 
-      PrintWriter out = sut.getWriter();
-      out.print("one");
-      out.write("two");
-      out.append('t');
-      out.flush();
+        PrintWriter out = sut.getWriter();
+        out.print("one");
+        out.write("two");
+        out.append('t');
+        out.flush();
 
-      assertEquals("onetwot", sut.getOutputAsString());
-   }
+        assertEquals("onetwot", sut.getOutputAsString());
+    }
 
-   @Test (expected=IllegalStateException.class)
-   public void writerThenOutputStreamShouldThrowException() throws IOException {
-      HttpServletResponse response = mock(HttpServletResponse.class);
-      when(response.getCharacterEncoding()).thenReturn(ISO_8859_1);
+    @Test(expected = IllegalStateException.class)
+    public void writerThenOutputStreamShouldThrowException() throws IOException {
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        when(response.getCharacterEncoding()).thenReturn(ISO_8859_1);
 
-      DecoratorResponseWrapper sut = new DecoratorResponseWrapper(response);
+        DecoratorResponseWrapper sut = new DecoratorResponseWrapper(response);
 
-      sut.getWriter();
-      sut.getOutputStream();
-   }
+        sut.getWriter();
+        sut.getOutputStream();
+    }
 
-   @Test (expected=IllegalStateException.class)
-   public void outputStreamThenWriterShouldThrowException() throws IOException {
-      HttpServletResponse response = mock(HttpServletResponse.class);
-      DecoratorResponseWrapper sut = new DecoratorResponseWrapper(response);
+    @Test(expected = IllegalStateException.class)
+    public void outputStreamThenWriterShouldThrowException() throws IOException {
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        DecoratorResponseWrapper sut = new DecoratorResponseWrapper(response);
 
-      sut.getOutputStream();
-      sut.getWriter();
-   }
+        sut.getOutputStream();
+        sut.getWriter();
+    }
 
 
 }

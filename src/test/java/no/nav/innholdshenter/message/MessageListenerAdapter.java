@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Adapter for StringRetriever that calls message listeners when new strings are fetched
  */
-public class MessageListenerAdapter implements StringRetriever{
+public class MessageListenerAdapter implements StringRetriever {
     private List<MessageListener> messageListeners = new ArrayList<MessageListener>();
     private StringRetriever stringRetriever;
 
@@ -20,7 +20,7 @@ public class MessageListenerAdapter implements StringRetriever{
 
     public String retrieveString(String key, String locale, String variant) {
         String value = stringRetriever.retrieveString(key, locale, variant);
-        if(value!= null){
+        if (value != null) {
             for (MessageListener messageListener : messageListeners) {
                 value = messageListener.onMessageRetrieved(value);
             }

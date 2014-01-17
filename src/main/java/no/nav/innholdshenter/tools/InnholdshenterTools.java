@@ -49,7 +49,6 @@ public class InnholdshenterTools {
      *
      * @param url
      * @return returns a cleaner url, suitable for the cacheline.
-     *
      */
     public static String sanitizeUrlCacheKey(String url) {
         URIBuilder uriBuilder = null;

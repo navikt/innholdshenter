@@ -44,7 +44,7 @@ public class InnholdshenterGroupCommunicatorTest {
 
     @Test
     public void should_not_call_update_when_wrong_message_received() {
-        Message m = new Message(null, "feiler "+TEST_STRING);
+        Message m = new Message(null, "feiler " + TEST_STRING);
         innholdshenterGroupCommunicator.receive(m);
         verify(innholdshenter, never()).refreshCache(false);
     }
@@ -70,7 +70,7 @@ public class InnholdshenterGroupCommunicatorTest {
         verify(innholdshenter).refreshCache(false);
         verify(innholdshenter, never()).refreshCache(true);
         verify(jChannel, never()).send(any(Message.class));
-        verify(jChannel, never()).send(any(Address.class),any());
+        verify(jChannel, never()).send(any(Address.class), any());
     }
 
 }

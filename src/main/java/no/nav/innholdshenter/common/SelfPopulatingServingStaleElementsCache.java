@@ -23,16 +23,16 @@ public class SelfPopulatingServingStaleElementsCache extends SelfPopulatingCache
     @Override
     public Element get(Object key) throws LockTimeoutException {
         Element element = super.get(key);
-        if(isElementExpired(element)) {
-             element = getUpdatedElement(element);
+        if (isElementExpired(element)) {
+            element = getUpdatedElement(element);
         }
         return element;
     }
 
     private Element getUpdatedElement(Element oldElement) {
-        if(statusMeldinger.containsKey(oldElement.getObjectKey())) {
+        if (statusMeldinger.containsKey(oldElement.getObjectKey())) {
             long lastRefresh = statusMeldinger.get(oldElement.getObjectKey()).getTimestamp();
-            if(!isTimeForRefresh(lastRefresh)) {
+            if (!isTimeForRefresh(lastRefresh)) {
                 return oldElement;
             }
         }

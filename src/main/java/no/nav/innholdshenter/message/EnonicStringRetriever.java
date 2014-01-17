@@ -13,7 +13,7 @@ import java.util.Properties;
  * Henter properties fra EnonicContentRetriever og returnerer en enkelt
  * property.
  */
-public class EnonicStringRetriever extends FixedSizeMap implements StringRetriever  {
+public class EnonicStringRetriever extends FixedSizeMap implements StringRetriever {
 
     private static final Logger logger = LoggerFactory.getLogger(EnonicStringRetriever.class);
     private static final String FEILMELDING_FEIL_VED_HENTING_AV_PROPERTY_MED_KEY = "Feil ved henting av property med key '{}', locale '{}', variant '{}': {}";
@@ -48,7 +48,7 @@ public class EnonicStringRetriever extends FixedSizeMap implements StringRetriev
         try {
             String path = propertiesPath;
             if (variant == null) {
-                path += getString(locale)+"&variant=";
+                path += getString(locale) + "&variant=";
             } else {
                 path += getPropertiesPath(locale, variant);
             }

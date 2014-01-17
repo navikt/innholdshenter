@@ -1,7 +1,7 @@
 package no.nav.innholdshenter.filter;
 
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Legger head og body inn i "rammen"

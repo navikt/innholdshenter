@@ -18,7 +18,7 @@ import static org.mockito.Mockito.when;
 public class EnonicContentRetrieverFeilmeldingTest extends EnonicContentRetrieverTestSetup {
 
     @Test
-    public void notfound_feil_skal_lage_feilmelding_i_listen() throws Exception{
+    public void notfound_feil_skal_lage_feilmelding_i_listen() throws Exception {
         when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class)))
                 .thenThrow(new HttpResponseException(404, "Not found"));
         String result;
@@ -28,14 +28,14 @@ public class EnonicContentRetrieverFeilmeldingTest extends EnonicContentRetrieve
             e.printStackTrace();
         }
         Map<String, CacheStatusMelding> feil = contentRetriever.getCacheStatusMeldinger();
-        assertTrue(feil.size()>=1);
+        assertTrue(feil.size() >= 1);
         int errorcode = feil.get(URL).getStatusCode();
         assertTrue(errorcode == 404);
         assertEquals("Not found", feil.get(URL).getMelding());
     }
 
     @Test
-    public void forbidden_feil_skal_lage_feilmelding_i_listen() throws Exception{
+    public void forbidden_feil_skal_lage_feilmelding_i_listen() throws Exception {
         when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class)))
                 .thenThrow(new HttpResponseException(403, "Forbidden"));
 
@@ -46,14 +46,14 @@ public class EnonicContentRetrieverFeilmeldingTest extends EnonicContentRetrieve
             e.printStackTrace();
         }
         Map<String, CacheStatusMelding> feil = contentRetriever.getCacheStatusMeldinger();
-        assertTrue(feil.size()>=1);
+        assertTrue(feil.size() >= 1);
         int errorcode = feil.get(URL).getStatusCode();
         assertTrue(errorcode == 403);
         assertEquals("Forbidden", feil.get(URL).getMelding());
     }
 
     @Test
-    public void ok_request_skal_lage_melding_i_listen() throws Exception{
+    public void ok_request_skal_lage_melding_i_listen() throws Exception {
         when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class)))
                 .thenReturn(CONTENT);
 
@@ -64,7 +64,7 @@ public class EnonicContentRetrieverFeilmeldingTest extends EnonicContentRetrieve
             e.printStackTrace();
         }
         Map<String, CacheStatusMelding> cacheStatusMeldinger = contentRetriever.getCacheStatusMeldinger();
-        assertTrue(cacheStatusMeldinger.size()==1);
+        assertTrue(cacheStatusMeldinger.size() == 1);
         int statusCode = cacheStatusMeldinger.get(URL).getStatusCode();
         assertTrue(statusCode == 200);
         assertEquals("OK", cacheStatusMeldinger.get(URL).getMelding());

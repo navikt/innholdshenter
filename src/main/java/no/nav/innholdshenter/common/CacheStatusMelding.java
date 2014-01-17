@@ -12,6 +12,7 @@ public class CacheStatusMelding implements Serializable {
         this.melding = melding;
         this.timestamp = timestamp;
     }
+
     public int getStatusCode() {
         return statusCode;
     }

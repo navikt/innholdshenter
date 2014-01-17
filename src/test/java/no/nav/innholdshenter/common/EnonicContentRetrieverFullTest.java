@@ -31,7 +31,7 @@ public class EnonicContentRetrieverFullTest extends EnonicContentRetrieverTestSe
         cache.put(new Element(URL, CACHED_PROPERTIES_2));
         testListener.resetStatus();
 
-        Thread.sleep((REFRESH_INTERVAL+2)*1000);
+        Thread.sleep((REFRESH_INTERVAL + 2) * 1000);
         Properties result = contentRetriever.getProperties(PATH);
 
         verify(httpClient).execute(any(HttpGet.class), any(BasicResponseHandler.class));
@@ -70,7 +70,7 @@ public class EnonicContentRetrieverFullTest extends EnonicContentRetrieverTestSe
         cache.put(new Element(URL, CACHED_CONTENT));
         testListener.resetStatus();
 
-        Thread.sleep((REFRESH_INTERVAL+2)*1000);
+        Thread.sleep((REFRESH_INTERVAL + 2) * 1000);
         String result = contentRetriever.getPageContent(PATH);
 
         assertEquals(CACHED_CONTENT, result);
@@ -85,7 +85,7 @@ public class EnonicContentRetrieverFullTest extends EnonicContentRetrieverTestSe
         cache.put(new Element(URL, CACHED_CONTENT));
         testListener.resetStatus();
 
-        Thread.sleep((REFRESH_INTERVAL-1)*1000);
+        Thread.sleep((REFRESH_INTERVAL - 1) * 1000);
         String result = contentRetriever.getPageContent(PATH);
 
         verify(httpClient, never()).execute(any(HttpGet.class), any(BasicResponseHandler.class));

@@ -76,7 +76,7 @@ public class InnholdshenterGroupCommunicator extends ReceiverAdapter {
     }
 
     public List<Address> getMembers() {
-        if(!channel.isConnected()) {
+        if (!channel.isConnected()) {
             return new LinkedList<Address>();
         }
         View view = channel.getView();

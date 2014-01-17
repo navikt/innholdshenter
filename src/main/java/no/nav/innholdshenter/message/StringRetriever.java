@@ -5,5 +5,6 @@ package no.nav.innholdshenter.message;
  */
 public interface StringRetriever {
     String retrieveString(String key, String locale);
+
     String retrieveString(String key, String locale, String variant);
 }

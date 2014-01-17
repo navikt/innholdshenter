@@ -49,16 +49,15 @@ public class DecoratorFrameTest extends TestCase {
     }
 
 
-    private String generateCorrectUrlString(String template)
-    {
-        return template + "?urlPath="+ REQUEST_URL_PATH;
+    private String generateCorrectUrlString(String template) {
+        return template + "?urlPath=" + REQUEST_URL_PATH;
     }
 
     @Test
     public void shouldReturnHtmlFrame() {
         String page = "<html><head><base href = \"http://www.nav.no/\" /><title>ti</title>he</head><body id=\"2\">" +
-              "<a href=\"/sbl/arbeid/innlogging\">Logg inn</a><a href=\"http://www.nav.no/Forsiden\">Forsiden</a>" +
-              "<a href=\"http://www.google.com/analytics/\">Google Analytics</a></body></html>";
+                "<a href=\"/sbl/arbeid/innlogging\">Logg inn</a><a href=\"http://www.nav.no/Forsiden\">Forsiden</a>" +
+                "<a href=\"http://www.google.com/analytics/\">Google Analytics</a></body></html>";
         when(request.getRequestURL()).thenReturn(new StringBuffer(HTTPS_REQUEST_URL));
         when(contentRetriever.getPageContent(generateCorrectUrlString(TEMPLATE_URL))).thenReturn(page);
 

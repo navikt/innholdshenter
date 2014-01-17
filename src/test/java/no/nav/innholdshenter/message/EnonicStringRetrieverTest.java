@@ -41,10 +41,10 @@ public class EnonicStringRetrieverTest {
 
     @Before
     public void setUp() {
-        when(contentRetriever.getProperties(PATH+"?locale=no_NO&variant=")).thenReturn(PROPERTIES);
-        when(contentRetriever.getProperties(PATH+"?locale=&variant=")).thenReturn(PROPERTIES);
-        when(contentRetriever.getProperties(PATH+"?locale=en_US&variant=")).thenReturn(PROPERTIES_EN);
-        when(contentRetriever.getProperties(PATH+"?locale=no_NO&variant=ingendata")).thenReturn(PROPERTIES_INGEN);
+        when(contentRetriever.getProperties(PATH + "?locale=no_NO&variant=")).thenReturn(PROPERTIES);
+        when(contentRetriever.getProperties(PATH + "?locale=&variant=")).thenReturn(PROPERTIES);
+        when(contentRetriever.getProperties(PATH + "?locale=en_US&variant=")).thenReturn(PROPERTIES_EN);
+        when(contentRetriever.getProperties(PATH + "?locale=no_NO&variant=ingendata")).thenReturn(PROPERTIES_INGEN);
     }
 
     @Test
