@@ -15,7 +15,6 @@ import static org.mockito.Mockito.when;
 public class EnonicContentRetrieverTestSetup {
 
     protected static final String PATH = "systemsider/ApplicationFrame";
-    protected static final String UGYLDIG_INNHOLD = "html>404</html>";
     protected static final String CACHE_NAME = "innholdshenterCache";
     protected static final String SERVER = "http://localhost:9000";
     protected static final String URL = SERVER + "/" + PATH;
@@ -29,12 +28,6 @@ public class EnonicContentRetrieverTestSetup {
             "<properties>" +
             "<entry key=\"cv.kontaktdetaljer.kontaktinfo.land\">Land</entry>" +
             "<entry key=\"kontaktinfo.overskrifter.maalform\">Ønsket målform</entry>" +
-            "</properties>";
-    protected static final String PROPERTIES_CONTENT_CACHED = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-            "<!DOCTYPE properties SYSTEM \"http://java.sun.com/dtd/properties.dtd\">\n" +
-            "<properties>" +
-            "<entry key=\"cv.kontaktdetaljer.kontaktinfo.land\">Land (cached)</entry>" +
-            "<entry key=\"kontaktinfo.overskrifter.maalform\">Ønsket målform (cached)</entry>" +
             "</properties>";
     protected static final String PROPERTIES_CONTENT_2 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
             "<!DOCTYPE properties SYSTEM \"http://java.sun.com/dtd/properties.dtd\">\n" +

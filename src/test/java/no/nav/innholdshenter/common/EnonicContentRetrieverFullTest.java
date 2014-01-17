@@ -5,7 +5,6 @@ import net.sf.ehcache.Element;
 import no.nav.innholdshenter.common.EhcacheTestListener.ListenerStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -149,41 +148,5 @@ public class EnonicContentRetrieverFullTest extends EnonicContentRetrieverTestSe
         assertEquals(CACHED_PROPERTIES, result);
         verify(httpClient, never()).execute(any(HttpGet.class), any(BasicResponseHandler.class));
         assertEquals(testListener.getLastStatus(), ListenerStatus.RESET);
-        //verify(cache, never()).cancelUpdate(URL);
     }
-
-    /**
-     * Worker thread for getPageContent.
-     */
-    class RetrieverWorker implements Runnable {
-
-        private String path;
-
-        public RetrieverWorker(String path) {
-            this.path = path;
-        }
-
-        public void run() {
-            contentRetriever.getPageContent(path);
-        }
-    }
-
-    @Test
-    public void skalReturnereInnholdFraUrlVedSamtidigAksess() throws Exception {
-        contentRetriever.setHttpClient(new DefaultHttpClient());
-        contentRetriever.setBaseUrl("http://maven.adeo.no:80");
-        contentRetriever.setHttpTimeoutMillis(5000);
-
-        Thread thread1 = new Thread(new RetrieverWorker("nexus/content/repositories/central/org/apache/solr/"));
-        Thread thread2 = new Thread(new RetrieverWorker("nexus/content/repositories/central/org/apache/wicket/"));
-
-        thread1.start();
-        thread2.start();
-
-        contentRetriever.getPageContent("nexus/content/repositories/central/org/apache/tomcat/");
-
-        thread1.join();
-        thread2.join();
-    }
-
 }
