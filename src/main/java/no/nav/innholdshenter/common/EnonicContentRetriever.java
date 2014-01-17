@@ -45,9 +45,6 @@ public class EnonicContentRetriever {
     private int refreshIntervalSeconds;
 
     private String cacheName = "innholdshenterCache";
-    private int maxElements = 1000;
-    private boolean overflowToDisk = false;
-    private boolean neverExpireCacheLines = true;
     private int httpTimeoutMillis;
     private HttpClient httpClient;
 
@@ -183,7 +180,7 @@ public class EnonicContentRetriever {
         if (cacheManager.cacheExists(this.cacheName)) {
             return;
         }
-        Cache oldCache = new Cache(this.cacheName, maxElements, overflowToDisk, neverExpireCacheLines, 0, 0);
+        Cache oldCache = new Cache(this.cacheName, 1000, false, true, 0, 0);
         cacheManager.addCache(oldCache);
         enonicCacheEntryFactory =
                 new EnonicCacheEntryFactory(getHttpClient(), cacheStatusMeldinger);
@@ -269,7 +266,7 @@ public class EnonicContentRetriever {
         if (!cacheManager.cacheExists(cacheName)) {
             return new LinkedList<Element>();
         }
-        List liste = new LinkedList<Element>();
+        List<Element> liste = new LinkedList<Element>();
         Ehcache c = cacheManager.getEhcache(cacheName);
         List keys = c.getKeys();
         for (Object o : keys) {

@@ -211,7 +211,7 @@ public class DecoratorFilter implements Filter {
     }
 
     public static boolean requestHeaderHasValue(HttpServletRequest request, String header, String value) {
-        return (request.getHeader(header) == null) ? false : request.getHeader(header).equalsIgnoreCase(value);
+        return (request.getHeader(header) != null) && request.getHeader(header).equalsIgnoreCase(value);
     }
 
     public void setExcludeHeaders(Map<String, String> excludeHeaders) {

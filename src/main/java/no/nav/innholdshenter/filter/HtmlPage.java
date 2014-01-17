@@ -79,8 +79,7 @@ class HtmlPage {
 
         if (matcher.find()) {
             String areaWithTags = matcher.group(1);
-            String areaWithinTags = areaWithTags.replace(startTag, "").replace(endTag, "");
-            return areaWithinTags;
+            return areaWithTags.replace(startTag, "").replace(endTag, "");
         } else {
             return EMPTY_STRING;
         }
