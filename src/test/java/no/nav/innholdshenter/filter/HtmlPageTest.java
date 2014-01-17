@@ -15,8 +15,6 @@ public class HtmlPageTest {
     private final String headTag = "<HEAD>" + titleTag + headText + "</head >";
     private final String bodyText = "<div>\n<script language=\"JavaScript\">\nfunction showBreadcrumbsEllipsis()\n{\ndocument.getElementById('breadcrumbsEllipsis').style.display = 'none';\ndocument.getElementById('breadcrumbsExpansion').style.display = 'inline';\n}\n</script></div>";
     private final String bodyTag = "<boDy onLoad=\"placeFocus()\">" + bodyText + "</bOdy >";
-    private final String hodeFotKey = "/sbl/ag/";
-    private final String metaTag = "<meta name=\"hodeFotKey\" content=\"" + hodeFotKey + "\" />  \n <div class=\"venstreKolonne\">&nbsp;</div>";
     private final String html = "<hTmL>" + headTag + bodyTag + "</html>";
 
     @Test
@@ -32,7 +30,9 @@ public class HtmlPageTest {
     }
 
     @Test
-    public void shouldFindeMetaTag() {
+    public void shouldFindMetaTag() {
+        String hodeFotKey = "/sbl/ag/";
+        String metaTag = "<meta name=\"hodeFotKey\" content=\"" + hodeFotKey + "\" />  \n <div class=\"venstreKolonne\">&nbsp;</div>";
         String html = "<html>" + headTag + metaTag + bodyTag + "</html>";
         HtmlPage sut = new HtmlPage(html);
         assertEquals(hodeFotKey, sut.extractMetaTagInformation("hodeFotKey"));

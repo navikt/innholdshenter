@@ -1,6 +1,5 @@
 package no.nav.innholdshenter.filter;
 
-import junit.framework.TestCase;
 import no.nav.innholdshenter.common.EnonicContentRetriever;
 import org.junit.Before;
 import org.junit.Test;
@@ -11,6 +10,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import static junit.framework.Assert.assertEquals;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -19,7 +19,7 @@ import static org.mockito.Mockito.when;
  * Testklasse for DecoratorFrame.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class DecoratorFrameTest extends TestCase {
+public class DecoratorFrameTest {
 
     @Mock
     private EnonicContentRetriever contentRetriever;

@@ -18,19 +18,16 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class InnholdshenterGroupCommunicatorTest {
 
-    private static String identifingGroupName = "innholdshenterCacheSyncGroup";
     private static String TEST_STRING = "updateCache";
     InnholdshenterGroupCommunicator innholdshenterGroupCommunicator;
     @Mock
     EnonicContentRetriever innholdshenter;
     @Mock
     JChannel jChannel;
-    private int jGroupsBindPort = 7800;
-    private String jGroupsHosts = "localhost";
 
     @Before
     public void setUp() throws Exception {
-        innholdshenterGroupCommunicator = new InnholdshenterGroupCommunicator(identifingGroupName, jGroupsHosts, jGroupsBindPort, innholdshenter);
+        innholdshenterGroupCommunicator = new InnholdshenterGroupCommunicator("innholdshenterCacheSyncGroup", "localhost", 7800, innholdshenter);
         innholdshenterGroupCommunicator.setJChannel(jChannel);
     }
 

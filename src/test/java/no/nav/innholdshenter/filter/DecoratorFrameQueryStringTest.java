@@ -1,6 +1,5 @@
 package no.nav.innholdshenter.filter;
 
-import junit.framework.TestCase;
 import no.nav.innholdshenter.common.EnonicContentRetriever;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,7 +21,7 @@ import static org.mockito.Mockito.when;
  * Testklasse for DecoratorFrame.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class DecoratorFrameQueryStringTest extends TestCase {
+public class DecoratorFrameQueryStringTest {
 
     @Mock
     private EnonicContentRetriever contentRetriever;
@@ -34,11 +33,9 @@ public class DecoratorFrameQueryStringTest extends TestCase {
     private DecoratorFrame decoratorFrame;
 
     private static final String TEMPLATE_URL = "http://www.nav.no/systemsider/Meny";
-    private static final String DEFAULT_BASE_URL = "http://www.nav.no/";
     private static final String REQUEST_URL_PATH_NO_QS = "/sbl/ag/minside.do";
     private static final String REQUEST_URL = "http://www.nav.no/sbl/ag/minside.do?qs=true";
     private static final String REQUEST_QS = "qs=true";
-    private static final String REQUEST_URL_WITH_ROLE = "http://www.nav.no/sbl/ag/minside.do?role=ARBS";
     private static final String REQUEST_ROLE = "role=ARBS";
 
     private static String page = "<html><head></body></html>";

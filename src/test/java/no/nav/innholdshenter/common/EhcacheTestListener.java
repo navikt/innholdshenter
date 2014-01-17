@@ -14,8 +14,6 @@ public class EhcacheTestListener implements CacheEventListener {
         ELEMENT_REMOVED, ELEMENT_UPDATED, REMOVED_ALL, ELEMENT_RETURNED,
     }
 
-    ;
-
     public ListenerStatus lastStatus;
 
     public ListenerStatus getLastStatus() {
