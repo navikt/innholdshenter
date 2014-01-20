@@ -172,7 +172,7 @@ public class EnonicContentRetriever {
         cache.setTimeToLiveSeconds(refreshIntervalSeconds);
     }
 
-    public void setCacheManager(CacheManager cacheManager) {
+    public synchronized void setCacheManager(CacheManager cacheManager) {
         this.cacheManager = cacheManager;
     }
 
@@ -230,7 +230,7 @@ public class EnonicContentRetriever {
         return httpClient;
     }
 
-    public void setHttpClient(HttpClient httpClient) {
+    public synchronized void setHttpClient(HttpClient httpClient) {
         this.httpClient = httpClient;
         setHttpTimeoutMillis(httpTimeoutMillis);
         enonicCacheEntryFactory.setHttpClient(httpClient);

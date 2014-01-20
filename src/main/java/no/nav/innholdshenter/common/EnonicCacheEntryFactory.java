@@ -60,7 +60,7 @@ public class EnonicCacheEntryFactory implements CacheEntryFactory {
         return content;
     }
 
-    public void setHttpClient(HttpClient httpClient) {
+    public synchronized void setHttpClient(HttpClient httpClient) {
         this.httpClient = httpClient;
     }
 }
