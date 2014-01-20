@@ -78,6 +78,7 @@ public class EnonicContentRetriever {
         configureJGroups(nodeSyncing, jGroupsHosts, jGroupsBindPort);
     }
 
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     private void configureJGroups(boolean nodeSyncing, String jGroupsHosts, int jGroupsBindPort) throws Exception {
         this.nodeSyncing = nodeSyncing;
         if (this.nodeSyncing) {
