@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>no.nav.sbl</groupId>
@@ -10,7 +9,7 @@
 
     <artifactId>innholdshenter</artifactId>
     <packaging>jar</packaging>
-    <version>1.4-SNAPSHOT</version>
+    <version>1.4</version>
     <name>nav-enonic-cms-innholdshenter</name>
 
     <build>
@@ -168,8 +167,8 @@
     </dependencies>
 
     <scm>
-        <connection>scm:svn:https://versjonskontroll.adeo.no/svn/nav-sbl/nav-enonic-cms-innholdshenter/trunk</connection>
-        <developerConnection>scm:svn:https://versjonskontroll.adeo.no/svn/nav-sbl/nav-enonic-cms-innholdshenter/trunk</developerConnection>
-        <url>http://versjonskontroll.adeo.no/viewsvn/trunk/?root=nav-sbl/nav-enonic-cms-innholdshenter</url>
+        <connection>scm:svn:https://versjonskontroll.adeo.no/svn/nav-sbl/nav-enonic-cms-innholdshenter/tags/20140210-1318_1.4</connection>
+        <developerConnection>scm:svn:https://versjonskontroll.adeo.no/svn/nav-sbl/nav-enonic-cms-innholdshenter/tags/20140210-1318_1.4</developerConnection>
+        <url>http://versjonskontroll.adeo.no/viewsvn/tags/20140210-1318_1.4?root=nav-sbl/nav-enonic-cms-innholdshenter</url>
     </scm>
 </project>
