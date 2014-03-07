@@ -13,6 +13,8 @@
     <version>1.5-SNAPSHOT</version>
     <name>nav-enonic-cms-innholdshenter</name>
 
+    <!--Dette er en test-->
+
     <build>
         <plugins>
             <plugin>
