@@ -132,8 +132,8 @@ public class EnonicContentRetriever {
             ByteArrayInputStream propertiesStream = new ByteArrayInputStream(content.getBytes(LOCALE_UTF_8));
             properties.loadFromXML(propertiesStream);
         } catch (IOException ex) {
-            logger.error("Feil i konvertering fra xml til Properties objekt.", ex);
-            throw new RuntimeException("Feil: Kunne ikke hente data.", ex);
+            logger.warn("Feil i konvertering fra xml til Properties objekt.", ex.getMessage());
+            throw new RuntimeException("Feil: Kunne ikke hente data. "+ ex.getMessage());
         }
         return properties;
     }
