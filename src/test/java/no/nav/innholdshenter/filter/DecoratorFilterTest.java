@@ -3,7 +3,6 @@ package no.nav.innholdshenter.filter;
 import no.nav.innholdshenter.common.EnonicContentRetriever;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -73,10 +72,18 @@ public class DecoratorFilterTest {
 
         decoratorFilter.doFilter(request, response, chain);
 
-        ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
-        verify(contentRetriever).getPageContent(argument.capture());
+        verify(contentRetriever).getPageContent("https://appres-t1.nav.no/felles-html/v1/navno?header=true&footer=true");
+    }
 
-        assertThat(argument.getValue(), is("https://appres-t1.nav.no/felles-html/v1/navno?header=true&footer=true"));
+    @Test
+    public void should_build_url_with_application_name() throws IOException, ServletException {
+        List<String> fragments = Arrays.asList("header", "footer");
+        decoratorFilter.setFragmentNames(fragments);
+        decoratorFilter.setApplicationName("bidragsveileder");
+
+        decoratorFilter.doFilter(request, response, chain);
+
+        verify(contentRetriever).getPageContent("https://appres-t1.nav.no/felles-html/v1/navno?appname=bidragsveileder&header=true&footer=true");
     }
 
     @Test
@@ -92,4 +99,5 @@ public class DecoratorFilterTest {
         decoratorFilter.doFilter(request, response, chain);
         assertThat(response.getContentAsString(), is("<html><body>${header}${footer}</body></html>"));
     }
+
 }

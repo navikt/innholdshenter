@@ -7,6 +7,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Required;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -29,6 +30,7 @@ public class DecoratorFilter implements Filter {
     private List<String> fragmentNames;
     private String baseUrl;
     private List<String> includeContentTypes;
+    private String applicationName;
 
     public DecoratorFilter() {
         setDefaultIncludeContentTypes();
@@ -101,6 +103,10 @@ public class DecoratorFilter implements Filter {
     private String buildUrl() throws URISyntaxException {
         URIBuilder urlBuilder = new URIBuilder(baseUrl);
 
+        if (applicationName != null) {
+            urlBuilder.addParameter("appname", applicationName);
+        }
+
         for (String fragmentName : fragmentNames) {
             urlBuilder.addParameter(fragmentName, "true");
         }
@@ -112,16 +118,23 @@ public class DecoratorFilter implements Filter {
     public void destroy() {
     }
 
+    @Required
     public void setBaseUrl(String baseUrl) {
         this.baseUrl = baseUrl;
     }
 
+    @Required
     public void setContentRetriever(EnonicContentRetriever contentRetriever) {
         this.contentRetriever = contentRetriever;
     }
 
+    @Required
     public void setFragmentNames(List<String> fragmentNames) {
         this.fragmentNames = fragmentNames;
     }
 
+    @Required
+    public void setApplicationName(String applicationName) {
+        this.applicationName = applicationName;
+    }
 }

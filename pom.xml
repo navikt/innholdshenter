@@ -49,6 +49,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+            <version>3.2.6.RELEASE</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>
             <version>3.2.1</version>
@@ -160,7 +166,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-        <groupId>org.powermock</groupId>
+            <groupId>org.powermock</groupId>
             <artifactId>powermock-api-mockito</artifactId>
             <version>1.5.1</version>
             <scope>test</scope>
@@ -206,8 +212,10 @@
     </dependencies>
 
     <scm>
-        <connection>scm:svn:https://versjonskontroll.adeo.no/svn/nav-sbl/nav-enonic-cms-innholdshenter/trunk</connection>
-        <developerConnection>scm:svn:https://versjonskontroll.adeo.no/svn/nav-sbl/nav-enonic-cms-innholdshenter/trunk</developerConnection>
+        <connection>scm:svn:https://versjonskontroll.adeo.no/svn/nav-sbl/nav-enonic-cms-innholdshenter/trunk
+        </connection>
+        <developerConnection>scm:svn:https://versjonskontroll.adeo.no/svn/nav-sbl/nav-enonic-cms-innholdshenter/trunk
+        </developerConnection>
         <url>http://versjonskontroll.adeo.no/viewsvn/trunk/?root=nav-sbl/nav-enonic-cms-innholdshenter</url>
     </scm>
 </project>
