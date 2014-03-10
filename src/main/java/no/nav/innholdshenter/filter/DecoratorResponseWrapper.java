@@ -14,11 +14,11 @@ class DecoratorResponseWrapper extends HttpServletResponseWrapper {
 
     private ByteArrayServletOutputStream stream;
     private PrintWriter writer;
-    private HttpServletResponse originalResposne;
+    private HttpServletResponse originalResponse;
 
     public DecoratorResponseWrapper(HttpServletResponse response) {
         super(response);
-        originalResposne = response;
+        originalResponse = response;
     }
 
     @Override
@@ -28,7 +28,7 @@ class DecoratorResponseWrapper extends HttpServletResponseWrapper {
         }
 
         if (stream == null) {
-            stream = new ByteArrayServletOutputStream(originalResposne.getCharacterEncoding());
+            stream = new ByteArrayServletOutputStream(originalResponse.getCharacterEncoding());
         }
 
         return stream;
@@ -44,8 +44,8 @@ class DecoratorResponseWrapper extends HttpServletResponseWrapper {
             throw new IllegalStateException("getOutputStream() has already been called!");
         }
 
-        stream = new ByteArrayServletOutputStream(originalResposne.getCharacterEncoding());
-        writer = new PrintWriter(new OutputStreamWriter(stream, originalResposne.getCharacterEncoding()));
+        stream = new ByteArrayServletOutputStream(originalResponse.getCharacterEncoding());
+        writer = new PrintWriter(new OutputStreamWriter(stream, originalResponse.getCharacterEncoding()));
         return writer;
     }
 
