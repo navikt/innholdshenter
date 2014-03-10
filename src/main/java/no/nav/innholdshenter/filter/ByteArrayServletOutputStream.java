@@ -14,11 +14,9 @@ import java.io.UnsupportedEncodingException;
 class ByteArrayServletOutputStream extends ServletOutputStream {
 
     private static final Logger logger = LoggerFactory.getLogger(ByteArrayServletOutputStream.class);
-    private static final String FEILMELDING_UNABLE_TO_CONVERT_STREAM_TO_STRING = "Unable to convert stream to string. Unsupported encoding used in request.";
 
     private ByteArrayOutputStream stream = null;
     private String encoding = null;
-
 
     public ByteArrayServletOutputStream(String encoding) {
         this.stream = new ByteArrayOutputStream();
@@ -27,17 +25,6 @@ class ByteArrayServletOutputStream extends ServletOutputStream {
 
     public ByteArrayOutputStream getByteArrayOutputStream() {
         return stream;
-    }
-
-    @Override
-    public String toString() {
-        try {
-            return stream.toString(encoding);
-        } catch (UnsupportedEncodingException e) {
-            logger.error(FEILMELDING_UNABLE_TO_CONVERT_STREAM_TO_STRING, e);
-        }
-
-        return "";
     }
 
     @Override
@@ -55,17 +42,14 @@ class ByteArrayServletOutputStream extends ServletOutputStream {
         stream.flush();
     }
 
-    public int getSize() {
-        return stream.size();
-    }
+    @Override
+    public String toString() {
+        try {
+            return stream.toString(encoding);
+        } catch (UnsupportedEncodingException e) {
+            logger.error("Unable to convert stream to string. Unsupported encoding ({}) used in request: {}", encoding, e.getMessage());
+        }
 
-    public void setSize(int size) throws IOException {
-        ByteArrayOutputStream oldStream = stream;
-        stream = new ByteArrayOutputStream(size);
-        stream.write(oldStream.toByteArray());
-    }
-
-    public void reset() {
-        stream.reset();
+        return "";
     }
 }

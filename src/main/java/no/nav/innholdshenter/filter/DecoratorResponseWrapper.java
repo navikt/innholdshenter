@@ -12,69 +12,23 @@ import java.io.PrintWriter;
  */
 class DecoratorResponseWrapper extends HttpServletResponseWrapper {
 
-    private static final String FEILMELDING_GET_WRITER_HAS_ALREADY_BEEN_CALLED = "getWriter() has already been called!";
-    private static final String FEILMELDING_GET_OUTPUT_STREAM_HAS_ALREADY_BEEN_CALLED = "getOutputStream() has already been called!";
-    private ByteArrayServletOutputStream stream = null;
-    private PrintWriter writer = null;
-    private String contentType = null;
-    private HttpServletResponse origResponse = null;
+    private ByteArrayServletOutputStream stream;
+    private PrintWriter writer;
+    private HttpServletResponse originalResposne;
 
     public DecoratorResponseWrapper(HttpServletResponse response) {
         super(response);
-        origResponse = response;
-    }
-
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
-        super.setContentType(contentType);
-    }
-
-    public String getContentType() {
-        return contentType;
-    }
-
-    public String getOutputAsString() {
-        if (stream != null) {
-            return stream.toString();
-        }
-        return "";
-    }
-
-    public byte[] getOutputAsByteArray() {
-        if (stream != null) {
-            return stream.getByteArrayOutputStream().toByteArray();
-        } else {
-            return "".getBytes();
-        }
-    }
-
-    public void flushBuffer() throws IOException {
-        if (writer != null) {
-            writer.flush();
-        }
-
-        if (stream != null) {
-            stream.flush();
-        }
-    }
-
-    @Override
-    public int getBufferSize() {
-        if (stream != null) {
-            return stream.getSize();
-        }
-
-        return 0;
+        originalResposne = response;
     }
 
     @Override
     public ServletOutputStream getOutputStream() {
         if (writer != null) {
-            throw new IllegalStateException(FEILMELDING_GET_WRITER_HAS_ALREADY_BEEN_CALLED);
+            throw new IllegalStateException("getWriter() has already been called!");
         }
 
         if (stream == null) {
-            stream = new ByteArrayServletOutputStream(origResponse.getCharacterEncoding());
+            stream = new ByteArrayServletOutputStream(originalResposne.getCharacterEncoding());
         }
 
         return stream;
@@ -87,35 +41,28 @@ class DecoratorResponseWrapper extends HttpServletResponseWrapper {
         }
 
         if (stream != null) {
-            throw new IllegalStateException(FEILMELDING_GET_OUTPUT_STREAM_HAS_ALREADY_BEEN_CALLED);
+            throw new IllegalStateException("getOutputStream() has already been called!");
         }
 
-        stream = new ByteArrayServletOutputStream(origResponse.getCharacterEncoding());
-        writer = new PrintWriter(new OutputStreamWriter(stream, origResponse.getCharacterEncoding()));
+        stream = new ByteArrayServletOutputStream(originalResposne.getCharacterEncoding());
+        writer = new PrintWriter(new OutputStreamWriter(stream, originalResposne.getCharacterEncoding()));
         return writer;
     }
 
-    @Override
-    public void reset() {
-        resetBuffer();
-        super.reset();
-    }
+    public void flushBuffer() throws IOException {
+        if (writer != null) {
+            writer.flush();
+        }
 
-    @Override
-    public void resetBuffer() {
         if (stream != null) {
-            stream.reset();
+            stream.flush();
         }
     }
 
-    @Override
-    public void setBufferSize(int size) throws IllegalStateException {
-        try {
-            if (stream != null) {
-                stream.setSize(size);
-            }
-        } catch (IOException ioe) {
-            throw new IllegalStateException(ioe.getMessage());
+    public String getOutputAsString() {
+        if (stream != null) {
+            return stream.toString();
         }
+        return "";
     }
 }

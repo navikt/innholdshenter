@@ -6,9 +6,6 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
-/**
- * Tester ByteArrayServletOutputStream
- */
 public class ByteArrayServletOutputStreamTest {
 
     @Test
@@ -21,7 +18,7 @@ public class ByteArrayServletOutputStreamTest {
             sut.write(b);
         }
 
-        assertEquals("Hold ikke på innholdet", str, sut.getByteArrayOutputStream().toString());
+        assertEquals(str, sut.getByteArrayOutputStream().toString());
     }
 
 }
