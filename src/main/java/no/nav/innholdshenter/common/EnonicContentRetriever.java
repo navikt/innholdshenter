@@ -133,7 +133,7 @@ public class EnonicContentRetriever {
             properties.loadFromXML(propertiesStream);
         } catch (IOException ex) {
             logger.warn("Feil i konvertering fra xml til Properties objekt.", ex.getMessage());
-            throw new RuntimeException("Feil: Kunne ikke hente data. "+ ex.getMessage());
+            throw new RuntimeException("Feil: Kunne ikke hente data.", ex);
         }
         return properties;
     }
