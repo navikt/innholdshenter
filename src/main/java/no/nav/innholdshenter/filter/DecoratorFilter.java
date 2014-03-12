@@ -64,7 +64,12 @@ public class DecoratorFilter implements Filter {
 
         String originalResponseString = responseWrapper.getOutputAsString();
         if (shouldHandleContentType(responseWrapper.getContentType())) {
-            response.getWriter().write(mergeWithFragments(originalResponseString, request));
+            String result = mergeWithFragments(originalResponseString, request);
+            try {
+                response.getWriter().write(result);
+            } catch (IllegalStateException getOutputStreamAlreadyCalled) {
+                response.getOutputStream().write(result.getBytes());
+            }
         } else {
             response.getWriter().write(originalResponseString);
         }
