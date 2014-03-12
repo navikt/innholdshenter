@@ -31,8 +31,10 @@ public class DecoratorFilter implements Filter {
     private String baseUrl;
     private List<String> includeContentTypes;
     private String applicationName;
+    private String subMenuPath;
 
     public DecoratorFilter() {
+        fragmentNames = new ArrayList<String>();
         setDefaultIncludeContentTypes();
     }
 
@@ -107,6 +109,10 @@ public class DecoratorFilter implements Filter {
             urlBuilder.addParameter("appname", applicationName);
         }
 
+        if (subMenuPath != null) {
+            urlBuilder.addParameter("submenu", subMenuPath);
+        }
+
         for (String fragmentName : fragmentNames) {
             urlBuilder.addParameter(fragmentName, "true");
         }
@@ -136,5 +142,9 @@ public class DecoratorFilter implements Filter {
     @Required
     public void setApplicationName(String applicationName) {
         this.applicationName = applicationName;
+    }
+
+    public void setSubMenuPath(String subMenuPath) {
+        this.subMenuPath = subMenuPath;
     }
 }

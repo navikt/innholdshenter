@@ -43,7 +43,7 @@ public class DecoratorFilterTest {
 
         decoratorFilter = new DecoratorFilter();
         decoratorFilter.setContentRetriever(contentRetriever);
-        decoratorFilter.setBaseUrl("https://appres-t1.nav.no/felles-html/v1/navno");
+        decoratorFilter.setBaseUrl("http://nav.no");
     }
 
     private void createDefaultFilterChain() {
@@ -72,7 +72,7 @@ public class DecoratorFilterTest {
 
         decoratorFilter.doFilter(request, response, chain);
 
-        verify(contentRetriever).getPageContent("https://appres-t1.nav.no/felles-html/v1/navno?header=true&footer=true");
+        verify(contentRetriever).getPageContent("http://nav.no?header=true&footer=true");
     }
 
     @Test
@@ -83,7 +83,7 @@ public class DecoratorFilterTest {
 
         decoratorFilter.doFilter(request, response, chain);
 
-        verify(contentRetriever).getPageContent("https://appres-t1.nav.no/felles-html/v1/navno?appname=bidragsveileder&header=true&footer=true");
+        verify(contentRetriever).getPageContent("http://nav.no?appname=bidragsveileder&header=true&footer=true");
     }
 
     @Test
@@ -100,4 +100,24 @@ public class DecoratorFilterTest {
         assertThat(response.getContentAsString(), is("<html><body>${header}${footer}</body></html>"));
     }
 
+    @Test
+    public void should_inject_sub_menu_when_submenu_path_and_fragment_is_defined() throws IOException, ServletException {
+        chain = new FilterChain() {
+            @Override
+            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
+                servletResponse.getWriter().write("<html><body>${submenu}</body></html>");
+                servletResponse.setContentType("text/html");
+            }
+        };
+
+        List<String> fragments = Arrays.asList("submenu");
+        decoratorFilter.setFragmentNames(fragments);
+        decoratorFilter.setSubMenuPath("/ditt-nav/din-side-arbeid");
+
+        when(contentRetriever.getPageContent(anyString())).thenReturn("<div id=\"submenu\"></div>");
+
+        decoratorFilter.doFilter(request, response, chain);
+
+        assertThat(response.getContentAsString(), is("<html><body><div id=\"submenu\"></div></body></html>"));
+    }
 }
