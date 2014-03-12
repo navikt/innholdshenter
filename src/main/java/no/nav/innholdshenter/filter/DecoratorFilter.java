@@ -31,7 +31,7 @@ public class DecoratorFilter implements Filter {
 
     private EnonicContentRetriever contentRetriever;
     private List<String> fragmentNames;
-    private String baseUrl;
+    private String fragmentsUrl;
     private List<String> includeContentTypes;
     private String applicationName;
     private String subMenuPath;
@@ -112,7 +112,7 @@ public class DecoratorFilter implements Filter {
     }
 
     private String buildUrl(HttpServletRequest request, String originalResponse) throws URISyntaxException {
-        URIBuilder urlBuilder = new URIBuilder(baseUrl);
+        URIBuilder urlBuilder = new URIBuilder(fragmentsUrl);
 
         if (applicationName != null) {
             urlBuilder.addParameter("appname", applicationName);
@@ -154,8 +154,8 @@ public class DecoratorFilter implements Filter {
     }
 
     @Required
-    public void setBaseUrl(String baseUrl) {
-        this.baseUrl = baseUrl;
+    public void setFragmentsUrl(String fragmentsUrl) {
+        this.fragmentsUrl = fragmentsUrl;
     }
 
     @Required

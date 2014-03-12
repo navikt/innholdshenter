@@ -43,7 +43,7 @@ public class DecoratorFilterTest {
 
         decoratorFilter = new DecoratorFilter();
         decoratorFilter.setContentRetriever(contentRetriever);
-        decoratorFilter.setBaseUrl("http://nav.no");
+        decoratorFilter.setFragmentsUrl("http://nav.no/fragments");
     }
 
     private void createDefaultFilterChain() {
@@ -72,7 +72,7 @@ public class DecoratorFilterTest {
 
         decoratorFilter.doFilter(request, response, chain);
 
-        verify(contentRetriever).getPageContent("http://nav.no?header=true&footer=true");
+        verify(contentRetriever).getPageContent("http://nav.no/fragments?header=true&footer=true");
     }
 
     @Test
@@ -83,7 +83,7 @@ public class DecoratorFilterTest {
 
         decoratorFilter.doFilter(request, response, chain);
 
-        verify(contentRetriever).getPageContent("http://nav.no?appname=bidragsveileder&header=true&footer=true");
+        verify(contentRetriever).getPageContent("http://nav.no/fragments?appname=bidragsveileder&header=true&footer=true");
     }
 
     @Test
@@ -128,7 +128,7 @@ public class DecoratorFilterTest {
         request.setRequestURI("/minside");
         decoratorFilter.doFilter(request, response, chain);
 
-        verify(contentRetriever).getPageContent("http://nav.no?activeitem=%2Fminside");
+        verify(contentRetriever).getPageContent("http://nav.no/fragments?activeitem=%2Fminside");
     }
 
     @Test
@@ -143,6 +143,6 @@ public class DecoratorFilterTest {
 
         decoratorFilter.doFilter(request, response, chain);
 
-        verify(contentRetriever).getPageContent("http://nav.no?userrole=ARBS");
+        verify(contentRetriever).getPageContent("http://nav.no/fragments?userrole=ARBS");
     }
 }
