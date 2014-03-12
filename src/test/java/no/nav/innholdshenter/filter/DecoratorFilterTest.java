@@ -120,4 +120,29 @@ public class DecoratorFilterTest {
 
         assertThat(response.getContentAsString(), is("<html><body><div id=\"submenu\"></div></body></html>"));
     }
+
+    @Test
+    public void should_build_url_with_activeitem_if_include_active_item_is_set() throws IOException, ServletException {
+        decoratorFilter.setShouldIncludeActiveItemInUrl(true);
+
+        request.setRequestURI("/minside");
+        decoratorFilter.doFilter(request, response, chain);
+
+        verify(contentRetriever).getPageContent("http://nav.no?activeitem=%2Fminside");
+    }
+
+    @Test
+    public void should_build_url_with_userrole_if_meta_tag_brukerstatus_exists() throws IOException, ServletException {
+        chain = new FilterChain() {
+            @Override
+            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
+                servletResponse.getWriter().write("<html><head><meta name=\"Brukerstatus\" content=\"ARBS\"></head><body></body></html>");
+                servletResponse.setContentType("text/html");
+            }
+        };
+
+        decoratorFilter.doFilter(request, response, chain);
+
+        verify(contentRetriever).getPageContent("http://nav.no?userrole=ARBS");
+    }
 }

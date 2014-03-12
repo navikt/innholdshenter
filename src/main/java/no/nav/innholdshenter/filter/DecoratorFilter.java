@@ -5,6 +5,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
@@ -22,6 +23,8 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.apache.commons.lang.StringUtils.isEmpty;
+
 public class DecoratorFilter implements Filter {
 
     private static final Logger logger = LoggerFactory.getLogger(DecoratorFilter.class);
@@ -32,6 +35,7 @@ public class DecoratorFilter implements Filter {
     private List<String> includeContentTypes;
     private String applicationName;
     private String subMenuPath;
+    private boolean shouldIncludeActiveItemInUrl;
 
     public DecoratorFilter() {
         fragmentNames = new ArrayList<String>();
@@ -60,7 +64,7 @@ public class DecoratorFilter implements Filter {
 
         String originalResponseString = responseWrapper.getOutputAsString();
         if (shouldHandleContentType(responseWrapper.getContentType())) {
-            response.getWriter().write(mergeWithFragments(originalResponseString));
+            response.getWriter().write(mergeWithFragments(originalResponseString, request));
         } else {
             response.getWriter().write(originalResponseString);
         }
@@ -78,9 +82,9 @@ public class DecoratorFilter implements Filter {
         return false;
     }
 
-    private String mergeWithFragments(String originalResponseString) {
+    private String mergeWithFragments(String originalResponseString, HttpServletRequest request) {
         String responseString = originalResponseString;
-        Document htmlFragments = getHtmlFragments();
+        Document htmlFragments = getHtmlFragments(request, originalResponseString);
 
         for (String fragmentName : fragmentNames) {
             Element element = htmlFragments.getElementById(fragmentName);
@@ -90,10 +94,10 @@ public class DecoratorFilter implements Filter {
         return responseString;
     }
 
-    private Document getHtmlFragments() {
+    private Document getHtmlFragments(HttpServletRequest request, String originalResponse) {
         String url = null;
         try {
-            url = buildUrl();
+            url = buildUrl(request, originalResponse);
         } catch (URISyntaxException e) {
             logger.warn("Exception when building URL", e);
         }
@@ -102,7 +106,7 @@ public class DecoratorFilter implements Filter {
         return Jsoup.parse(pageContent);
     }
 
-    private String buildUrl() throws URISyntaxException {
+    private String buildUrl(HttpServletRequest request, String originalResponse) throws URISyntaxException {
         URIBuilder urlBuilder = new URIBuilder(baseUrl);
 
         if (applicationName != null) {
@@ -113,11 +117,31 @@ public class DecoratorFilter implements Filter {
             urlBuilder.addParameter("submenu", subMenuPath);
         }
 
+        if (shouldIncludeActiveItemInUrl) {
+            urlBuilder.addParameter("activeitem", request.getRequestURI());
+        }
+
+        String role = extractMetaTag(originalResponse, "Brukerstatus");
+        if (!isEmpty(role)) {
+            urlBuilder.addParameter("userrole", role);
+        }
+
         for (String fragmentName : fragmentNames) {
             urlBuilder.addParameter(fragmentName, "true");
         }
 
         return urlBuilder.build().toString();
+    }
+
+    private String extractMetaTag(String originalResponse, String tag) {
+        Document doc = Jsoup.parse(originalResponse);
+        Elements brukerStatus = doc.select(String.format("meta[name=%s]", tag));
+
+        if (!brukerStatus.isEmpty()) {
+            return brukerStatus.attr("content");
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -146,5 +170,9 @@ public class DecoratorFilter implements Filter {
 
     public void setSubMenuPath(String subMenuPath) {
         this.subMenuPath = subMenuPath;
+    }
+
+    public void setShouldIncludeActiveItemInUrl(boolean shouldIncludeActiveItemInUrl) {
+        this.shouldIncludeActiveItemInUrl = shouldIncludeActiveItemInUrl;
     }
 }
