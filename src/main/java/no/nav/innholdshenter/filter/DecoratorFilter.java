@@ -39,10 +39,12 @@ public class DecoratorFilter implements Filter {
     private String subMenuPath;
     private boolean shouldIncludeActiveItemInUrl;
     private List<String> noDecoratePatterns;
+    private List<String> noSubmenuPatterns;
 
     public DecoratorFilter() {
         fragmentNames = new ArrayList<String>();
         noDecoratePatterns = new ArrayList<String>();
+        noSubmenuPatterns = new ArrayList<String>();
         setDefaultIncludeContentTypes();
     }
 
@@ -86,10 +88,10 @@ public class DecoratorFilter implements Filter {
 
     private boolean shouldDecorateRequest(HttpServletRequest request) {
         String requestUri = request.getRequestURI();
-        return !(requestMatchesNoDecoratePattern(requestUri));
+        return !(requestUriMatchesNoDecoratePattern(requestUri));
     }
 
-    private boolean requestMatchesNoDecoratePattern(String requestUri) {
+    private boolean requestUriMatchesNoDecoratePattern(String requestUri) {
         for (String noDecoratePattern : noDecoratePatterns) {
             Matcher matcher = createMatcher(noDecoratePattern, requestUri);
             if (matcher.matches()) {
@@ -97,11 +99,6 @@ public class DecoratorFilter implements Filter {
             }
         }
         return false;
-    }
-
-    private Matcher createMatcher(String regex, String content) {
-        Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-        return pattern.matcher(content);
     }
 
     private boolean shouldHandleContentType(String contentType) {
@@ -122,10 +119,26 @@ public class DecoratorFilter implements Filter {
 
         for (String fragmentName : fragmentNames) {
             Element element = htmlFragments.getElementById(fragmentName);
-            responseString = responseString.replace(String.format("${%s}", fragmentName), element.toString());
+            if ("submenu".equals(fragmentName)) {
+                responseString = mergeSubmenu(request, responseString, fragmentName, element);
+            } else {
+                responseString = replaceFragment(responseString, fragmentName, element.toString());
+            }
         }
-
         return responseString;
+    }
+
+    private String mergeSubmenu(HttpServletRequest request, String responseString, String fragmentName, Element element) {
+        if (!requestUriMatchesNoSubmenuPattern(request.getRequestURI())) {
+            responseString = replaceFragment(responseString, fragmentName, element.toString());
+        } else {
+            responseString = replaceFragment(responseString, fragmentName, "");
+        }
+        return responseString;
+    }
+
+    private String replaceFragment(String responseString, String fragmentName, String elementMarkup) {
+        return responseString.replace(String.format("${%s}", fragmentName), elementMarkup);
     }
 
     private Document getHtmlFragments(HttpServletRequest request, String originalResponse) {
@@ -178,6 +191,21 @@ public class DecoratorFilter implements Filter {
         }
     }
 
+    private boolean requestUriMatchesNoSubmenuPattern(String requestUri) {
+        for (String noSubmenuPattern : noSubmenuPatterns) {
+            Matcher matcher = createMatcher(noSubmenuPattern, requestUri);
+            if (matcher.matches()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private Matcher createMatcher(String regex, String content) {
+        Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+        return pattern.matcher(content);
+    }
+
     @Override
     public void destroy() {
     }
@@ -212,5 +240,9 @@ public class DecoratorFilter implements Filter {
 
     public void setNoDecoratePatterns(List<String> noDecoratePatterns) {
         this.noDecoratePatterns = noDecoratePatterns;
+    }
+
+    public void setNoSubmenuPatterns(List<String> noSubmenuPatterns) {
+        this.noSubmenuPatterns = noSubmenuPatterns;
     }
 }

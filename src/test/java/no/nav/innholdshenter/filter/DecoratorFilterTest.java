@@ -152,12 +152,36 @@ public class DecoratorFilterTest {
         decoratorFilter.setFragmentNames(fragments);
         List<String> noDecoratePatterns = Arrays.asList(".*selftest.*");
         decoratorFilter.setNoDecoratePatterns(noDecoratePatterns);
-
-        request.setRequestURI("/bidragsveileder/internal/selftest");
+        request.setRequestURI("/internal/selftest");
 
         decoratorFilter.doFilter(request, response, chain);
 
         assertThat(response.getContentAsString(), is("<html><body>${header}${footer}</body></html>"));
+    }
+
+    @Test
+    public void should_not_inject_submenu_and_remove_placholder_when_requestUri_matches_no_submenu_pattern() throws IOException, ServletException {
+        chain = new FilterChain() {
+            @Override
+            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
+                servletResponse.getWriter().write("<html><body>${submenu}</body></html>");
+                servletResponse.setContentType("text/html");
+            }
+        };
+
+        when(contentRetriever.getPageContent(anyString())).thenReturn("<div id=\"submenu\"></div>");
+
+        List<String> fragments = Arrays.asList("submenu");
+        decoratorFilter.setFragmentNames(fragments);
+        decoratorFilter.setSubMenuPath("path/to/menu");
+        List<String> noSubmenuPatterns = Arrays.asList(".*selftest.*");
+        decoratorFilter.setNoSubmenuPatterns(noSubmenuPatterns);
+        request.setRequestURI("/internal/selftest");
+
+        decoratorFilter.doFilter(request, response, chain);
+
+        verify(contentRetriever).getPageContent("http://nav.no/fragments?submenu=path%2Fto%2Fmenu");
+        assertThat(response.getContentAsString(), is("<html><body></body></html>"));
     }
 
 }
