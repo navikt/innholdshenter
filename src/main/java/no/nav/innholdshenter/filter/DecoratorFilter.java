@@ -142,18 +142,22 @@ public class DecoratorFilter implements Filter {
 
         for (String fragmentName : fragmentNames) {
             Element element = htmlFragments.getElementById(fragmentName);
-            if ("submenu".equals(fragmentName)) {
+            if (isFragmentSubmenu(fragmentName)) {
                 responseString = mergeSubmenu(request, responseString, fragmentName, element);
             } else {
-                responseString = replaceFragment(responseString, fragmentName, element.toString());
+                responseString = replaceFragment(responseString, fragmentName, element.outerHtml());
             }
         }
         return responseString;
     }
 
+    private boolean isFragmentSubmenu(String fragmentName) {
+        return "submenu".equals(fragmentName);
+    }
+
     private String mergeSubmenu(HttpServletRequest request, String responseString, String fragmentName, Element element) {
         if (!requestUriMatchesNoSubmenuPattern(request.getRequestURI())) {
-            responseString = replaceFragment(responseString, fragmentName, element.toString());
+            responseString = replaceFragment(responseString, fragmentName, element.outerHtml());
         } else {
             responseString = replaceFragment(responseString, fragmentName, "");
         }
@@ -193,7 +197,7 @@ public class DecoratorFilter implements Filter {
         }
 
         for (String fragmentName : fragmentNames) {
-            if ("submenu".equals(fragmentName)) {
+            if (isFragmentSubmenu(fragmentName)) {
                 urlBuilder.addParameter("submenu", subMenuPath);
             } else {
                 urlBuilder.addParameter(fragmentName, "true");

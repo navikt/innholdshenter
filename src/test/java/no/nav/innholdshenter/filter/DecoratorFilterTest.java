@@ -12,7 +12,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -27,7 +26,6 @@ public class DecoratorFilterTest {
     private MockHttpServletRequest request;
     private MockHttpServletResponse response;
     private FilterChain chain;
-
     private EnonicContentRetriever contentRetriever;
 
     private DecoratorFilter decoratorFilter;
@@ -40,14 +38,16 @@ public class DecoratorFilterTest {
         contentRetriever = mock(EnonicContentRetriever.class);
         when(contentRetriever.getPageContent(anyString())).thenReturn("<div id=\"header\"></div><div id=\"footer\"></div>");
 
-        createDefaultFilterChain();
-
         decoratorFilter = new DecoratorFilter();
         decoratorFilter.setContentRetriever(contentRetriever);
         decoratorFilter.setFragmentsUrl("http://nav.no/fragments");
     }
 
-    private void createDefaultFilterChain() {
+    private void withFragments(String... fragments) {
+        decoratorFilter.setFragmentNames(Arrays.asList(fragments));
+    }
+
+    private void withDefaultFilterChain() {
         chain = new FilterChain() {
             @Override
             public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
@@ -59,17 +59,18 @@ public class DecoratorFilterTest {
 
     @Test
     public void should_replace_elements_in_fragments_list() throws IOException, ServletException {
-        List<String> fragments = Arrays.asList("header", "footer");
-        decoratorFilter.setFragmentNames(fragments);
+        withDefaultFilterChain();
+        withFragments("header", "footer");
 
         decoratorFilter.doFilter(request, response, chain);
+
         assertThat(response.getContentAsString(), is("<html><body><div id=\"header\"></div><div id=\"footer\"></div></body></html>"));
     }
 
     @Test
     public void should_build_url_based_on_fragment_list() throws IOException, ServletException {
-        List<String> fragments = Arrays.asList("header", "footer");
-        decoratorFilter.setFragmentNames(fragments);
+        withDefaultFilterChain();
+        withFragments("header", "footer");
 
         decoratorFilter.doFilter(request, response, chain);
 
@@ -78,8 +79,8 @@ public class DecoratorFilterTest {
 
     @Test
     public void should_build_url_with_application_name() throws IOException, ServletException {
-        List<String> fragments = Arrays.asList("header", "footer");
-        decoratorFilter.setFragmentNames(fragments);
+        withDefaultFilterChain();
+        withFragments("header", "footer");
         decoratorFilter.setApplicationName("bidragsveileder");
 
         decoratorFilter.doFilter(request, response, chain);
@@ -98,6 +99,7 @@ public class DecoratorFilterTest {
         };
 
         decoratorFilter.doFilter(request, response, chain);
+
         assertThat(response.getContentAsString(), is("<html><body>${header}${footer}</body></html>"));
     }
 
@@ -110,11 +112,8 @@ public class DecoratorFilterTest {
                 servletResponse.setContentType("text/html");
             }
         };
-
-        List<String> fragments = Arrays.asList("submenu");
-        decoratorFilter.setFragmentNames(fragments);
+        withFragments("submenu");
         decoratorFilter.setSubMenuPath("/ditt-nav/din-side-arbeid");
-
         when(contentRetriever.getPageContent(anyString())).thenReturn("<div id=\"submenu\"></div>");
 
         decoratorFilter.doFilter(request, response, chain);
@@ -124,9 +123,10 @@ public class DecoratorFilterTest {
 
     @Test
     public void should_build_url_with_activeitem_if_include_active_item_is_set() throws IOException, ServletException {
+        withDefaultFilterChain();
         decoratorFilter.setShouldIncludeActiveItemInUrl(true);
-
         request.setRequestURI("/minside");
+
         decoratorFilter.doFilter(request, response, chain);
 
         verify(contentRetriever).getPageContent("http://nav.no/fragments?activeitem=%2Fminside");
@@ -149,10 +149,9 @@ public class DecoratorFilterTest {
 
     @Test
     public void should_not_decorate_request_when_requestUri_matches_no_decorate_pattern() throws IOException, ServletException {
-        List<String> fragments = Arrays.asList("header", "footer");
-        decoratorFilter.setFragmentNames(fragments);
-        List<String> noDecoratePatterns = Arrays.asList(".*selftest.*");
-        decoratorFilter.setNoDecoratePatterns(noDecoratePatterns);
+        withDefaultFilterChain();
+        withFragments("header", "footer");
+        decoratorFilter.setNoDecoratePatterns(Arrays.asList(".*selftest.*"));
         request.setRequestURI("/internal/selftest");
 
         decoratorFilter.doFilter(request, response, chain);
@@ -170,14 +169,11 @@ public class DecoratorFilterTest {
             }
         };
 
-        when(contentRetriever.getPageContent(anyString())).thenReturn("<div id=\"submenu\"></div>");
-
-        List<String> fragments = Arrays.asList("submenu");
-        decoratorFilter.setFragmentNames(fragments);
+        withFragments("submenu");
         decoratorFilter.setSubMenuPath("path/to/menu");
-        List<String> noSubmenuPatterns = Arrays.asList(".*selftest.*");
-        decoratorFilter.setNoSubmenuPatterns(noSubmenuPatterns);
+        decoratorFilter.setNoSubmenuPatterns(Arrays.asList(".*selftest.*"));
         request.setRequestURI("/internal/selftest");
+        when(contentRetriever.getPageContent(anyString())).thenReturn("<div id=\"submenu\"></div>");
 
         decoratorFilter.doFilter(request, response, chain);
 
@@ -187,7 +183,9 @@ public class DecoratorFilterTest {
 
     @Test
     public void should_not_decorate_page_with_exclude_header() throws IOException, ServletException {
+        withDefaultFilterChain();
         request.addHeader("X-Requested-With", "XMLHttpRequest");
+
         decoratorFilter.doFilter(request, response, chain);
 
         verify(contentRetriever, times(0)).getPageContent(anyString());
