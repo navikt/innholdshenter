@@ -142,29 +142,35 @@ public class DecoratorFilter implements Filter {
 
         for (String fragmentName : fragmentNames) {
             Element element = htmlFragments.getElementById(fragmentName);
-            if (isFragmentSubmenu(fragmentName)) {
-                responseString = mergeSubmenu(request, responseString, fragmentName, element);
+            if (isFragmentStaticResource(fragmentName)) {
+                responseString = mergeFragment(responseString, fragmentName, element.html());
+            } else if (isFragmentSubmenu(fragmentName)) {
+                responseString = mergeSubmenuFragment(request, responseString, fragmentName, element);
             } else {
-                responseString = replaceFragment(responseString, fragmentName, element.outerHtml());
+                responseString = mergeFragment(responseString, fragmentName, element.outerHtml());
             }
         }
         return responseString;
+    }
+
+    private boolean isFragmentStaticResource(String fragmentName) {
+        return fragmentName != null && fragmentName.contains("resources");
     }
 
     private boolean isFragmentSubmenu(String fragmentName) {
         return "submenu".equals(fragmentName);
     }
 
-    private String mergeSubmenu(HttpServletRequest request, String responseString, String fragmentName, Element element) {
+    private String mergeSubmenuFragment(HttpServletRequest request, String responseString, String fragmentName, Element element) {
         if (!requestUriMatchesNoSubmenuPattern(request.getRequestURI())) {
-            responseString = replaceFragment(responseString, fragmentName, element.outerHtml());
+            responseString = mergeFragment(responseString, fragmentName, element.outerHtml());
         } else {
-            responseString = replaceFragment(responseString, fragmentName, "");
+            responseString = mergeFragment(responseString, fragmentName, "");
         }
         return responseString;
     }
 
-    private String replaceFragment(String responseString, String fragmentName, String elementMarkup) {
+    private String mergeFragment(String responseString, String fragmentName, String elementMarkup) {
         return responseString.replace(String.format("${%s}", fragmentName), elementMarkup);
     }
 

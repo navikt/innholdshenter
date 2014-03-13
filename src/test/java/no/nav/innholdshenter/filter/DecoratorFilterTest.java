@@ -182,13 +182,30 @@ public class DecoratorFilterTest {
     }
 
     @Test
-    public void should_not_decorate_page_with_exclude_header() throws IOException, ServletException {
+    public void should_not_decorate_response_when_request_has_exclude_header() throws IOException, ServletException {
         withDefaultFilterChain();
         request.addHeader("X-Requested-With", "XMLHttpRequest");
 
         decoratorFilter.doFilter(request, response, chain);
 
         verify(contentRetriever, times(0)).getPageContent(anyString());
+    }
+
+    @Test
+    public void should_inject_inner_html_when_fragment_is_static_resource() throws IOException, ServletException {
+        chain = new FilterChain() {
+            @Override
+            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
+                servletResponse.getWriter().write("<html><head>${resources-head}</head><body></body></html>");
+                servletResponse.setContentType("text/html");
+            }
+        };
+        withFragments("resources-head");
+        when(contentRetriever.getPageContent(anyString())).thenReturn("<div id=\"resources-head\"><link href=\"main.css\" /></div>");
+
+        decoratorFilter.doFilter(request, response, chain);
+
+        assertThat(response.getContentAsString(), is("<html><head><link href=\"main.css\" /></head><body></body></html>"));
     }
 
 }
