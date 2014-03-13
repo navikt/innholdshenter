@@ -36,7 +36,7 @@ public class DecoratorFilterTest {
         response = new MockHttpServletResponse();
 
         contentRetriever = mock(EnonicContentRetriever.class);
-        when(contentRetriever.getPageContent(anyString())).thenReturn("<div id=\"header\"></div><div id=\"footer\"></div>");
+        when(contentRetriever.getPageContent(anyString())).thenReturn("<div id=\"header\"><nav></nav></div><div id=\"footer\"><footer></footer></div>");
 
         decoratorFilter = new DecoratorFilter();
         decoratorFilter.setContentRetriever(contentRetriever);
@@ -64,7 +64,7 @@ public class DecoratorFilterTest {
 
         decoratorFilter.doFilter(request, response, chain);
 
-        assertThat(response.getContentAsString(), is("<html><body><div id=\"header\"></div><div id=\"footer\"></div></body></html>"));
+        assertThat(response.getContentAsString(), is("<html><body><nav></nav><footer></footer></body></html>"));
     }
 
     @Test
@@ -114,11 +114,11 @@ public class DecoratorFilterTest {
         };
         withFragments("submenu");
         decoratorFilter.setSubMenuPath("/ditt-nav/din-side-arbeid");
-        when(contentRetriever.getPageContent(anyString())).thenReturn("<div id=\"submenu\"></div>");
+        when(contentRetriever.getPageContent(anyString())).thenReturn("<div id=\"submenu\"><nav id=\"submenu\"></nav></div><<</div>");
 
         decoratorFilter.doFilter(request, response, chain);
 
-        assertThat(response.getContentAsString(), is("<html><body><div id=\"submenu\"></div></body></html>"));
+        assertThat(response.getContentAsString(), is("<html><body><nav id=\"submenu\"></nav></body></html>"));
     }
 
     @Test
@@ -192,7 +192,7 @@ public class DecoratorFilterTest {
     }
 
     @Test
-    public void should_inject_inner_html_when_fragment_is_static_resource() throws IOException, ServletException {
+    public void should_inject_static_resource_fragment() throws IOException, ServletException {
         chain = new FilterChain() {
             @Override
             public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {

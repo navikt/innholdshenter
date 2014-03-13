@@ -142,19 +142,13 @@ public class DecoratorFilter implements Filter {
 
         for (String fragmentName : fragmentNames) {
             Element element = htmlFragments.getElementById(fragmentName);
-            if (isFragmentStaticResource(fragmentName)) {
-                responseString = mergeFragment(responseString, fragmentName, element.html());
-            } else if (isFragmentSubmenu(fragmentName)) {
+            if (isFragmentSubmenu(fragmentName)) {
                 responseString = mergeSubmenuFragment(request, responseString, fragmentName, element);
             } else {
-                responseString = mergeFragment(responseString, fragmentName, element.outerHtml());
+                responseString = mergeFragment(responseString, fragmentName, element.html());
             }
         }
         return responseString;
-    }
-
-    private boolean isFragmentStaticResource(String fragmentName) {
-        return fragmentName != null && fragmentName.contains("resources");
     }
 
     private boolean isFragmentSubmenu(String fragmentName) {
@@ -163,7 +157,7 @@ public class DecoratorFilter implements Filter {
 
     private String mergeSubmenuFragment(HttpServletRequest request, String responseString, String fragmentName, Element element) {
         if (!requestUriMatchesNoSubmenuPattern(request.getRequestURI())) {
-            responseString = mergeFragment(responseString, fragmentName, element.outerHtml());
+            responseString = mergeFragment(responseString, fragmentName, element.html());
         } else {
             responseString = mergeFragment(responseString, fragmentName, "");
         }
