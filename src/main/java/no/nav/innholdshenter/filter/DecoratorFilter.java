@@ -62,16 +62,16 @@ public class DecoratorFilter implements Filter {
         filterChain.doFilter(request, responseWrapper);
         responseWrapper.flushBuffer();
 
-        String originalResponseString = responseWrapper.getOutputAsString();
+        String originalResponse = responseWrapper.getOutputAsString();
         if (shouldHandleContentType(responseWrapper.getContentType())) {
-            String result = mergeWithFragments(originalResponseString, request);
+            String result = mergeWithFragments(originalResponse, request);
             try {
                 response.getWriter().write(result);
             } catch (IllegalStateException getOutputStreamAlreadyCalled) {
                 response.getOutputStream().write(result.getBytes());
             }
         } else {
-            response.getWriter().write(originalResponseString);
+            response.getWriter().write(originalResponse);
         }
     }
 
@@ -118,10 +118,6 @@ public class DecoratorFilter implements Filter {
             urlBuilder.addParameter("appname", applicationName);
         }
 
-        if (subMenuPath != null) {
-            urlBuilder.addParameter("submenu", subMenuPath);
-        }
-
         if (shouldIncludeActiveItemInUrl) {
             urlBuilder.addParameter("activeitem", request.getRequestURI());
         }
@@ -132,7 +128,11 @@ public class DecoratorFilter implements Filter {
         }
 
         for (String fragmentName : fragmentNames) {
-            urlBuilder.addParameter(fragmentName, "true");
+            if ("submenu".equals(fragmentName)) {
+                urlBuilder.addParameter("submenu", subMenuPath);
+            } else {
+                urlBuilder.addParameter(fragmentName, "true");
+            }
         }
 
         return urlBuilder.build().toString();
