@@ -21,7 +21,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,16 +42,14 @@ public class DecoratorFilter implements Filter {
     private boolean shouldIncludeActiveItemInUrl;
     private List<String> noDecoratePatterns;
     private List<String> noSubmenuPatterns;
+    private Map<String, String> excludeHeaders;
 
     public DecoratorFilter() {
         fragmentNames = new ArrayList<String>();
         noDecoratePatterns = new ArrayList<String>();
         noSubmenuPatterns = new ArrayList<String>();
         setDefaultIncludeContentTypes();
-    }
-
-    @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+        setDefaultExcludeHeaders();
     }
 
     private void setDefaultIncludeContentTypes() {
@@ -57,6 +57,15 @@ public class DecoratorFilter implements Filter {
         includeContentTypes.add("text/html");
         includeContentTypes.add("text/html; charset=UTF-8");
         includeContentTypes.add("application/xhtml+xml");
+    }
+
+    private void setDefaultExcludeHeaders() {
+        excludeHeaders = new HashMap<String, String>();
+        excludeHeaders.put("X-Requested-With", "XMLHttpRequest");
+    }
+
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
     }
 
     @Override
@@ -87,11 +96,11 @@ public class DecoratorFilter implements Filter {
     }
 
     private boolean shouldDecorateRequest(HttpServletRequest request) {
-        String requestUri = request.getRequestURI();
-        return !(requestUriMatchesNoDecoratePattern(requestUri));
+        return !(requestUriMatchesNoDecoratePattern(request) || requestHeaderHasExcludeValue(request));
     }
 
-    private boolean requestUriMatchesNoDecoratePattern(String requestUri) {
+    private boolean requestUriMatchesNoDecoratePattern(HttpServletRequest request) {
+        String requestUri = request.getRequestURI();
         for (String noDecoratePattern : noDecoratePatterns) {
             Matcher matcher = createMatcher(noDecoratePattern, requestUri);
             if (matcher.matches()) {
@@ -100,6 +109,20 @@ public class DecoratorFilter implements Filter {
         }
         return false;
     }
+
+    private boolean requestHeaderHasExcludeValue(HttpServletRequest request) {
+        for (Map.Entry<String, String> entry : excludeHeaders.entrySet()) {
+            if (requestHeaderHasValue(request, entry.getKey(), entry.getValue())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean requestHeaderHasValue(HttpServletRequest request, String header, String value) {
+        return (request.getHeader(header) != null) && request.getHeader(header).equalsIgnoreCase(value);
+    }
+
 
     private boolean shouldHandleContentType(String contentType) {
         if (contentType == null) {

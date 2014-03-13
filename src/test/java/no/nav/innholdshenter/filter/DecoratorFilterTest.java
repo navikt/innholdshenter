@@ -18,6 +18,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -182,6 +183,14 @@ public class DecoratorFilterTest {
 
         verify(contentRetriever).getPageContent("http://nav.no/fragments?submenu=path%2Fto%2Fmenu");
         assertThat(response.getContentAsString(), is("<html><body></body></html>"));
+    }
+
+    @Test
+    public void should_not_decorate_page_with_exclude_header() throws IOException, ServletException {
+        request.addHeader("X-Requested-With", "XMLHttpRequest");
+        decoratorFilter.doFilter(request, response, chain);
+
+        verify(contentRetriever, times(0)).getPageContent(anyString());
     }
 
 }
