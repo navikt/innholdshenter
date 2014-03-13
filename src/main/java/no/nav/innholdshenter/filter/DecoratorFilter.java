@@ -39,7 +39,7 @@ public class DecoratorFilter implements Filter {
     private List<String> includeContentTypes;
     private String applicationName;
     private String subMenuPath;
-    private boolean shouldIncludeActiveItemInUrl;
+    private boolean shouldIncludeActiveItem;
     private List<String> noDecoratePatterns;
     private List<String> noSubmenuPatterns;
     private Map<String, String> excludeHeaders;
@@ -187,7 +187,7 @@ public class DecoratorFilter implements Filter {
             urlBuilder.addParameter("appname", applicationName);
         }
 
-        if (shouldIncludeActiveItemInUrl) {
+        if (shouldIncludeActiveItem) {
             urlBuilder.addParameter("activeitem", request.getRequestURI());
         }
 
@@ -261,8 +261,8 @@ public class DecoratorFilter implements Filter {
         this.subMenuPath = subMenuPath;
     }
 
-    public void setShouldIncludeActiveItemInUrl(boolean shouldIncludeActiveItemInUrl) {
-        this.shouldIncludeActiveItemInUrl = shouldIncludeActiveItemInUrl;
+    public void setShouldIncludeActiveItem(boolean shouldIncludeActiveItem) {
+        this.shouldIncludeActiveItem = shouldIncludeActiveItem;
     }
 
     public void setNoDecoratePatterns(List<String> noDecoratePatterns) {

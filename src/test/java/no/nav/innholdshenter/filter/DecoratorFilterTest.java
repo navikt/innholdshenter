@@ -124,7 +124,7 @@ public class DecoratorFilterTest {
     @Test
     public void should_build_url_with_activeitem_if_include_active_item_is_set() throws IOException, ServletException {
         withDefaultFilterChain();
-        decoratorFilter.setShouldIncludeActiveItemInUrl(true);
+        decoratorFilter.setShouldIncludeActiveItem(true);
         request.setRequestURI("/minside");
 
         decoratorFilter.doFilter(request, response, chain);
