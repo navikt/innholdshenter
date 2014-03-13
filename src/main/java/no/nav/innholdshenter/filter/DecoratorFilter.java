@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
@@ -36,9 +38,11 @@ public class DecoratorFilter implements Filter {
     private String applicationName;
     private String subMenuPath;
     private boolean shouldIncludeActiveItemInUrl;
+    private List<String> noDecoratePatterns;
 
     public DecoratorFilter() {
         fragmentNames = new ArrayList<String>();
+        noDecoratePatterns = new ArrayList<String>();
         setDefaultIncludeContentTypes();
     }
 
@@ -54,12 +58,17 @@ public class DecoratorFilter implements Filter {
     }
 
     @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
-        DecoratorResponseWrapper responseWrapper = new DecoratorResponseWrapper(response);
 
-        filterChain.doFilter(request, responseWrapper);
+        if (!shouldDecorateRequest(request)) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+        DecoratorResponseWrapper responseWrapper = new DecoratorResponseWrapper(response);
+        chain.doFilter(request, responseWrapper);
         responseWrapper.flushBuffer();
 
         String originalResponse = responseWrapper.getOutputAsString();
@@ -73,6 +82,26 @@ public class DecoratorFilter implements Filter {
         } else {
             response.getWriter().write(originalResponse);
         }
+    }
+
+    private boolean shouldDecorateRequest(HttpServletRequest request) {
+        String requestUri = request.getRequestURI();
+        return !(requestMatchesNoDecoratePattern(requestUri));
+    }
+
+    private boolean requestMatchesNoDecoratePattern(String requestUri) {
+        for (String noDecoratePattern : noDecoratePatterns) {
+            Matcher matcher = createMatcher(noDecoratePattern, requestUri);
+            if (matcher.matches()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private Matcher createMatcher(String regex, String content) {
+        Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+        return pattern.matcher(content);
     }
 
     private boolean shouldHandleContentType(String contentType) {
@@ -179,5 +208,9 @@ public class DecoratorFilter implements Filter {
 
     public void setShouldIncludeActiveItemInUrl(boolean shouldIncludeActiveItemInUrl) {
         this.shouldIncludeActiveItemInUrl = shouldIncludeActiveItemInUrl;
+    }
+
+    public void setNoDecoratePatterns(List<String> noDecoratePatterns) {
+        this.noDecoratePatterns = noDecoratePatterns;
     }
 }

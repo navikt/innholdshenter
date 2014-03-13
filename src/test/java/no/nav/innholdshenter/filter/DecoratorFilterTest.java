@@ -145,4 +145,19 @@ public class DecoratorFilterTest {
 
         verify(contentRetriever).getPageContent("http://nav.no/fragments?userrole=ARBS");
     }
+
+    @Test
+    public void should_not_decorate_request_when_requestUri_matches_no_decorate_pattern() throws IOException, ServletException {
+        List<String> fragments = Arrays.asList("header", "footer");
+        decoratorFilter.setFragmentNames(fragments);
+        List<String> noDecoratePatterns = Arrays.asList(".*selftest.*");
+        decoratorFilter.setNoDecoratePatterns(noDecoratePatterns);
+
+        request.setRequestURI("/bidragsveileder/internal/selftest");
+
+        decoratorFilter.doFilter(request, response, chain);
+
+        assertThat(response.getContentAsString(), is("<html><body>${header}${footer}</body></html>"));
+    }
+
 }
