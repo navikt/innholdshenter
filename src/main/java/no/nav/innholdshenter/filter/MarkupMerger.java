@@ -12,6 +12,7 @@ public class MarkupMerger {
 
     private static final String PLACEHOLDER_START = "{{";
     private static final String PLACEHOLDER_END = "}}";
+    private static final String PLACEHOLDER_PREFIX = "fragment.";
     private final List<String> noSubmenuPatterns;
     private List<String> fragmentNames;
 
@@ -61,7 +62,7 @@ public class MarkupMerger {
     }
 
     private String mergeFragment(String responseString, String fragmentName, String elementMarkup) {
-        String placeholder = PLACEHOLDER_START + fragmentName + PLACEHOLDER_END;
+        String placeholder = PLACEHOLDER_START + PLACEHOLDER_PREFIX + fragmentName + PLACEHOLDER_END;
         return responseString.replace(placeholder, elementMarkup);
     }
 

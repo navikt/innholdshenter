@@ -52,7 +52,7 @@ public class DecoratorFilterTest {
         chain = new FilterChain() {
             @Override
             public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-                servletResponse.getWriter().write("<html><body>{{header}}{{footer}}</body></html>");
+                servletResponse.getWriter().write("<html><body>{{fragment.header}}{{fragment.footer}}</body></html>");
                 servletResponse.setContentType("text/html");
             }
         };
@@ -91,17 +91,18 @@ public class DecoratorFilterTest {
 
     @Test
     public void should_not_inject_fragments_when_response_is_invalid_content_type() throws IOException, ServletException {
+        final String expected = "<html><body>{{fragment.header}}{{fragment.footer}}</body></html>";
         chain = new FilterChain() {
             @Override
             public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-                servletResponse.getWriter().write("<html><body>{{header}}{{footer}}</body></html>");
+                servletResponse.getWriter().write(expected);
                 servletResponse.setContentType(null);
             }
         };
 
         decoratorFilter.doFilter(request, response, chain);
 
-        assertThat(response.getContentAsString(), is("<html><body>{{header}}{{footer}}</body></html>"));
+        assertThat(response.getContentAsString(), is(expected));
     }
 
     @Test
@@ -109,7 +110,7 @@ public class DecoratorFilterTest {
         chain = new FilterChain() {
             @Override
             public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-                servletResponse.getWriter().write("<html><body>{{submenu}}</body></html>");
+                servletResponse.getWriter().write("<html><body>{{fragment.submenu}}</body></html>");
                 servletResponse.setContentType("text/html");
             }
         };
@@ -165,7 +166,7 @@ public class DecoratorFilterTest {
         chain = new FilterChain() {
             @Override
             public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-                servletResponse.getWriter().write("<html><body>{{submenu}}</body></html>");
+                servletResponse.getWriter().write("<html><body>{{fragment.submenu}}</body></html>");
                 servletResponse.setContentType("text/html");
             }
         };
@@ -207,7 +208,7 @@ public class DecoratorFilterTest {
         chain = new FilterChain() {
             @Override
             public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-                servletResponse.getWriter().write("<html><head>{{resources-head}}</head><body></body></html>");
+                servletResponse.getWriter().write("<html><head>{{fragment.resources-head}}</head><body></body></html>");
                 servletResponse.setContentType("text/html");
             }
         };
