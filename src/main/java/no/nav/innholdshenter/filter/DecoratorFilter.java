@@ -88,7 +88,7 @@ public class DecoratorFilter implements Filter {
             try {
                 response.getWriter().write(result);
             } catch (IllegalStateException getOutputStreamAlreadyCalled) {
-                response.getOutputStream().write(result.getBytes());
+                response.getOutputStream().write(result.getBytes(responseWrapper.getCharacterEncoding()));
             }
         } else {
             response.getWriter().write(originalResponse);
