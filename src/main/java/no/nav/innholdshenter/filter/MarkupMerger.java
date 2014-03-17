@@ -9,7 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MarkupMerger {
-    private final String PLACEHOLDER_FORMAT = "<!--${%s}-->";
+    private static final String PLACEHOLDER_FORMAT = "${%s}";
 
     private final List<String> noSubmenuPatterns;
     private List<String> fragmentNames;
@@ -33,6 +33,14 @@ public class MarkupMerger {
         return responseString;
     }
 
+    public String removePlaceholders(String originalResponseString) {
+        String responseString = originalResponseString;
+        for (String fragmentName : fragmentNames) {
+            responseString = mergeFragment(responseString, fragmentName, "");
+        }
+        return responseString;
+    }
+
     public static boolean isFragmentSubmenu(String fragmentName) {
         return "submenu".equals(fragmentName);
     }
@@ -45,8 +53,9 @@ public class MarkupMerger {
     private String mergeSubmenuFragment(HttpServletRequest request, String responseString, String fragmentName, Element element) {
         if (!requestUriMatchesNoSubmenuPattern(request.getRequestURI())) {
             responseString = mergeFragment(responseString, fragmentName, element.html());
+        } else {
+            responseString = mergeFragment(responseString, fragmentName, "");
         }
-
         return responseString;
     }
 
@@ -63,4 +72,5 @@ public class MarkupMerger {
         }
         return false;
     }
+
 }

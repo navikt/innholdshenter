@@ -51,7 +51,7 @@ public class DecoratorFilterTest {
         chain = new FilterChain() {
             @Override
             public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-                servletResponse.getWriter().write("<html><body><!--${header}--><!--${footer}--></body></html>");
+                servletResponse.getWriter().write("<html><body>${header}${footer}</body></html>");
                 servletResponse.setContentType("text/html");
             }
         };
@@ -93,14 +93,14 @@ public class DecoratorFilterTest {
         chain = new FilterChain() {
             @Override
             public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-                servletResponse.getWriter().write("<html><body><!--${header}--><!--${footer}--></body></html>");
+                servletResponse.getWriter().write("<html><body>${header}${footer}</body></html>");
                 servletResponse.setContentType(null);
             }
         };
 
         decoratorFilter.doFilter(request, response, chain);
 
-        assertThat(response.getContentAsString(), is("<html><body><!--${header}--><!--${footer}--></body></html>"));
+        assertThat(response.getContentAsString(), is("<html><body>${header}${footer}</body></html>"));
     }
 
     @Test
@@ -108,7 +108,7 @@ public class DecoratorFilterTest {
         chain = new FilterChain() {
             @Override
             public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-                servletResponse.getWriter().write("<html><body><!--${submenu}--></body></html>");
+                servletResponse.getWriter().write("<html><body>${submenu}</body></html>");
                 servletResponse.setContentType("text/html");
             }
         };
@@ -156,7 +156,7 @@ public class DecoratorFilterTest {
 
         decoratorFilter.doFilter(request, response, chain);
 
-        assertThat(response.getContentAsString(), is("<html><body><!--${header}--><!--${footer}--></body></html>"));
+        assertThat(response.getContentAsString(), is("<html><body></body></html>"));
     }
 
     @Test
@@ -164,7 +164,7 @@ public class DecoratorFilterTest {
         chain = new FilterChain() {
             @Override
             public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-                servletResponse.getWriter().write("<html><body><!--${submenu}--></body></html>");
+                servletResponse.getWriter().write("<html><body>${submenu}</body></html>");
                 servletResponse.setContentType("text/html");
             }
         };
@@ -178,7 +178,7 @@ public class DecoratorFilterTest {
         decoratorFilter.doFilter(request, response, chain);
 
         verify(contentRetriever).getPageContent("http://nav.no/fragments?submenu=path%2Fto%2Fmenu");
-        assertThat(response.getContentAsString(), is("<html><body><!--${submenu}--></body></html>"));
+        assertThat(response.getContentAsString(), is("<html><body></body></html>"));
     }
 
     @Test
@@ -196,7 +196,7 @@ public class DecoratorFilterTest {
         chain = new FilterChain() {
             @Override
             public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-                servletResponse.getWriter().write("<html><head><!--${resources-head}--></head><body></body></html>");
+                servletResponse.getWriter().write("<html><head>${resources-head}</head><body></body></html>");
                 servletResponse.setContentType("text/html");
             }
         };

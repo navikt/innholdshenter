@@ -73,16 +73,18 @@ public class DecoratorFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
 
-        if (!shouldDecorateRequest(request)) {
-            chain.doFilter(request, response);
-            return;
-        }
-
         DecoratorResponseWrapper responseWrapper = new DecoratorResponseWrapper(response);
         chain.doFilter(request, responseWrapper);
         responseWrapper.flushBuffer();
-
         String originalResponse = responseWrapper.getOutputAsString();
+
+        if (!shouldDecorateRequest(request)) {
+            MarkupMerger markupMerger = new MarkupMerger(fragmentNames, noSubmenuPatterns);
+            String responseWithoutPlaceholders = markupMerger.removePlaceholders(originalResponse);
+            response.getWriter().write(responseWithoutPlaceholders);
+            return;
+        }
+
         if (shouldHandleContentType(responseWrapper.getContentType())) {
             String result = mergeWithFragments(originalResponse, request);
             try {
