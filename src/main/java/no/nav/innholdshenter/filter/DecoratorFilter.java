@@ -4,7 +4,6 @@ import no.nav.innholdshenter.common.EnonicContentRetriever;
 import org.apache.http.client.utils.URIBuilder;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +24,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+import static no.nav.innholdshenter.filter.MarkupMerger.createMatcher;
+import static no.nav.innholdshenter.filter.MarkupMerger.isFragmentSubmenu;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
 public class DecoratorFilter implements Filter {
@@ -137,35 +137,9 @@ public class DecoratorFilter implements Filter {
     }
 
     private String mergeWithFragments(String originalResponseString, HttpServletRequest request) {
-        String responseString = originalResponseString;
         Document htmlFragments = getHtmlFragments(request, originalResponseString);
-
-        for (String fragmentName : fragmentNames) {
-            Element element = htmlFragments.getElementById(fragmentName);
-            if (isFragmentSubmenu(fragmentName)) {
-                responseString = mergeSubmenuFragment(request, responseString, fragmentName, element);
-            } else {
-                responseString = mergeFragment(responseString, fragmentName, element.html());
-            }
-        }
-        return responseString;
-    }
-
-    private boolean isFragmentSubmenu(String fragmentName) {
-        return "submenu".equals(fragmentName);
-    }
-
-    private String mergeSubmenuFragment(HttpServletRequest request, String responseString, String fragmentName, Element element) {
-        if (!requestUriMatchesNoSubmenuPattern(request.getRequestURI())) {
-            responseString = mergeFragment(responseString, fragmentName, element.html());
-        } else {
-            responseString = mergeFragment(responseString, fragmentName, "");
-        }
-        return responseString;
-    }
-
-    private String mergeFragment(String responseString, String fragmentName, String elementMarkup) {
-        return responseString.replace(String.format("${%s}", fragmentName), elementMarkup);
+        MarkupMerger markupMerger = new MarkupMerger(fragmentNames, noSubmenuPatterns);
+        return markupMerger.merge(originalResponseString, htmlFragments, request);
     }
 
     private Document getHtmlFragments(HttpServletRequest request, String originalResponse) {
@@ -216,21 +190,6 @@ public class DecoratorFilter implements Filter {
         } else {
             return null;
         }
-    }
-
-    private boolean requestUriMatchesNoSubmenuPattern(String requestUri) {
-        for (String noSubmenuPattern : noSubmenuPatterns) {
-            Matcher matcher = createMatcher(noSubmenuPattern, requestUri);
-            if (matcher.matches()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private Matcher createMatcher(String regex, String content) {
-        Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-        return pattern.matcher(content);
     }
 
     @Override
