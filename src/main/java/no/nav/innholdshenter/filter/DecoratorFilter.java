@@ -33,6 +33,8 @@ public class DecoratorFilter implements Filter {
 
     private static final Logger logger = LoggerFactory.getLogger(DecoratorFilter.class);
 
+    public static final String ALREADY_DECORATED_HEADER = "X-NAV-decorator";
+
     private EnonicContentRetriever contentRetriever;
     private List<String> fragmentNames;
     private String fragmentsUrl;
@@ -87,6 +89,7 @@ public class DecoratorFilter implements Filter {
 
         if (shouldHandleContentType(responseWrapper.getContentType())) {
             String result = mergeWithFragments(originalResponse, request);
+            markRequestAsDecorated(request);
             try {
                 response.getWriter().write(result);
             } catch (IllegalStateException getOutputStreamAlreadyCalled) {
@@ -98,7 +101,7 @@ public class DecoratorFilter implements Filter {
     }
 
     private boolean shouldDecorateRequest(HttpServletRequest request) {
-        return !(requestUriMatchesNoDecoratePattern(request) || requestHeaderHasExcludeValue(request));
+        return !(requestUriMatchesNoDecoratePattern(request) || requestHeaderHasExcludeValue(request) || filterAlreadyAppliedForRequest(request));
     }
 
     private boolean requestUriMatchesNoDecoratePattern(HttpServletRequest request) {
@@ -125,6 +128,13 @@ public class DecoratorFilter implements Filter {
         return (request.getHeader(header) != null) && request.getHeader(header).equalsIgnoreCase(value);
     }
 
+    private boolean filterAlreadyAppliedForRequest(HttpServletRequest request) {
+        return request.getAttribute(ALREADY_DECORATED_HEADER) == Boolean.TRUE;
+    }
+
+    private void markRequestAsDecorated(HttpServletRequest request) {
+        request.setAttribute(ALREADY_DECORATED_HEADER, Boolean.TRUE);
+    }
 
     private boolean shouldHandleContentType(String contentType) {
         if (contentType == null) {

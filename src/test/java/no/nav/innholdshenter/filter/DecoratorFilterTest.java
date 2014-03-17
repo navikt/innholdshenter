@@ -13,6 +13,7 @@ import javax.servlet.ServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
 
+import static no.nav.innholdshenter.filter.DecoratorFilter.ALREADY_DECORATED_HEADER;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
@@ -185,6 +186,16 @@ public class DecoratorFilterTest {
     public void should_not_decorate_response_when_request_has_exclude_header() throws IOException, ServletException {
         withDefaultFilterChain();
         request.addHeader("X-Requested-With", "XMLHttpRequest");
+
+        decoratorFilter.doFilter(request, response, chain);
+
+        verify(contentRetriever, times(0)).getPageContent(anyString());
+    }
+
+    @Test
+    public void should_not_decorate_response_when_request_is_already_decorated() throws IOException, ServletException {
+        withDefaultFilterChain();
+        request.setAttribute(ALREADY_DECORATED_HEADER, Boolean.TRUE);
 
         decoratorFilter.doFilter(request, response, chain);
 
