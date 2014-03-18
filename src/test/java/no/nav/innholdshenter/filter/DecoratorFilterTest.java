@@ -59,6 +59,12 @@ public class DecoratorFilterTest {
         };
     }
 
+    private void withNoDecoratePattern(String noDecoratePattern) {
+        ArrayList<String> noDecoratePatterns = new ArrayList<String>();
+        noDecoratePatterns.add(noDecoratePattern);
+        decoratorFilter.setNoDecoratePatterns(noDecoratePatterns);
+    }
+
     @Test
     public void should_replace_elements_in_fragments_list() throws IOException, ServletException {
         withDefaultFilterChain();
@@ -154,7 +160,7 @@ public class DecoratorFilterTest {
     public void should_not_decorate_request_and_remove_placeholder_when_requestUri_matches_no_decorate_pattern() throws IOException, ServletException {
         withDefaultFilterChain();
         withFragments("header", "footer");
-        decoratorFilter.setNoDecoratePatterns(asList(".*selftest.*"));
+        withNoDecoratePattern(".*selftest.*");
         request.setRequestURI("/internal/selftest");
 
         decoratorFilter.doFilter(request, response, chain);
@@ -225,9 +231,7 @@ public class DecoratorFilterTest {
     public void should_have_default_noDecoratePattern() {
         withDefaultFilterChain();
 
-        ArrayList<String> noDecoratePatterns = new ArrayList<String>();
-        noDecoratePatterns.add("test");
-        decoratorFilter.setNoDecoratePatterns(noDecoratePatterns);
+        withNoDecoratePattern("test");
 
         assertThat(decoratorFilter.getNoDecoratePatterns().size(), is(2));
         assertThat(decoratorFilter.getNoDecoratePatterns().get(1), is(".*isAlive.*"));
