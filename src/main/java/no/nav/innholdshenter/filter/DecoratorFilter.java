@@ -2,6 +2,8 @@ package no.nav.innholdshenter.filter;
 
 import no.nav.innholdshenter.common.EnonicContentRetriever;
 import org.jsoup.nodes.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
 
 import javax.annotation.PostConstruct;
@@ -26,6 +28,8 @@ import static no.nav.innholdshenter.filter.DecoratorFilterUtils.isFragmentSubmen
 import static no.nav.innholdshenter.filter.DecoratorFilterUtils.removePlaceholders;
 
 public class DecoratorFilter implements Filter {
+
+    private static final Logger logger = LoggerFactory.getLogger(DecoratorFilter.class);
 
     public static final String ALREADY_DECORATED_HEADER = "X-NAV-decorator";
     private static final List<String> DEFAULT_NO_DECORATE_PATTERNS = asList(".*isAlive.*");
@@ -92,15 +96,18 @@ public class DecoratorFilter implements Filter {
         String originalResponseString = responseWrapper.getOutputAsString();
 
         if (!shouldDecorateRequest(request)) {
+            logger.debug("Should not decorate response for request: {}", request.getRequestURI());
             writeToResponse(removePlaceholders(originalResponseString, fragmentNames), response);
             return;
         }
 
         if (shouldHandleContentType(responseWrapper.getContentType())) {
+            logger.debug("Merging response with fragments for request: {}", request.getRequestURI());
             String mergedResponseString = mergeWithFragments(originalResponseString, request);
             markRequestAsDecorated(request);
             writeToResponse(mergedResponseString, response);
         } else {
+            logger.debug("Should not handle content type: {}", responseWrapper.getContentType());
             writeToResponse(originalResponseString, response);
         }
     }
