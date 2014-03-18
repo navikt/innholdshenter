@@ -6,7 +6,9 @@ import org.jsoup.nodes.Element;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import static no.nav.innholdshenter.filter.DecoratorFilterUtils.createMatcher;
+import static no.nav.innholdshenter.filter.DecoratorFilterUtils.isFragmentSubmenu;
 
 public class MarkupMerger {
 
@@ -41,15 +43,6 @@ public class MarkupMerger {
             responseString = mergeFragment(responseString, fragmentName, "");
         }
         return responseString;
-    }
-
-    public static boolean isFragmentSubmenu(String fragmentName) {
-        return "submenu".equals(fragmentName);
-    }
-
-    public static Matcher createMatcher(String regex, String content) {
-        Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-        return pattern.matcher(content);
     }
 
     private String mergeSubmenuFragment(HttpServletRequest request, String responseString, String fragmentName, Element element) {

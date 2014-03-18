@@ -1,12 +1,7 @@
 package no.nav.innholdshenter.filter;
 
 import no.nav.innholdshenter.common.EnonicContentRetriever;
-import org.apache.http.client.utils.URIBuilder;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
 
 import javax.servlet.Filter;
@@ -18,20 +13,15 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 
-import static no.nav.innholdshenter.filter.MarkupMerger.createMatcher;
-import static no.nav.innholdshenter.filter.MarkupMerger.isFragmentSubmenu;
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import static no.nav.innholdshenter.filter.DecoratorFilterUtils.createMatcher;
 
 public class DecoratorFilter implements Filter {
-
-    private static final Logger logger = LoggerFactory.getLogger(DecoratorFilter.class);
 
     public static final String ALREADY_DECORATED_HEADER = "X-NAV-decorator";
 
@@ -83,20 +73,24 @@ public class DecoratorFilter implements Filter {
         if (!shouldDecorateRequest(request)) {
             MarkupMerger markupMerger = new MarkupMerger(fragmentNames, noSubmenuPatterns);
             String responseWithoutPlaceholders = markupMerger.removePlaceholders(originalResponse);
-            response.getWriter().write(responseWithoutPlaceholders);
+            writeToResponse(responseWithoutPlaceholders, response, response.getCharacterEncoding());
             return;
         }
 
         if (shouldHandleContentType(responseWrapper.getContentType())) {
             String result = mergeWithFragments(originalResponse, request);
             markRequestAsDecorated(request);
-            try {
-                response.getWriter().write(result);
-            } catch (IllegalStateException getOutputStreamAlreadyCalled) {
-                response.getOutputStream().write(result.getBytes(responseWrapper.getCharacterEncoding()));
-            }
+            writeToResponse(result, response, responseWrapper.getCharacterEncoding());
         } else {
-            response.getWriter().write(originalResponse);
+            writeToResponse(originalResponse, response, response.getCharacterEncoding());
+        }
+    }
+
+    private void writeToResponse(String output, HttpServletResponse response, String characterEncoding) throws IOException {
+        try {
+            response.getWriter().write(output);
+        } catch (IllegalStateException getOutputStreamAlreadyCalled) {
+            response.getOutputStream().write(output.getBytes(characterEncoding));
         }
     }
 
@@ -149,59 +143,10 @@ public class DecoratorFilter implements Filter {
     }
 
     private String mergeWithFragments(String originalResponseString, HttpServletRequest request) {
-        Document htmlFragments = getHtmlFragments(request, originalResponseString);
+        FragmentFetcher fragmentFetcher = new FragmentFetcher(contentRetriever, fragmentsUrl, applicationName, shouldIncludeActiveItem, subMenuPath, fragmentNames);
+        Document htmlFragments = fragmentFetcher.fetchHtmlFragments(request, originalResponseString);
         MarkupMerger markupMerger = new MarkupMerger(fragmentNames, noSubmenuPatterns);
         return markupMerger.merge(originalResponseString, htmlFragments, request);
-    }
-
-    private Document getHtmlFragments(HttpServletRequest request, String originalResponse) {
-        String url = null;
-        try {
-            url = buildUrl(request, originalResponse);
-        } catch (URISyntaxException e) {
-            logger.warn("Exception when building URL", e);
-        }
-
-        String pageContent = contentRetriever.getPageContent(url);
-        return Jsoup.parse(pageContent);
-    }
-
-    private String buildUrl(HttpServletRequest request, String originalResponse) throws URISyntaxException {
-        URIBuilder urlBuilder = new URIBuilder(fragmentsUrl);
-
-        if (applicationName != null) {
-            urlBuilder.addParameter("appname", applicationName);
-        }
-
-        if (shouldIncludeActiveItem) {
-            urlBuilder.addParameter("activeitem", request.getRequestURI());
-        }
-
-        String role = extractMetaTag(originalResponse, "Brukerstatus");
-        if (!isEmpty(role)) {
-            urlBuilder.addParameter("userrole", role);
-        }
-
-        for (String fragmentName : fragmentNames) {
-            if (isFragmentSubmenu(fragmentName)) {
-                urlBuilder.addParameter("submenu", subMenuPath);
-            } else {
-                urlBuilder.addParameter(fragmentName, "true");
-            }
-        }
-
-        return urlBuilder.build().toString();
-    }
-
-    private String extractMetaTag(String originalResponse, String tag) {
-        Document doc = Jsoup.parse(originalResponse);
-        Elements brukerStatus = doc.select(String.format("meta[name=%s]", tag));
-
-        if (!brukerStatus.isEmpty()) {
-            return brukerStatus.attr("content");
-        } else {
-            return null;
-        }
     }
 
     @Override
