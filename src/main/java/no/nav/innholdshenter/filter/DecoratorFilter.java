@@ -4,6 +4,7 @@ import no.nav.innholdshenter.common.EnonicContentRetriever;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Required;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -21,6 +22,7 @@ import java.util.regex.Matcher;
 
 import static java.util.Arrays.asList;
 import static no.nav.innholdshenter.filter.DecoratorFilterUtils.createMatcher;
+import static no.nav.innholdshenter.filter.DecoratorFilterUtils.isFragmentSubmenu;
 
 public class DecoratorFilter implements Filter {
 
@@ -44,6 +46,22 @@ public class DecoratorFilter implements Filter {
         noSubmenuPatterns = new ArrayList<String>();
         setDefaultIncludeContentTypes();
         setDefaultExcludeHeaders();
+    }
+
+    @PostConstruct
+    private void validateConfiguration() {
+        if (isSubmenuFragmentDefined() && subMenuPath == null) {
+            throw new IllegalArgumentException("subMenuPath kan ikke være null når submenu er definert som fragment");
+        }
+    }
+
+    private boolean isSubmenuFragmentDefined() {
+        for (String fragmentName : fragmentNames) {
+            if (isFragmentSubmenu(fragmentName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void setDefaultIncludeContentTypes() {
