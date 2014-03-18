@@ -23,6 +23,7 @@ import java.util.regex.Matcher;
 import static java.util.Arrays.asList;
 import static no.nav.innholdshenter.filter.DecoratorFilterUtils.createMatcher;
 import static no.nav.innholdshenter.filter.DecoratorFilterUtils.isFragmentSubmenu;
+import static no.nav.innholdshenter.filter.DecoratorFilterUtils.removePlaceholders;
 
 public class DecoratorFilter implements Filter {
 
@@ -88,21 +89,19 @@ public class DecoratorFilter implements Filter {
         DecoratorResponseWrapper responseWrapper = new DecoratorResponseWrapper(response);
         chain.doFilter(request, responseWrapper);
         responseWrapper.flushBuffer();
-        String originalResponse = responseWrapper.getOutputAsString();
+        String originalResponseString = responseWrapper.getOutputAsString();
 
         if (!shouldDecorateRequest(request)) {
-            MarkupMerger markupMerger = new MarkupMerger(fragmentNames, noSubmenuPatterns);
-            String responseWithoutPlaceholders = markupMerger.removePlaceholders(originalResponse);
-            writeToResponse(responseWithoutPlaceholders, response);
+            writeToResponse(removePlaceholders(originalResponseString, fragmentNames), response);
             return;
         }
 
         if (shouldHandleContentType(responseWrapper.getContentType())) {
-            String mergedResponse = mergeWithFragments(originalResponse, request);
+            String mergedResponse = mergeWithFragments(originalResponseString, request);
             markRequestAsDecorated(request);
             writeToResponse(mergedResponse, response);
         } else {
-            writeToResponse(originalResponse, response);
+            writeToResponse(originalResponseString, response);
         }
     }
 
@@ -166,8 +165,8 @@ public class DecoratorFilter implements Filter {
     private String mergeWithFragments(String originalResponseString, HttpServletRequest request) {
         FragmentFetcher fragmentFetcher = new FragmentFetcher(contentRetriever, fragmentsUrl, applicationName, shouldIncludeActiveItem, subMenuPath, fragmentNames);
         Document htmlFragments = fragmentFetcher.fetchHtmlFragments(request, originalResponseString);
-        MarkupMerger markupMerger = new MarkupMerger(fragmentNames, noSubmenuPatterns);
-        return markupMerger.merge(originalResponseString, htmlFragments, request);
+        MarkupMerger markupMerger = new MarkupMerger(fragmentNames, noSubmenuPatterns, originalResponseString, htmlFragments, request);
+        return markupMerger.merge();
     }
 
     @Override
