@@ -31,48 +31,55 @@ public class MarkupMerger {
     public String merge() {
         String responseString = originalResponseString;
         for (String fragmentName : fragmentNames) {
-            Element element = this.htmlFragments.getElementById(fragmentName);
-
-            if (element == null) {
-                throw new RuntimeException("Element [ " + fragmentName + " ] ikke funnet i responsen fra Enonic.");
-            }
-
-            String placeholder = createPlaceholder(fragmentName);
-            if (!responseString.contains(placeholder)) {
-                throw new RuntimeException("Fant ikke placeholder " + placeholder + " i applikasjonens markup.");
-            }
+            Element element = htmlFragments.getElementById(fragmentName);
+            validateFragmentAndPlaceholder(fragmentName, element);
 
             if (isFragmentSubmenu(fragmentName)) {
-                responseString = mergeSubmenuFragment(request, responseString, fragmentName, element);
+                responseString = mergeSubmenuFragment(responseString, fragmentName, element);
             } else {
                 responseString = mergeFragment(responseString, fragmentName, element.html());
             }
         }
 
+        checkForUnresolvedPlaceholders(responseString);
+        return responseString;
+    }
+
+    private void validateFragmentAndPlaceholder(String fragmentName, Element element) {
+        if (element == null) {
+            throw new RuntimeException("Element [ " + fragmentName + " ] ikke funnet i responsen fra Enonic.");
+        }
+
+        String placeholder = createPlaceholder(fragmentName);
+        if (!originalResponseString.contains(placeholder)) {
+            throw new RuntimeException("Fant ikke placeholder " + placeholder + " i applikasjonens markup.");
+        }
+    }
+
+    private void checkForUnresolvedPlaceholders(String responseString) {
         Matcher matcher = createMatcher(PLACEHOLDER_REGEX, responseString);
         if (matcher.matches()) {
             throw new RuntimeException("Fant unresolved placeholder " + matcher.group(1) + " i applikasjonens markup.");
         }
-
-        return responseString;
     }
 
-    private String mergeSubmenuFragment(HttpServletRequest request, String responseString, String fragmentName, Element element) {
-        if (!requestUriMatchesNoSubmenuPattern(request.getRequestURI())) {
-            responseString = mergeFragment(responseString, fragmentName, element.html());
+    private String mergeSubmenuFragment(String responseString, String fragmentName, Element element) {
+        String mergedResponseString = responseString;
+        if (!requestUriMatchesNoSubmenuPattern()) {
+            mergedResponseString = mergeFragment(mergedResponseString, fragmentName, element.html());
         } else {
-            responseString = mergeFragment(responseString, fragmentName, "");
+            mergedResponseString = mergeFragment(mergedResponseString, fragmentName, "");
         }
-        return responseString;
+        return mergedResponseString;
     }
 
     private String mergeFragment(String responseString, String fragmentName, String elementMarkup) {
         return responseString.replace(createPlaceholder(fragmentName), elementMarkup);
     }
 
-    private boolean requestUriMatchesNoSubmenuPattern(String requestUri) {
+    private boolean requestUriMatchesNoSubmenuPattern() {
         for (String noSubmenuPattern : noSubmenuPatterns) {
-            Matcher matcher = createMatcher(noSubmenuPattern, requestUri);
+            Matcher matcher = createMatcher(noSubmenuPattern, request.getRequestURI());
             if (matcher.matches()) {
                 return true;
             }

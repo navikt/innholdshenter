@@ -97,9 +97,9 @@ public class DecoratorFilter implements Filter {
         }
 
         if (shouldHandleContentType(responseWrapper.getContentType())) {
-            String mergedResponse = mergeWithFragments(originalResponseString, request);
+            String mergedResponseString = mergeWithFragments(originalResponseString, request);
             markRequestAsDecorated(request);
-            writeToResponse(mergedResponse, response);
+            writeToResponse(mergedResponseString, response);
         } else {
             writeToResponse(originalResponseString, response);
         }
