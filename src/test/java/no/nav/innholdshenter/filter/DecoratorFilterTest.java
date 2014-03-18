@@ -278,4 +278,5 @@ public class DecoratorFilterTest {
 
         decoratorFilter.doFilter(request, response, chain);
     }
+
 }
