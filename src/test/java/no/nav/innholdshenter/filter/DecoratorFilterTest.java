@@ -234,7 +234,10 @@ public class DecoratorFilterTest {
     public void should_have_default_noDecoratePattern() {
         withDefaultFilterChain();
 
-        withNoDecoratePattern("test");
+        assertThat(decoratorFilter.getNoDecoratePatterns().size(), is(1));
+        assertThat(decoratorFilter.getNoDecoratePatterns().get(0), is(".*isAlive.*"));
+
+        withNoDecoratePattern("testDecoratePattern");
 
         assertThat(decoratorFilter.getNoDecoratePatterns().size(), is(2));
         assertThat(decoratorFilter.getNoDecoratePatterns().get(1), is(".*isAlive.*"));

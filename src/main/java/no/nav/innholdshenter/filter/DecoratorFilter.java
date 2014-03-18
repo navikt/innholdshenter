@@ -47,7 +47,7 @@ public class DecoratorFilter implements Filter {
 
     public DecoratorFilter() {
         fragmentNames = new ArrayList<String>();
-        noDecoratePatterns = new ArrayList<String>();
+        noDecoratePatterns = new ArrayList<String>(DEFAULT_NO_DECORATE_PATTERNS);
         noSubmenuPatterns = new ArrayList<String>();
         setDefaultIncludeContentTypes();
         setDefaultExcludeHeaders();
