@@ -25,21 +25,25 @@ public class FragmentFetcher {
     private boolean shouldIncludeActiveItem;
     private List<String> fragmentNames;
     private String subMenuPath;
+    private final HttpServletRequest request;
+    private final String originalResponseString;
 
     public FragmentFetcher(EnonicContentRetriever contentRetriever, String fragmentsUrl, String applicationName,
-                           boolean shouldIncludeActiveItem, String subMenuPath, List<String> fragmentNames) {
+                           boolean shouldIncludeActiveItem, String subMenuPath, List<String> fragmentNames, HttpServletRequest request, String originalResponseString) {
         this.contentRetriever = contentRetriever;
         this.fragmentsUrl = fragmentsUrl;
         this.applicationName = applicationName;
         this.shouldIncludeActiveItem = shouldIncludeActiveItem;
         this.fragmentNames = fragmentNames;
         this.subMenuPath = subMenuPath;
+        this.request = request;
+        this.originalResponseString = originalResponseString;
     }
 
-    public Document fetchHtmlFragments(HttpServletRequest request, String originalResponse) {
+    public Document fetchHtmlFragments() {
         String url = null;
         try {
-            url = buildUrl(request, originalResponse);
+            url = buildUrl();
         } catch (URISyntaxException e) {
             logger.warn("Exception when building URL", e);
         }
@@ -48,7 +52,7 @@ public class FragmentFetcher {
         return Jsoup.parse(pageContent);
     }
 
-    private String buildUrl(HttpServletRequest request, String originalResponse) throws URISyntaxException {
+    private String buildUrl() throws URISyntaxException {
         URIBuilder urlBuilder = new URIBuilder(fragmentsUrl);
 
         if (applicationName != null) {
@@ -59,7 +63,7 @@ public class FragmentFetcher {
             urlBuilder.addParameter("activeitem", request.getRequestURI());
         }
 
-        String role = extractMetaTag(originalResponse, "Brukerstatus");
+        String role = extractMetaTag("Brukerstatus");
         if (!isEmpty(role)) {
             urlBuilder.addParameter("userrole", role);
         }
@@ -75,8 +79,8 @@ public class FragmentFetcher {
         return urlBuilder.build().toString();
     }
 
-    private String extractMetaTag(String originalResponse, String tag) {
-        Document doc = Jsoup.parse(originalResponse);
+    private String extractMetaTag(String tag) {
+        Document doc = Jsoup.parse(originalResponseString);
         Elements brukerStatus = doc.select(String.format("meta[name=%s]", tag));
 
         if (!brukerStatus.isEmpty()) {
