@@ -133,12 +133,13 @@ public class DecoratorFilterTest {
     @Test
     public void should_build_url_with_activeitem_if_include_active_item_is_set() throws IOException, ServletException {
         withDefaultFilterChain();
+        withFragments("header", "footer");
         decoratorFilter.setShouldIncludeActiveItem(true);
         request.setRequestURI("/minside");
 
         decoratorFilter.doFilter(request, response, chain);
 
-        verify(contentRetriever).getPageContent("http://nav.no/fragments?activeitem=%2Fminside");
+        verify(contentRetriever).getPageContent("http://nav.no/fragments?activeitem=%2Fminside&header=true&footer=true");
     }
 
     @Test
@@ -193,6 +194,7 @@ public class DecoratorFilterTest {
     @Test
     public void should_not_decorate_response_when_request_has_exclude_header() throws IOException, ServletException {
         withDefaultFilterChain();
+        withFragments("header", "footer");
         request.addHeader("X-Requested-With", "XMLHttpRequest");
 
         decoratorFilter.doFilter(request, response, chain);
@@ -203,6 +205,7 @@ public class DecoratorFilterTest {
     @Test
     public void should_not_decorate_response_when_request_is_already_decorated() throws IOException, ServletException {
         withDefaultFilterChain();
+        withFragments("header", "footer");
         request.setAttribute(ALREADY_DECORATED_HEADER, Boolean.TRUE);
 
         decoratorFilter.doFilter(request, response, chain);
@@ -235,5 +238,44 @@ public class DecoratorFilterTest {
 
         assertThat(decoratorFilter.getNoDecoratePatterns().size(), is(2));
         assertThat(decoratorFilter.getNoDecoratePatterns().get(1), is(".*isAlive.*"));
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void should_throw_exception_when_expected_fragment_is_not_found_in_response_from_enonic() throws Exception {
+        withDefaultFilterChain();
+        withFragments("header", "footer");
+        when(contentRetriever.getPageContent(anyString())).thenReturn("<div id=\"header\"></div>");
+
+        decoratorFilter.doFilter(request, response, chain);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void should_throw_exception_when_placeholder_is_not_found_in_application_markup() throws Exception {
+        chain = new FilterChain() {
+            @Override
+            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
+                servletResponse.getWriter().write("<html><body>{{fragment.header}}</body></html>");
+                servletResponse.setContentType("text/html");
+
+            }
+        };
+        withFragments("header", "footer");
+
+        decoratorFilter.doFilter(request, response, chain);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void should_throw_exception_when_application_markup_has_unresolved_placeholders() throws IOException, ServletException {
+        chain = new FilterChain() {
+            @Override
+            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
+                servletResponse.getWriter().write("<html><body>{{fragment.header}}{{fragment.footer}}{{fragment.ubrukt_placeholder}}</body></html>");
+                servletResponse.setContentType("text/html");
+
+            }
+        };
+        withFragments("header", "footer");
+
+        decoratorFilter.doFilter(request, response, chain);
     }
 }

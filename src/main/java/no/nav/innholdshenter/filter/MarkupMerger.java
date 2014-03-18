@@ -15,6 +15,12 @@ public class MarkupMerger {
     private static final String PLACEHOLDER_START = "{{";
     private static final String PLACEHOLDER_END = "}}";
     private static final String PLACEHOLDER_PREFIX = "fragment.";
+
+    private static final String PLACEHOLDER_START_REGEX = "\\{\\{";
+    private static final String PLACEHOLDER_END_REGEX = "\\}\\}";
+    private static final String PLACEHOLDER_PREFIX_REGEX = "fragment\\.";
+    private static final String PLACEHOLDER_REGEX = ".*(" + PLACEHOLDER_START_REGEX + PLACEHOLDER_PREFIX_REGEX + ".*" + PLACEHOLDER_END_REGEX + ").*";
+
     private final List<String> noSubmenuPatterns;
     private List<String> fragmentNames;
 
@@ -27,6 +33,11 @@ public class MarkupMerger {
         String responseString = originalResponseString;
         for (String fragmentName : fragmentNames) {
             Element element = htmlFragments.getElementById(fragmentName);
+
+            if (element == null) {
+                throw new RuntimeException("Element [ " + fragmentName + " ] ikke funnet i responsen fra Enonic.");
+            }
+
             if (isFragmentSubmenu(fragmentName)) {
                 responseString = mergeSubmenuFragment(request, responseString, fragmentName, element);
             } else {
@@ -34,6 +45,7 @@ public class MarkupMerger {
             }
         }
 
+        checkForUnresolvedPlaceholders(responseString);
         return responseString;
     }
 
@@ -42,7 +54,16 @@ public class MarkupMerger {
         for (String fragmentName : fragmentNames) {
             responseString = mergeFragment(responseString, fragmentName, "");
         }
+
+        checkForUnresolvedPlaceholders(responseString);
         return responseString;
+    }
+
+    private void checkForUnresolvedPlaceholders(String responseString) {
+        Matcher matcher = createMatcher(PLACEHOLDER_REGEX, responseString);
+        if (matcher.matches()) {
+            throw new RuntimeException("Fant unresolved placeholder " + matcher.group(1) + " i applikasjonens markup.");
+        }
     }
 
     private String mergeSubmenuFragment(HttpServletRequest request, String responseString, String fragmentName, Element element) {
@@ -56,6 +77,9 @@ public class MarkupMerger {
 
     private String mergeFragment(String responseString, String fragmentName, String elementMarkup) {
         String placeholder = PLACEHOLDER_START + PLACEHOLDER_PREFIX + fragmentName + PLACEHOLDER_END;
+        if (!responseString.contains(placeholder)) {
+            throw new RuntimeException("Fant ikke placeholder " + placeholder + " i applikasjonens markup.");
+        }
         return responseString.replace(placeholder, elementMarkup);
     }
 
