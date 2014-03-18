@@ -19,11 +19,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 
+import static java.util.Arrays.asList;
 import static no.nav.innholdshenter.filter.DecoratorFilterUtils.createMatcher;
 
 public class DecoratorFilter implements Filter {
 
     public static final String ALREADY_DECORATED_HEADER = "X-NAV-decorator";
+    private static final List<String> DEFAULT_NO_DECORATE_PATTERNS = asList(".*isAlive.*");
 
     private EnonicContentRetriever contentRetriever;
     private List<String> fragmentNames;
@@ -184,9 +186,14 @@ public class DecoratorFilter implements Filter {
 
     public void setNoDecoratePatterns(List<String> noDecoratePatterns) {
         this.noDecoratePatterns = noDecoratePatterns;
+        this.noDecoratePatterns.addAll(DEFAULT_NO_DECORATE_PATTERNS);
     }
 
     public void setNoSubmenuPatterns(List<String> noSubmenuPatterns) {
         this.noSubmenuPatterns = noSubmenuPatterns;
+    }
+
+    public List<String> getNoDecoratePatterns() {
+        return noDecoratePatterns;
     }
 }

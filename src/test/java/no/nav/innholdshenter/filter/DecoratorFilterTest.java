@@ -11,8 +11,9 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.ArrayList;
 
+import static java.util.Arrays.asList;
 import static no.nav.innholdshenter.filter.DecoratorFilter.ALREADY_DECORATED_HEADER;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -45,7 +46,7 @@ public class DecoratorFilterTest {
     }
 
     private void withFragments(String... fragments) {
-        decoratorFilter.setFragmentNames(Arrays.asList(fragments));
+        decoratorFilter.setFragmentNames(asList(fragments));
     }
 
     private void withDefaultFilterChain() {
@@ -153,7 +154,7 @@ public class DecoratorFilterTest {
     public void should_not_decorate_request_and_remove_placeholder_when_requestUri_matches_no_decorate_pattern() throws IOException, ServletException {
         withDefaultFilterChain();
         withFragments("header", "footer");
-        decoratorFilter.setNoDecoratePatterns(Arrays.asList(".*selftest.*"));
+        decoratorFilter.setNoDecoratePatterns(asList(".*selftest.*"));
         request.setRequestURI("/internal/selftest");
 
         decoratorFilter.doFilter(request, response, chain);
@@ -173,7 +174,7 @@ public class DecoratorFilterTest {
 
         withFragments("submenu");
         decoratorFilter.setSubMenuPath("path/to/menu");
-        decoratorFilter.setNoSubmenuPatterns(Arrays.asList(".*selftest.*"));
+        decoratorFilter.setNoSubmenuPatterns(asList(".*selftest.*"));
         request.setRequestURI("/internal/selftest");
         when(contentRetriever.getPageContent(anyString())).thenReturn("<div id=\"submenu\"></div>");
 
@@ -220,4 +221,15 @@ public class DecoratorFilterTest {
         assertThat(response.getContentAsString(), is("<html><head><link href=\"main.css\" /></head><body></body></html>"));
     }
 
+    @Test
+    public void should_have_default_noDecoratePattern() {
+        withDefaultFilterChain();
+
+        ArrayList<String> noDecoratePatterns = new ArrayList<String>();
+        noDecoratePatterns.add("test");
+        decoratorFilter.setNoDecoratePatterns(noDecoratePatterns);
+
+        assertThat(decoratorFilter.getNoDecoratePatterns().size(), is(2));
+        assertThat(decoratorFilter.getNoDecoratePatterns().get(1), is(".*isAlive.*"));
+    }
 }
