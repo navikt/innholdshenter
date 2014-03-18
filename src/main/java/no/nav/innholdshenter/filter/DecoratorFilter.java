@@ -73,20 +73,21 @@ public class DecoratorFilter implements Filter {
         if (!shouldDecorateRequest(request)) {
             MarkupMerger markupMerger = new MarkupMerger(fragmentNames, noSubmenuPatterns);
             String responseWithoutPlaceholders = markupMerger.removePlaceholders(originalResponse);
-            writeToResponse(responseWithoutPlaceholders, response, response.getCharacterEncoding());
+            writeToResponse(responseWithoutPlaceholders, response);
             return;
         }
 
         if (shouldHandleContentType(responseWrapper.getContentType())) {
-            String result = mergeWithFragments(originalResponse, request);
+            String mergedResponse = mergeWithFragments(originalResponse, request);
             markRequestAsDecorated(request);
-            writeToResponse(result, response, responseWrapper.getCharacterEncoding());
+            writeToResponse(mergedResponse, response);
         } else {
-            writeToResponse(originalResponse, response, response.getCharacterEncoding());
+            writeToResponse(originalResponse, response);
         }
     }
 
-    private void writeToResponse(String output, HttpServletResponse response, String characterEncoding) throws IOException {
+    private void writeToResponse(String output, HttpServletResponse response) throws IOException {
+        String characterEncoding = response.getCharacterEncoding();
         try {
             response.getWriter().write(output);
         } catch (IllegalStateException getOutputStreamAlreadyCalled) {
