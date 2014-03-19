@@ -113,7 +113,7 @@ public class DecoratorFilterTest {
     }
 
     @Test
-    public void should_inject_sub_menu_when_submenu_path_and_fragment_is_defined() throws IOException, ServletException {
+    public void should_inject_submenu_when_submenu_path_and_fragment_is_defined() throws IOException, ServletException {
         chain = new FilterChain() {
             @Override
             public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
@@ -188,6 +188,19 @@ public class DecoratorFilterTest {
         decoratorFilter.doFilter(request, response, chain);
 
         verify(contentRetriever).getPageContent("http://nav.no/fragments?submenu=path%2Fto%2Fmenu");
+        assertThat(response.getContentAsString(), is("<html><body></body></html>"));
+    }
+
+    @Test
+    public void should_not_throw_exception_when_page_does_not_contain_submenu_placeholder_and_page_should_not_contain_submenu() throws IOException, ServletException {
+        withDefaultFilterChain();
+        withFragments("header", "footer", "submenu");
+        decoratorFilter.setSubMenuPath("path/to/menu");
+        decoratorFilter.setNoSubmenuPatterns(asList(".*selftest.*"));
+        request.setRequestURI("/internal/selftest");
+        when(contentRetriever.getPageContent(anyString())).thenReturn("<div id=\"header\"></div><div id=\"submenu\"></div><div id=\"footer\"></div>");
+
+        decoratorFilter.doFilter(request, response, chain);
         assertThat(response.getContentAsString(), is("<html><body></body></html>"));
     }
 

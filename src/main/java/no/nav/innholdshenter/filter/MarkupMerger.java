@@ -51,7 +51,7 @@ public class MarkupMerger {
         }
 
         String placeholder = createPlaceholder(fragmentName);
-        if (!originalResponseString.contains(placeholder)) {
+        if (!originalResponseString.contains(placeholder) && !isFragmentSubmenu(fragmentName)) {
             throw new RuntimeException("Fant ikke placeholder " + placeholder + " i applikasjonens markup.");
         }
     }
