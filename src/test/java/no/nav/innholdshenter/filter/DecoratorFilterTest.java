@@ -6,11 +6,17 @@ import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
+import javax.imageio.ImageIO;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 import static java.util.Arrays.asList;
@@ -293,6 +299,28 @@ public class DecoratorFilterTest {
         withFragments("header", "footer");
 
         decoratorFilter.doFilter(request, response, chain);
+    }
+
+    @Test
+    public void should_preserve_image_response() throws IOException, ServletException, URISyntaxException {
+        FileInputStream file = new FileInputStream(new File(getClass().getResource("/dashedhorizontal.gif").toURI()));
+        BufferedImage image = ImageIO.read(file);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        ImageIO.write(image, "gif", outputStream);
+        final byte[] bytes = outputStream.toByteArray();
+
+        chain = new FilterChain() {
+            @Override
+            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
+                servletResponse.getOutputStream().write(bytes);
+                servletResponse.setContentType("image/gif;charset=UTF-8");
+            }
+        };
+
+        decoratorFilter.doFilter(request, response, chain);
+        byte[] result = response.getContentAsByteArray();
+
+        assertThat(result, is(bytes));
     }
 
 }

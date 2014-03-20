@@ -95,17 +95,17 @@ public class DecoratorFilter implements Filter {
         responseWrapper.flushBuffer();
         String originalResponseString = responseWrapper.getOutputAsString();
 
-        if (!shouldDecorateRequest(request)) {
+        if (!shouldHandleContentType(responseWrapper.getContentType())) {
+            logger.debug("Should not handle content type: {}", responseWrapper.getContentType());
+            writeOriginalOutputToResponse(responseWrapper, response);
+        } else if (!shouldDecorateRequest(request)) {
             logger.debug("Should not decorate response for request: {}", request.getRequestURI());
             writeToResponse(removePlaceholders(originalResponseString, fragmentNames), response);
-        } else if (shouldHandleContentType(responseWrapper.getContentType())) {
+        } else {
             logger.debug("Merging response with fragments for request: {}", request.getRequestURI());
             String mergedResponseString = mergeWithFragments(originalResponseString, request);
             markRequestAsDecorated(request);
             writeToResponse(mergedResponseString, response);
-        } else {
-            logger.debug("Should not handle content type: {}", responseWrapper.getContentType());
-            writeOriginalOutputToResponse(responseWrapper, response);
         }
     }
 
