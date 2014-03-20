@@ -98,26 +98,31 @@ public class DecoratorFilter implements Filter {
         if (!shouldDecorateRequest(request)) {
             logger.debug("Should not decorate response for request: {}", request.getRequestURI());
             writeToResponse(removePlaceholders(originalResponseString, fragmentNames), response);
-            return;
-        }
-
-        if (shouldHandleContentType(responseWrapper.getContentType())) {
+        } else if (shouldHandleContentType(responseWrapper.getContentType())) {
             logger.debug("Merging response with fragments for request: {}", request.getRequestURI());
             String mergedResponseString = mergeWithFragments(originalResponseString, request);
             markRequestAsDecorated(request);
             writeToResponse(mergedResponseString, response);
         } else {
             logger.debug("Should not handle content type: {}", responseWrapper.getContentType());
-            writeToResponse(originalResponseString, response);
+            writeOriginalOutputToResponse(responseWrapper, response);
         }
     }
 
-    private void writeToResponse(String output, HttpServletResponse response) throws IOException {
+    private void writeToResponse(String transformedOutput, HttpServletResponse response) throws IOException {
         String characterEncoding = response.getCharacterEncoding();
         try {
-            response.getWriter().write(output);
-        } catch (IllegalStateException getOutputStreamAlreadyCalled) {
-            response.getOutputStream().write(output.getBytes(characterEncoding));
+            response.getOutputStream().write(transformedOutput.getBytes(characterEncoding));
+        } catch (IllegalStateException getWriterAlreadyCalled) {
+            response.getWriter().write(transformedOutput);
+        }
+    }
+
+    private void writeOriginalOutputToResponse(DecoratorResponseWrapper responseWrapper, HttpServletResponse response) throws IOException {
+        try {
+            response.getOutputStream().write(responseWrapper.getOutputAsByteArray());
+        } catch (IllegalStateException getWriterHasAlreadyBeenCalled) {
+            response.getWriter().print(responseWrapper.getOutputAsString());
         }
     }
 

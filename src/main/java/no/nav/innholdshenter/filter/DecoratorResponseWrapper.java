@@ -65,4 +65,12 @@ class DecoratorResponseWrapper extends HttpServletResponseWrapper {
         }
         return "";
     }
+
+    public byte[] getOutputAsByteArray() {
+        if (stream != null) {
+            return stream.getByteArrayOutputStream().toByteArray();
+        } else {
+            return "".getBytes();
+        }
+    }
 }
