@@ -26,6 +26,7 @@ import static java.util.Arrays.asList;
 import static no.nav.innholdshenter.filter.DecoratorFilterUtils.createMatcher;
 import static no.nav.innholdshenter.filter.DecoratorFilterUtils.isFragmentSubmenu;
 import static no.nav.innholdshenter.filter.DecoratorFilterUtils.removePlaceholders;
+import static org.apache.commons.lang.StringUtils.isEmpty;
 
 public class DecoratorFilter implements Filter {
 
@@ -95,8 +96,8 @@ public class DecoratorFilter implements Filter {
         responseWrapper.flushBuffer();
         String originalResponseString = responseWrapper.getOutputAsString();
 
-        if (!shouldHandleContentType(responseWrapper.getContentType())) {
-            logger.debug("Should not handle content type: {}", responseWrapper.getContentType());
+        if (!shouldHandleContentType(responseWrapper.getContentType()) || isEmpty(originalResponseString)) {
+            logger.debug("Should not handle content type, or original response string is empty: {}", responseWrapper.getContentType());
             writeOriginalOutputToResponse(responseWrapper, response);
         } else if (!shouldDecorateRequest(request)) {
             logger.debug("Should not decorate response for request: {}", request.getRequestURI());

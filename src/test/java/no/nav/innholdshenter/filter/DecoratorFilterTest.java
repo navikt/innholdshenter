@@ -323,4 +323,20 @@ public class DecoratorFilterTest {
         assertThat(result, is(bytes));
     }
 
+    @Test
+    public void should_handle_empty_response_when_response_should_be_merged_with_fragments() throws IOException, ServletException {
+        chain = new FilterChain() {
+            @Override
+            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
+                servletResponse.getWriter().write("");
+                servletResponse.setContentType("text/html");
+            }
+        };
+        withFragments("header", "footer");
+
+        decoratorFilter.doFilter(request, response, chain);
+
+        assertThat(response.getContentAsString(), is(""));
+    }
+
 }
