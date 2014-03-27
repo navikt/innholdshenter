@@ -83,8 +83,8 @@ public class MarkupMerger {
 
     private String removeSubmenuAndExpandGrid(String mergedResponseString) {
         Document document = Jsoup.parse(mergedResponseString);
-        Element main = document.getElementById("main");
-        Element row = main.getElementsByClass("row").first();
+        Element maincontent = document.getElementById("maincontent");
+        Element row = maincontent.getElementsByClass("row").first();
 
         Element subMenu = row.child(0);
         Element application = row.child(1);

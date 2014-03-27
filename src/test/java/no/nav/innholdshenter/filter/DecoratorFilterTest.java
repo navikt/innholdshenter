@@ -342,7 +342,7 @@ public class DecoratorFilterTest {
         chain = new FilterChain() {
             @Override
             public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-                servletResponse.getWriter().write("<html><body><main id=\"main\"><div class=\"row\"><div class=\"col-md-4\">{{fragment.submenu}}</div><div class=\"col-md-8\"></div></div></main></body></html>");
+                servletResponse.getWriter().write("<html><body><main id=\"maincontent\"><div class=\"row\"><div class=\"col-md-4\">{{fragment.submenu}}</div><div class=\"col-md-8\"></div></div></main></body></html>");
                 servletResponse.setContentType("text/html");
             }
         };
@@ -365,7 +365,7 @@ public class DecoratorFilterTest {
         chain = new FilterChain() {
             @Override
             public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-                servletResponse.getWriter().write("<html><body>{{fragment.header}}<main id=\"main\"><div class=\"row\"><div class=\"col-md-4\">{{fragment.submenu}}</div><div class=\"col-md-8\"></div></div></main>{{fragment.footer}}</body></html>");
+                servletResponse.getWriter().write("<html><body>{{fragment.header}}<main id=\"maincontent\"><div class=\"row\"><div class=\"col-md-4\">{{fragment.submenu}}</div><div class=\"col-md-8\"></div></div></main>{{fragment.footer}}</body></html>");
                 servletResponse.setContentType("text/html");
             }
         };
