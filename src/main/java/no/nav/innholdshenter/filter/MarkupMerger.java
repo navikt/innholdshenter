@@ -1,5 +1,6 @@
 package no.nav.innholdshenter.filter;
 
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
@@ -41,6 +42,7 @@ public class MarkupMerger {
             }
         }
 
+        responseString = extractAndInjectTitle(responseString);
         checkForUnresolvedPlaceholders(responseString);
         return responseString;
     }
@@ -56,6 +58,12 @@ public class MarkupMerger {
         }
     }
 
+    private String extractAndInjectTitle(String responseString) {
+        Document document = Jsoup.parse(responseString);
+        String title = document.title();
+        return responseString.replace(createPlaceholder("title"), title);
+    }
+
     private void checkForUnresolvedPlaceholders(String responseString) {
         Matcher matcher = createMatcher(PLACEHOLDER_REGEX, responseString);
         if (matcher.matches()) {
@@ -65,12 +73,27 @@ public class MarkupMerger {
 
     private String mergeSubmenuFragment(String responseString, String fragmentName, Element element) {
         String mergedResponseString = responseString;
-        if (!requestUriMatchesNoSubmenuPattern()) {
-            mergedResponseString = mergeFragment(mergedResponseString, fragmentName, element.html());
+        if (requestUriMatchesNoSubmenuPattern()) {
+            mergedResponseString = removeSubmenuAndExpandGrid(mergedResponseString);
         } else {
-            mergedResponseString = mergeFragment(mergedResponseString, fragmentName, "");
+            mergedResponseString = mergeFragment(mergedResponseString, fragmentName, element.html());
         }
         return mergedResponseString;
+    }
+
+    private String removeSubmenuAndExpandGrid(String mergedResponseString) {
+        Document document = Jsoup.parse(mergedResponseString);
+        Element main = document.getElementById("main");
+        Element row = main.getElementsByClass("row").first();
+
+        Element subMenu = row.child(0);
+        Element application = row.child(1);
+
+        subMenu.remove();
+        application.removeClass(application.className());
+        application.addClass("col-md-12");
+
+        return document.html();
     }
 
     private String mergeFragment(String responseString, String fragmentName, String elementMarkup) {

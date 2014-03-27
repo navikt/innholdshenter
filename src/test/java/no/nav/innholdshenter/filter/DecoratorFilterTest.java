@@ -21,6 +21,8 @@ import java.util.ArrayList;
 
 import static java.util.Arrays.asList;
 import static no.nav.innholdshenter.filter.DecoratorFilter.ALREADY_DECORATED_HEADER;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
@@ -176,41 +178,6 @@ public class DecoratorFilterTest {
     }
 
     @Test
-    public void should_not_inject_submenu_and_remove_placholder_when_requestUri_matches_no_submenu_pattern() throws IOException, ServletException {
-        chain = new FilterChain() {
-            @Override
-            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-                servletResponse.getWriter().write("<html><body>{{fragment.submenu}}</body></html>");
-                servletResponse.setContentType("text/html");
-            }
-        };
-
-        withFragments("submenu");
-        decoratorFilter.setSubMenuPath("path/to/menu");
-        decoratorFilter.setNoSubmenuPatterns(asList(".*selftest.*"));
-        request.setRequestURI("/internal/selftest");
-        when(contentRetriever.getPageContent(anyString())).thenReturn("<div id=\"submenu\"></div>");
-
-        decoratorFilter.doFilter(request, response, chain);
-
-        verify(contentRetriever).getPageContent("http://nav.no/fragments?submenu=path%2Fto%2Fmenu");
-        assertThat(response.getContentAsString(), is("<html><body></body></html>"));
-    }
-
-    @Test
-    public void should_not_throw_exception_when_page_does_not_contain_submenu_placeholder_and_page_should_not_contain_submenu() throws IOException, ServletException {
-        withDefaultFilterChain();
-        withFragments("header", "footer", "submenu");
-        decoratorFilter.setSubMenuPath("path/to/menu");
-        decoratorFilter.setNoSubmenuPatterns(asList(".*selftest.*"));
-        request.setRequestURI("/internal/selftest");
-        when(contentRetriever.getPageContent(anyString())).thenReturn("<div id=\"header\"></div><div id=\"submenu\"></div><div id=\"footer\"></div>");
-
-        decoratorFilter.doFilter(request, response, chain);
-        assertThat(response.getContentAsString(), is("<html><body></body></html>"));
-    }
-
-    @Test
     public void should_not_decorate_response_when_request_has_exclude_header() throws IOException, ServletException {
         withDefaultFilterChain();
         withFragments("header", "footer");
@@ -337,6 +304,78 @@ public class DecoratorFilterTest {
         decoratorFilter.doFilter(request, response, chain);
 
         assertThat(response.getContentAsString(), is(""));
+    }
+
+    @Test
+    public void should_replace_title_placeholder_with_value_from_html_title_tag() throws IOException, ServletException {
+        chain = new FilterChain() {
+            @Override
+            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
+                servletResponse.getWriter().write("<html><head><title>Bidragsveileder</title></head><body><h1>{{fragment.title}}</h1></html>");
+                servletResponse.setContentType("text/html");
+            }
+        };
+
+        decoratorFilter.doFilter(request, response, chain);
+
+        assertThat(response.getContentAsString(), is("<html><head><title>Bidragsveileder</title></head><body><h1>Bidragsveileder</h1></html>"));
+    }
+
+    @Test
+    public void should_handle_no_title_in_application_markup() throws IOException, ServletException {
+        chain = new FilterChain() {
+            @Override
+            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
+                servletResponse.getWriter().write("<html><head></head><body><h1>{{fragment.title}}</h1></html>");
+                servletResponse.setContentType("text/html");
+            }
+        };
+
+        decoratorFilter.doFilter(request, response, chain);
+
+        assertThat(response.getContentAsString(), is("<html><head></head><body><h1></h1></html>"));
+
+    }
+
+    @Test
+    public void should_remove_submenu_and_expand_grid_when_requestUri_matches_no_submenu_pattern() throws IOException, ServletException {
+        chain = new FilterChain() {
+            @Override
+            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
+                servletResponse.getWriter().write("<html><body><main id=\"main\"><div class=\"row\"><div class=\"col-md-4\">{{fragment.submenu}}</div><div class=\"col-md-8\"></div></div></main></body></html>");
+                servletResponse.setContentType("text/html");
+            }
+        };
+
+        withFragments("submenu");
+        decoratorFilter.setSubMenuPath("path/to/menu");
+        decoratorFilter.setNoSubmenuPatterns(asList(".*selftest.*"));
+        request.setRequestURI("/internal/selftest");
+        when(contentRetriever.getPageContent(anyString())).thenReturn("<div id=\"submenu\"></div>");
+
+        decoratorFilter.doFilter(request, response, chain);
+
+        verify(contentRetriever).getPageContent("http://nav.no/fragments?submenu=path%2Fto%2Fmenu");
+        assertThat(response.getContentAsString(), not(containsString("<div class=\"col-md-4\"></div>")));
+        assertThat(response.getContentAsString(), containsString("<div class=\"col-md-12\"></div>"));
+    }
+
+    @Test
+    public void should_not_throw_exception_when_page_does_not_contain_submenu_placeholder_and_page_should_not_contain_submenu() throws IOException, ServletException {
+        chain = new FilterChain() {
+            @Override
+            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
+                servletResponse.getWriter().write("<html><body>{{fragment.header}}<main id=\"main\"><div class=\"row\"><div class=\"col-md-4\">{{fragment.submenu}}</div><div class=\"col-md-8\"></div></div></main>{{fragment.footer}}</body></html>");
+                servletResponse.setContentType("text/html");
+            }
+        };
+        withFragments("header", "footer", "submenu");
+        decoratorFilter.setSubMenuPath("path/to/menu");
+        decoratorFilter.setNoSubmenuPatterns(asList(".*selftest.*"));
+        request.setRequestURI("/internal/selftest");
+        when(contentRetriever.getPageContent(anyString())).thenReturn("<div id=\"header\"></div><div id=\"submenu\"></div><div id=\"footer\"></div>");
+
+        decoratorFilter.doFilter(request, response, chain);
     }
 
 }
