@@ -54,6 +54,7 @@ public class DecoratorFilter implements Filter {
         setDefaultExcludeHeaders();
     }
 
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
     @PostConstruct
     private void validateConfiguration() {
         if (isSubmenuFragmentDefined() && subMenuPath == null) {
