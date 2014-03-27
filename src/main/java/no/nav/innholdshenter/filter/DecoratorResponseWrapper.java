@@ -12,25 +12,51 @@ import java.io.PrintWriter;
  */
 class DecoratorResponseWrapper extends HttpServletResponseWrapper {
 
-    private static final String FEILMELDING_GET_WRITER_HAS_ALREADY_BEEN_CALLED = "getWriter() has already been called!";
-    private static final String FEILMELDING_GET_OUTPUT_STREAM_HAS_ALREADY_BEEN_CALLED = "getOutputStream() has already been called!";
-    private ByteArrayServletOutputStream stream = null;
-    private PrintWriter writer = null;
-    private String contentType = null;
-    private HttpServletResponse origResponse = null;
+    private ByteArrayServletOutputStream stream;
+    private PrintWriter writer;
+    private HttpServletResponse originalResponse;
 
     public DecoratorResponseWrapper(HttpServletResponse response) {
         super(response);
-        origResponse = response;
+        originalResponse = response;
     }
 
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
-        super.setContentType(contentType);
+    @Override
+    public ServletOutputStream getOutputStream() {
+        if (writer != null) {
+            throw new IllegalStateException("getWriter() has already been called!");
+        }
+
+        if (stream == null) {
+            stream = new ByteArrayServletOutputStream(originalResponse.getCharacterEncoding());
+        }
+
+        return stream;
     }
 
-    public String getContentType() {
-        return contentType;
+    @Override
+    public PrintWriter getWriter() throws IOException {
+        if (writer != null) {
+            return writer;
+        }
+
+        if (stream != null) {
+            throw new IllegalStateException("getOutputStream() has already been called!");
+        }
+
+        stream = new ByteArrayServletOutputStream(originalResponse.getCharacterEncoding());
+        writer = new PrintWriter(new OutputStreamWriter(stream, originalResponse.getCharacterEncoding()));
+        return writer;
+    }
+
+    public void flushBuffer() throws IOException {
+        if (writer != null) {
+            writer.flush();
+        }
+
+        if (stream != null) {
+            stream.flush();
+        }
     }
 
     public String getOutputAsString() {
@@ -45,77 +71,6 @@ class DecoratorResponseWrapper extends HttpServletResponseWrapper {
             return stream.getByteArrayOutputStream().toByteArray();
         } else {
             return "".getBytes();
-        }
-    }
-
-    public void flushBuffer() throws IOException {
-        if (writer != null) {
-            writer.flush();
-        }
-
-        if (stream != null) {
-            stream.flush();
-        }
-    }
-
-    @Override
-    public int getBufferSize() {
-        if (stream != null) {
-            return stream.getSize();
-        }
-
-        return 0;
-    }
-
-    @Override
-    public ServletOutputStream getOutputStream() {
-        if (writer != null) {
-            throw new IllegalStateException(FEILMELDING_GET_WRITER_HAS_ALREADY_BEEN_CALLED);
-        }
-
-        if (stream == null) {
-            stream = new ByteArrayServletOutputStream(origResponse.getCharacterEncoding());
-        }
-
-        return stream;
-    }
-
-    @Override
-    public PrintWriter getWriter() throws IOException {
-        if (writer != null) {
-            return writer;
-        }
-
-        if (stream != null) {
-            throw new IllegalStateException(FEILMELDING_GET_OUTPUT_STREAM_HAS_ALREADY_BEEN_CALLED);
-        }
-
-        stream = new ByteArrayServletOutputStream(origResponse.getCharacterEncoding());
-        writer = new PrintWriter(new OutputStreamWriter(stream, origResponse.getCharacterEncoding()));
-        return writer;
-    }
-
-    @Override
-    public void reset() {
-        resetBuffer();
-        super.reset();
-    }
-
-    @Override
-    public void resetBuffer() {
-        if (stream != null) {
-            stream.reset();
-        }
-    }
-
-    @Override
-    public void setBufferSize(int size) throws IllegalStateException {
-        try {
-            if (stream != null) {
-                stream.setSize(size);
-            }
-        } catch (IOException ioe) {
-            throw new IllegalStateException(ioe.getMessage());
         }
     }
 }

@@ -11,9 +11,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/**
- * Tester ByteArrayServletOutputStream
- */
 public class DecoratorResponseWrapperTest {
     private static final String ISO_8859_1 = "iso-8859-1";
 

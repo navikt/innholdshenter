@@ -1,128 +1,113 @@
 package no.nav.innholdshenter.filter;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-/**
- * Legger head og body inn i "rammen"
- */
-class MarkupMerger {
+import static no.nav.innholdshenter.filter.DecoratorFilterUtils.PLACEHOLDER_REGEX;
+import static no.nav.innholdshenter.filter.DecoratorFilterUtils.createMatcher;
+import static no.nav.innholdshenter.filter.DecoratorFilterUtils.createPlaceholder;
+import static no.nav.innholdshenter.filter.DecoratorFilterUtils.isFragmentSubmenu;
 
-    private static final String EMPTY_STRING = "";
-    private static final String ENCODING_PATTERN_MATCHER = "(<\\?xml\\s*version=\"(.*)\"\\s*encoding=\"([^\"]*)?\">?\\s*\\?>)";
+public class MarkupMerger {
 
-    private static final String HEAD_PLACEHOLDER = "<!-- ${head} -->";
+    private final List<String> noSubmenuPatterns;
+    private List<String> fragmentNames;
+    private final String originalResponseString;
+    private Document htmlFragments;
+    private final HttpServletRequest request;
 
-    private static final String BODY_PLACEHOLDER = "<!-- ${body} -->";
-    private static final String TITLE_PLACEHOLDER = "<!-- ${title} -->";
-    private static final String HEADERBAR_COMPONENT_PLACEHOLDER = "<!-- ${headerbarcomponent} -->";
-    private static final String LEFT_MENU_COMPONENT_PLACEHOLDER = "<!-- ${leftmenucomponent} -->";
-    private static final String BREADCRUMB_FROM_VS_START = "<!--breadcrumbs_start-->";
-
-    private static final String BREADCRUMB_FROM_VS_END = "<!--breadcrumbs_end-->";
-    private static final String BREADCRUMB_PLACEHOLDER = "<!-- ${breadcrumb} -->";
-
-    private MarkupMerger() {
+    public MarkupMerger(List<String> fragmentNames, List<String> noSubmenuPatterns, String originalResponseString, Document htmlFragments, HttpServletRequest request) {
+        this.fragmentNames = fragmentNames;
+        this.noSubmenuPatterns = noSubmenuPatterns;
+        this.originalResponseString = originalResponseString;
+        this.htmlFragments = htmlFragments;
+        this.request = request;
     }
 
-    public static HtmlPage mergeHeaderBarComponent(HtmlPage mergedPage, String headerBarStartTag, String headerBarEndTag) {
-        return mergeComponent(headerBarStartTag, headerBarEndTag, mergedPage, HEADERBAR_COMPONENT_PLACEHOLDER);
+    public String merge() {
+        String responseString = originalResponseString;
+        for (String fragmentName : fragmentNames) {
+            Element element = htmlFragments.getElementById(fragmentName);
+            validateFragmentAndPlaceholder(fragmentName, element);
+
+            if (isFragmentSubmenu(fragmentName)) {
+                responseString = mergeSubmenuFragment(responseString, fragmentName, element);
+            } else {
+                responseString = mergeFragment(responseString, fragmentName, element.html());
+            }
+        }
+
+        responseString = extractAndInjectTitle(responseString);
+        checkForUnresolvedPlaceholders(responseString);
+        return responseString;
     }
 
-    public static HtmlPage mergeLeftMenuComponent(HtmlPage mergedPage, String menuComponentStartTag, String menuCompoentEndTag) {
-        return mergeComponent(menuComponentStartTag, menuCompoentEndTag, mergedPage, LEFT_MENU_COMPONENT_PLACEHOLDER);
+    private void validateFragmentAndPlaceholder(String fragmentName, Element element) {
+        if (element == null) {
+            throw new RuntimeException("Element [ " + fragmentName + " ] ikke funnet i responsen fra Enonic.");
+        }
+
+        String placeholder = createPlaceholder(fragmentName);
+        if (!originalResponseString.contains(placeholder) && !isFragmentSubmenu(fragmentName)) {
+            throw new RuntimeException("Fant ikke placeholder " + placeholder + " i applikasjonens markup.");
+        }
     }
 
-    public static HtmlPage mergeBreadcrumbComponent(HtmlPage originalPageFromApplication, HtmlPage mergedPage, String breadcrumbComponentStartTag,
-                                                    String breadcrumbComponentEndTag, String breadbrumbComponentMergePoint) {
-        String tmpMarkup;
-        String breadcrumbsFromVerticalSite = mergedPage.getAreaWithinTagsFromHtml(BREADCRUMB_FROM_VS_START, BREADCRUMB_FROM_VS_END);
-        String breadcrumbsFromApplication = originalPageFromApplication.getAreaWithinTagsFromHtml(breadcrumbComponentStartTag, breadcrumbComponentEndTag);
-        String newBreadCrumb = mergeApplicationBreadcrumbWithVSBreadcrumb(breadcrumbsFromVerticalSite, breadcrumbsFromApplication,
-                breadcrumbComponentStartTag, breadcrumbComponentEndTag, breadbrumbComponentMergePoint);
-
-        tmpMarkup = mergedPage.removeAreaWithinTagsFromHtml(BREADCRUMB_FROM_VS_START, BREADCRUMB_FROM_VS_END);
-        tmpMarkup = tmpMarkup.replace(BREADCRUMB_PLACEHOLDER, newBreadCrumb);
-
-        return new HtmlPage(tmpMarkup);
+    private String extractAndInjectTitle(String responseString) {
+        Document document = Jsoup.parse(responseString);
+        String title = document.title();
+        return responseString.replace(createPlaceholder("title"), title);
     }
 
-    private static String mergeApplicationBreadcrumbWithVSBreadcrumb(String breadcrumbsFromVerticalSite, String breadcrumbsFromApplication,
-                                                                     String breadcrumbComponentStartTag, String breadcrumbComponentEndTag,
-                                                                     String breadbrumbComponentMergePoint) {
+    private void checkForUnresolvedPlaceholders(String responseString) {
+        Matcher matcher = createMatcher(PLACEHOLDER_REGEX, responseString);
+        if (matcher.matches()) {
+            throw new RuntimeException("Fant unresolved placeholder " + matcher.group(1) + " i applikasjonens markup.");
+        }
+    }
 
-        String breadcrumbsFromApplicationStrippedTags = stripTags(breadcrumbsFromApplication, breadcrumbComponentStartTag, breadcrumbComponentEndTag);
-        String breadcrumbsFromVerticalSiteStrippedTags = stripTags(breadcrumbsFromVerticalSite, BREADCRUMB_FROM_VS_START, BREADCRUMB_FROM_VS_END);
-        String newBreadCrumb = breadcrumbsFromVerticalSiteStrippedTags;
-
-        if (mergePointIsFoundInBothDecorationTemplateAndPageToBeRewritten(breadbrumbComponentMergePoint, breadcrumbsFromApplicationStrippedTags, breadcrumbsFromVerticalSiteStrippedTags)) {
-            newBreadCrumb = newBreadCrumb.substring(0, breadcrumbsFromVerticalSiteStrippedTags.indexOf(breadbrumbComponentMergePoint));
-            int breadcrumpsFromApplicationIndex = breadcrumbsFromApplicationStrippedTags.indexOf(breadbrumbComponentMergePoint);
-            int length = breadcrumbsFromApplicationStrippedTags.length();
-            newBreadCrumb += breadcrumbsFromApplicationStrippedTags.substring(breadcrumpsFromApplicationIndex, length);
-            return newBreadCrumb;
+    private String mergeSubmenuFragment(String responseString, String fragmentName, Element element) {
+        String mergedResponseString = responseString;
+        if (requestUriMatchesNoSubmenuPattern()) {
+            mergedResponseString = removeSubmenuAndExpandGrid(mergedResponseString);
         } else {
-            return breadcrumbsFromApplicationStrippedTags;
+            mergedResponseString = mergeFragment(mergedResponseString, fragmentName, element.html());
         }
+        return mergedResponseString;
     }
 
-    private static boolean mergePointIsFoundInBothDecorationTemplateAndPageToBeRewritten(String breadbrumbComponentMergePoint,
-                                                                                         String breadcrumbsFromApplicationStrippedTags,
-                                                                                         String breadcrumbsFromVerticalSiteStrippedTags) {
-        if (breadbrumbComponentMergePoint != null) {
-            int breadCrumpsFromVerticalSiteIndex = breadcrumbsFromVerticalSiteStrippedTags.indexOf(breadbrumbComponentMergePoint);
-            int breadCrumpsFromApplicationIndex = breadcrumbsFromApplicationStrippedTags.indexOf(breadbrumbComponentMergePoint);
-            return breadCrumpsFromApplicationIndex >= 0 && breadCrumpsFromVerticalSiteIndex >= 0;
-        }
+    private String removeSubmenuAndExpandGrid(String mergedResponseString) {
+        Document document = Jsoup.parse(mergedResponseString);
+        Element maincontent = document.getElementById("maincontent");
+        Element row = maincontent.getElementsByClass("row").first();
 
+        Element subMenu = row.child(0);
+        Element application = row.child(1);
+
+        subMenu.remove();
+        application.removeClass(application.className());
+        application.addClass("col-md-12");
+
+        return document.html();
+    }
+
+    private String mergeFragment(String responseString, String fragmentName, String elementMarkup) {
+        return responseString.replace(createPlaceholder(fragmentName), elementMarkup);
+    }
+
+    private boolean requestUriMatchesNoSubmenuPattern() {
+        for (String noSubmenuPattern : noSubmenuPatterns) {
+            Matcher matcher = createMatcher(noSubmenuPattern, request.getRequestURI());
+            if (matcher.matches()) {
+                return true;
+            }
+        }
         return false;
     }
 
-    private static String stripTags(String stringToStrip, String startTag, String endTag) {
-        return stringToStrip.replace(startTag, EMPTY_STRING).replace(endTag, EMPTY_STRING);
-    }
-
-    private static HtmlPage mergeComponent(String startTag, String endTag, HtmlPage mergedPage, String placeHolder) {
-        String tmpMarkup;
-        tmpMarkup = mergedPage.removeAreaWithinTagsFromHtml(startTag, endTag);
-        String areaWithinTagsFromHtml = mergedPage.getAreaWithinTagsFromHtml(startTag, endTag);
-        tmpMarkup = tmpMarkup.replace(placeHolder, areaWithinTagsFromHtml);
-
-        return new HtmlPage(tmpMarkup);
-    }
-
-
-    public static HtmlPage mergeMarkup(String verticalSiteFrame, HtmlPage originalPageFromApplication) {
-        String tmpMarkup = verticalSiteFrame;
-
-        String head = originalPageFromApplication.getHeadPartOfHtml();
-        String body = originalPageFromApplication.getBodyPartOfHtml();
-        String title = originalPageFromApplication.getTitlePartOfHtml();
-
-        tmpMarkup = tmpMarkup.replace(HEAD_PLACEHOLDER, head);
-        tmpMarkup = tmpMarkup.replace(BODY_PLACEHOLDER, body);
-        tmpMarkup = tmpMarkup.replace(TITLE_PLACEHOLDER, title);
-
-        tmpMarkup = getEncodingTag(originalPageFromApplication.getHtml()) + tmpMarkup;
-
-        if (noChangesHasBeenMadeToPage(head, body, title)) {
-            return originalPageFromApplication;
-        }
-        return new HtmlPage(tmpMarkup);
-    }
-
-    private static boolean noChangesHasBeenMadeToPage(String head, String body, String title) {
-        return head.equals(EMPTY_STRING) && body.equals(EMPTY_STRING) && title.equals(EMPTY_STRING);
-    }
-
-    public static String getEncodingTag(String html) {
-        Pattern pattern = Pattern.compile(ENCODING_PATTERN_MATCHER, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-        Matcher matcher = pattern.matcher(html);
-
-        if (matcher.find()) {
-            return matcher.group(1);
-        } else {
-            return EMPTY_STRING;
-        }
-    }
 }
