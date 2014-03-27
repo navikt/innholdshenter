@@ -21,8 +21,8 @@ import java.util.ArrayList;
 
 import static java.util.Arrays.asList;
 import static no.nav.innholdshenter.filter.DecoratorFilter.ALREADY_DECORATED_HEADER;
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
