@@ -11,7 +11,10 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.http.HttpServletRequest;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
 
+import static no.nav.innholdshenter.filter.DecoratorFilterUtils.createMatcher;
 import static no.nav.innholdshenter.filter.DecoratorFilterUtils.isFragmentSubmenu;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
@@ -27,9 +30,11 @@ public class FragmentFetcher {
     private String subMenuPath;
     private final HttpServletRequest request;
     private final String originalResponseString;
+    private ExtendedConfiguration arbeidConfiguration;
 
-    public FragmentFetcher(EnonicContentRetriever contentRetriever, String fragmentsUrl, String applicationName,
-                           boolean shouldIncludeActiveItem, String subMenuPath, List<String> fragmentNames, HttpServletRequest request, String originalResponseString) {
+    public FragmentFetcher(EnonicContentRetriever contentRetriever, String fragmentsUrl, String applicationName, boolean shouldIncludeActiveItem,
+                           String subMenuPath, List<String> fragmentNames, HttpServletRequest request,
+                           String originalResponseString, ExtendedConfiguration arbeidConfiguration) {
         this.contentRetriever = contentRetriever;
         this.fragmentsUrl = fragmentsUrl;
         this.applicationName = applicationName;
@@ -38,6 +43,7 @@ public class FragmentFetcher {
         this.subMenuPath = subMenuPath;
         this.request = request;
         this.originalResponseString = originalResponseString;
+        this.arbeidConfiguration = arbeidConfiguration;
     }
 
     public Document fetchHtmlFragments() {
@@ -60,7 +66,7 @@ public class FragmentFetcher {
         }
 
         if (shouldIncludeActiveItem) {
-            urlBuilder.addParameter("activeitem", request.getRequestURI());
+            addActiveItem(urlBuilder);
         }
 
         String role = extractMetaTag("Brukerstatus");
@@ -70,13 +76,55 @@ public class FragmentFetcher {
 
         for (String fragmentName : fragmentNames) {
             if (isFragmentSubmenu(fragmentName)) {
-                urlBuilder.addParameter("submenu", subMenuPath);
+                addSubmenuPath(urlBuilder);
             } else {
                 urlBuilder.addParameter(fragmentName, "true");
             }
         }
 
         return urlBuilder.build().toString();
+    }
+
+    private void addActiveItem(URIBuilder urlBuilder) {
+        String requestUri = getRequestUriOrAlternativePathBasedOnMetaTag();
+        if (arbeidConfiguration != null) {
+            Map<String, String> menuMap = arbeidConfiguration.getMenuMap();
+            for (String key : menuMap.keySet()) {
+                Matcher matcher = createMatcher(key, requestUri);
+                if (matcher.matches()) {
+                    urlBuilder.addParameter("activeitem", menuMap.get(key));
+                    return;
+                }
+            }
+        }
+
+        urlBuilder.addParameter("activeitem", requestUri);
+    }
+
+    private void addSubmenuPath(URIBuilder urlBuilder) {
+        String requestUri = getRequestUriOrAlternativePathBasedOnMetaTag();
+        if (arbeidConfiguration != null) {
+            Map<String, String> subMenuPathMap = arbeidConfiguration.getSubMenuPathMap();
+            for (String key : subMenuPathMap.keySet()) {
+                Matcher matcher = createMatcher(key, requestUri);
+                if (matcher.matches()) {
+                    urlBuilder.addParameter("submenu", subMenuPathMap.get(key));
+                    return;
+                }
+            }
+        }
+
+        urlBuilder.addParameter("submenu", subMenuPath);
+    }
+
+    private String getRequestUriOrAlternativePathBasedOnMetaTag() {
+        String alternativeRequestUri = extractMetaTag("hodeFotKey");
+
+        if (!isEmpty(alternativeRequestUri)) {
+            return alternativeRequestUri;
+        } else {
+            return request.getRequestURI();
+        }
     }
 
     private String extractMetaTag(String tag) {

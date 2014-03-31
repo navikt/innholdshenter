@@ -45,6 +45,7 @@ public class DecoratorFilter implements Filter {
     private List<String> noDecoratePatterns;
     private List<String> noSubmenuPatterns;
     private Map<String, String> excludeHeaders;
+    private ExtendedConfiguration extendedConfiguration;
 
     public DecoratorFilter() {
         fragmentNames = new ArrayList<String>();
@@ -57,7 +58,7 @@ public class DecoratorFilter implements Filter {
     @SuppressWarnings("PMD.UnusedPrivateMethod")
     @PostConstruct
     private void validateConfiguration() {
-        if (isSubmenuFragmentDefined() && subMenuPath == null) {
+        if (isSubmenuFragmentDefined() && subMenuPath == null && extendedConfiguration == null) {
             throw new IllegalArgumentException("subMenuPath kan ikke være null når submenu er definert som fragment");
         }
     }
@@ -177,7 +178,7 @@ public class DecoratorFilter implements Filter {
     }
 
     private String mergeWithFragments(String originalResponseString, HttpServletRequest request) {
-        FragmentFetcher fragmentFetcher = new FragmentFetcher(contentRetriever, fragmentsUrl, applicationName, shouldIncludeActiveItem, subMenuPath, fragmentNames, request, originalResponseString);
+        FragmentFetcher fragmentFetcher = new FragmentFetcher(contentRetriever, fragmentsUrl, applicationName, shouldIncludeActiveItem, subMenuPath, fragmentNames, request, originalResponseString, extendedConfiguration);
         Document htmlFragments = fragmentFetcher.fetchHtmlFragments();
         MarkupMerger markupMerger = new MarkupMerger(fragmentNames, noSubmenuPatterns, originalResponseString, htmlFragments, request);
         return markupMerger.merge();
@@ -226,5 +227,9 @@ public class DecoratorFilter implements Filter {
 
     public List<String> getNoDecoratePatterns() {
         return noDecoratePatterns;
+    }
+
+    public void setExtendedConfiguration(ExtendedConfiguration extendedConfiguration) {
+        this.extendedConfiguration = extendedConfiguration;
     }
 }

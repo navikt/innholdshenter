@@ -18,6 +18,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import static java.util.Arrays.asList;
 import static no.nav.innholdshenter.filter.DecoratorFilter.ALREADY_DECORATED_HEADER;
@@ -378,4 +380,67 @@ public class DecoratorFilterTest {
         decoratorFilter.doFilter(request, response, chain);
     }
 
+    @Test
+    public void should_send_active_item_in_menu_map_if_request_uri_matches_menu_map_key() throws IOException, ServletException {
+        chain = new FilterChain() {
+            @Override
+            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
+                servletResponse.getWriter().write("<html></html>");
+                servletResponse.setContentType("text/html");
+            }
+        };
+        decoratorFilter.setShouldIncludeActiveItem(true);
+        ExtendedConfiguration extendedConfiguration = new ExtendedConfiguration();
+        Map<String, String> menuMap = new HashMap<String, String>();
+        menuMap.put("^/sbl/kategori.*", "/sbl/ag/sok/enkelt.do");
+        extendedConfiguration.setMenuMap(menuMap);
+        decoratorFilter.setExtendedConfiguration(extendedConfiguration);
+        request.setRequestURI("/sbl/kategorier");
+
+        decoratorFilter.doFilter(request, response, chain);
+
+        verify(contentRetriever).getPageContent("http://nav.no/fragments?activeitem=%2Fsbl%2Fag%2Fsok%2Fenkelt.do");
+    }
+
+    @Test
+    public void should_send_submenupath_based_on_request_uri_and_submenu_map() throws IOException, ServletException {
+        chain = new FilterChain() {
+            @Override
+            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
+                servletResponse.getWriter().write("<html></html>");
+                servletResponse.setContentType("text/html");
+            }
+        };
+        withFragments("submenu");
+        when(contentRetriever.getPageContent(anyString())).thenReturn("<div id=\"submenu\"><nav id=\"submenu\"></nav></div><<</div>");
+        ExtendedConfiguration extendedConfiguration = new ExtendedConfiguration();
+        Map<String, String> subMenuPathMap = new HashMap<String, String>();
+        subMenuPathMap.put("^/sbl/ag.*", "ditt-nav/din-side");
+        subMenuPathMap.put("^/sbl/.*", "ditt-nav/din-side-arbeid");
+        extendedConfiguration.setSubMenuPathMap(subMenuPathMap);
+        decoratorFilter.setExtendedConfiguration(extendedConfiguration);
+        request.setRequestURI("/sbl/ag/minside.do");
+
+        decoratorFilter.doFilter(request, response, chain);
+
+        verify(contentRetriever).getPageContent("http://nav.no/fragments?submenu=ditt-nav%2Fdin-side");
+    }
+
+    @Test
+    public void should_use_hodeFotKey_as_requestUri_if_exists_in_application_markup() throws IOException, ServletException {
+        chain = new FilterChain() {
+            @Override
+            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
+                servletResponse.getWriter().write("<meta name=\"hodeFotKey\" content=\"/sbl\">");
+                servletResponse.setContentType("text/html");
+            }
+        };
+        request.setRequestURI("/meldekort");
+        decoratorFilter.setShouldIncludeActiveItem(true);
+
+        decoratorFilter.doFilter(request, response, chain);
+
+        verify(contentRetriever).getPageContent("http://nav.no/fragments?activeitem=%2Fsbl");
+
+    }
 }
