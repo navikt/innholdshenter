@@ -178,7 +178,8 @@ public class DecoratorFilter implements Filter {
     }
 
     private String mergeWithFragments(String originalResponseString, HttpServletRequest request) {
-        FragmentFetcher fragmentFetcher = new FragmentFetcher(contentRetriever, fragmentsUrl, applicationName, shouldIncludeActiveItem, subMenuPath, fragmentNames, request, originalResponseString, extendedConfiguration);
+        FragmentFetcher fragmentFetcher = new FragmentFetcher(contentRetriever, fragmentsUrl, applicationName, shouldIncludeActiveItem, subMenuPath, fragmentNames,
+                request, originalResponseString, extendedConfiguration);
         Document htmlFragments = fragmentFetcher.fetchHtmlFragments();
         MarkupMerger markupMerger = new MarkupMerger(fragmentNames, noSubmenuPatterns, originalResponseString, htmlFragments, request);
         return markupMerger.merge();
