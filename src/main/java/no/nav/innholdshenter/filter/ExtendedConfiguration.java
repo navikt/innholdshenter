@@ -1,13 +1,14 @@
 package no.nav.innholdshenter.filter;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Utvidet konfigurasjon for DecoratorFilter (brukes først og fremst av SBL Arbeid)
  */
 public class ExtendedConfiguration {
-    private Map<String, String> menuMap;
-    private Map<String, String> subMenuPathMap;
+    private Map<String, String> menuMap = new HashMap<String, String>();
+    private Map<String, String> subMenuPathMap = new HashMap<String, String>();
 
     public void setMenuMap(Map<String, String> menuMap) {
         this.menuMap = menuMap;

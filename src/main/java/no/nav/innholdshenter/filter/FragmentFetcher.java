@@ -30,11 +30,11 @@ public class FragmentFetcher {
     private String subMenuPath;
     private final HttpServletRequest request;
     private final String originalResponseString;
-    private ExtendedConfiguration arbeidConfiguration;
+    private ExtendedConfiguration extendedConfiguration;
 
     public FragmentFetcher(EnonicContentRetriever contentRetriever, String fragmentsUrl, String applicationName, boolean shouldIncludeActiveItem,
                            String subMenuPath, List<String> fragmentNames, HttpServletRequest request,
-                           String originalResponseString, ExtendedConfiguration arbeidConfiguration) {
+                           String originalResponseString, ExtendedConfiguration extendedConfiguration) {
         this.contentRetriever = contentRetriever;
         this.fragmentsUrl = fragmentsUrl;
         this.applicationName = applicationName;
@@ -43,7 +43,7 @@ public class FragmentFetcher {
         this.subMenuPath = subMenuPath;
         this.request = request;
         this.originalResponseString = originalResponseString;
-        this.arbeidConfiguration = arbeidConfiguration;
+        this.extendedConfiguration = extendedConfiguration;
     }
 
     public Document fetchHtmlFragments() {
@@ -87,8 +87,8 @@ public class FragmentFetcher {
 
     private void addActiveItem(URIBuilder urlBuilder) {
         String requestUri = getRequestUriOrAlternativePathBasedOnMetaTag();
-        if (arbeidConfiguration != null) {
-            Map<String, String> menuMap = arbeidConfiguration.getMenuMap();
+        if (extendedConfiguration != null) {
+            Map<String, String> menuMap = extendedConfiguration.getMenuMap();
             for (String key : menuMap.keySet()) {
                 Matcher matcher = createMatcher(key, requestUri);
                 if (matcher.matches()) {
@@ -103,8 +103,8 @@ public class FragmentFetcher {
 
     private void addSubmenuPath(URIBuilder urlBuilder) {
         String requestUri = getRequestUriOrAlternativePathBasedOnMetaTag();
-        if (arbeidConfiguration != null) {
-            Map<String, String> subMenuPathMap = arbeidConfiguration.getSubMenuPathMap();
+        if (extendedConfiguration != null) {
+            Map<String, String> subMenuPathMap = extendedConfiguration.getSubMenuPathMap();
             for (String key : subMenuPathMap.keySet()) {
                 Matcher matcher = createMatcher(key, requestUri);
                 if (matcher.matches()) {
