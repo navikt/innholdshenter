@@ -11,6 +11,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -378,6 +379,24 @@ public class DecoratorFilterTest {
         when(contentRetriever.getPageContent(anyString())).thenReturn("<div id=\"header\"></div><div id=\"submenu\"></div><div id=\"footer\"></div>");
 
         decoratorFilter.doFilter(request, response, chain);
+    }
+
+    @Test
+    public void response_should_not_contain_a_body_when_status_code_is_304() throws IOException, ServletException, URISyntaxException {
+        chain = new FilterChain() {
+            @Override
+            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
+                HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;
+                servletResponse.getOutputStream().write("hvaSomHelst".getBytes());
+                servletResponse.setContentType("image/gif;charset=UTF-8");
+                httpServletResponse.setStatus(304);
+            }
+        };
+
+        decoratorFilter.doFilter(request, response, chain);
+
+        byte[] result = response.getContentAsByteArray();
+        assertThat(result, is("".getBytes()));
     }
 
     @Test

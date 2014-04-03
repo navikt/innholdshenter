@@ -122,6 +122,10 @@ public class DecoratorFilter implements Filter {
     }
 
     private void writeOriginalOutputToResponse(DecoratorResponseWrapper responseWrapper, HttpServletResponse response) throws IOException {
+        if (response.getStatus() == HttpServletResponse.SC_NOT_MODIFIED) {
+            return;
+        }
+
         try {
             response.getOutputStream().write(responseWrapper.getOutputAsByteArray());
         } catch (IllegalStateException getWriterHasAlreadyBeenCalled) {
