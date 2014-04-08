@@ -4,7 +4,7 @@ import no.nav.innholdshenter.common.EnonicContentRetriever;
 import org.apache.http.client.utils.URIBuilder;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
+import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -129,10 +129,10 @@ public class FragmentFetcher {
 
     private String extractMetaTag(String tag) {
         Document doc = Jsoup.parse(originalResponseString);
-        Elements brukerStatus = doc.select(String.format("meta[name=%s]", tag));
+        Element metaTag = doc.select(String.format("meta[name=%s]", tag)).first();
 
-        if (!brukerStatus.isEmpty()) {
-            return brukerStatus.attr("content");
+        if (metaTag != null) {
+            return metaTag.attr("content");
         } else {
             return null;
         }

@@ -460,6 +460,5 @@ public class DecoratorFilterTest {
         decoratorFilter.doFilter(request, response, chain);
 
         verify(contentRetriever).getPageContent("http://nav.no/fragments?activeitem=%2Fsbl");
-
     }
 }
