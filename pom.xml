@@ -9,7 +9,7 @@
 
     <artifactId>innholdshenter</artifactId>
     <packaging>jar</packaging>
-    <version>1.7-SNAPSHOT</version>
+    <version>2.0</version>
     <name>nav-enonic-cms-innholdshenter</name>
 
     <build>
@@ -211,10 +211,10 @@
     </dependencies>
 
     <scm>
-        <connection>scm:svn:https://versjonskontroll.adeo.no/svn/nav-sbl/nav-enonic-cms-innholdshenter/trunk
+        <connection>scm:svn:https://versjonskontroll.adeo.no/svn/nav-sbl/nav-enonic-cms-innholdshenter/tags/20140408-0924_2.0
         </connection>
-        <developerConnection>scm:svn:https://versjonskontroll.adeo.no/svn/nav-sbl/nav-enonic-cms-innholdshenter/trunk
+        <developerConnection>scm:svn:https://versjonskontroll.adeo.no/svn/nav-sbl/nav-enonic-cms-innholdshenter/tags/20140408-0924_2.0
         </developerConnection>
-        <url>http://versjonskontroll.adeo.no/viewsvn/trunk/?root=nav-sbl/nav-enonic-cms-innholdshenter</url>
+        <url>http://versjonskontroll.adeo.no/viewsvn/tags/20140408-0924_2.0?root=nav-sbl/nav-enonic-cms-innholdshenter</url>
     </scm>
 </project>
