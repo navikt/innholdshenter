@@ -461,4 +461,26 @@ public class DecoratorFilterTest {
 
         verify(contentRetriever).getPageContent("http://nav.no/fragments?activeitem=%2Fsbl");
     }
+
+    @Test
+    public void should_send_tns_value_based_on_request_uri_and_tns_values() throws IOException, ServletException {
+        chain = new FilterChain() {
+            @Override
+            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
+                servletResponse.getWriter().write("<html></html>");
+                servletResponse.setContentType("text/html");
+            }
+        };
+        ExtendedConfiguration extendedConfiguration = new ExtendedConfiguration();
+        Map<String, String> tnsValues = new HashMap<String, String>();
+        tnsValues.put("^/sbl/as/minside.*", "AS-DinSide");
+        extendedConfiguration.setTnsValues(tnsValues);
+        decoratorFilter.setExtendedConfiguration(extendedConfiguration);
+        decoratorFilter.setApplicationName("Arbeid");
+        request.setRequestURI("/sbl/as/minside.do");
+
+        decoratorFilter.doFilter(request, response, chain);
+
+        verify(contentRetriever).getPageContent("http://nav.no/fragments?appname=AS-DinSide");
+    }
 }

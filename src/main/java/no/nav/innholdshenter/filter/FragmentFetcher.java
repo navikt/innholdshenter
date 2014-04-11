@@ -62,7 +62,7 @@ public class FragmentFetcher {
         URIBuilder urlBuilder = new URIBuilder(fragmentsUrl);
 
         if (applicationName != null) {
-            urlBuilder.addParameter("appname", applicationName);
+            addApplicationName(urlBuilder);
         }
 
         if (shouldIncludeActiveItem) {
@@ -83,6 +83,22 @@ public class FragmentFetcher {
         }
 
         return urlBuilder.build().toString();
+    }
+
+    private void addApplicationName(URIBuilder urlBuilder) {
+        String requestUri = request.getRequestURI();
+        if (extendedConfiguration != null) {
+            Map<String, String> tnsValues = extendedConfiguration.getTnsValues();
+            for (String key : tnsValues.keySet()) {
+                Matcher matcher = createMatcher(key, requestUri);
+                if (matcher.matches()) {
+                    urlBuilder.addParameter("appname", tnsValues.get(key));
+                    return;
+                }
+            }
+        }
+
+        urlBuilder.addParameter("appname", applicationName);
     }
 
     private void addActiveItem(URIBuilder urlBuilder) {

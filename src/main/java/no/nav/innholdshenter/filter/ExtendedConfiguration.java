@@ -9,6 +9,7 @@ import java.util.Map;
 public class ExtendedConfiguration {
     private Map<String, String> menuMap = new HashMap<String, String>();
     private Map<String, String> subMenuPathMap = new HashMap<String, String>();
+    private Map<String, String> tnsValues = new HashMap<String, String>();
 
     public void setMenuMap(Map<String, String> menuMap) {
         this.menuMap = menuMap;
@@ -24,5 +25,13 @@ public class ExtendedConfiguration {
 
     public Map<String, String> getSubMenuPathMap() {
         return subMenuPathMap;
+    }
+
+    public Map<String, String> getTnsValues() {
+        return tnsValues;
+    }
+
+    public void setTnsValues(Map<String, String> tnsValues) {
+        this.tnsValues = tnsValues;
     }
 }
