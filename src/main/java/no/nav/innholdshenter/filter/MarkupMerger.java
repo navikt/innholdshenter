@@ -33,7 +33,7 @@ public class MarkupMerger {
         String responseString = originalResponseString;
         for (String fragmentName : fragmentNames) {
             Element element = htmlFragments.getElementById(fragmentName);
-            validateFragmentAndPlaceholder(fragmentName, element);
+            verifyThatElementIsFoundInResponseFromEnonic(fragmentName, element);
 
             if (isFragmentSubmenu(fragmentName)) {
                 responseString = mergeSubmenuFragment(responseString, fragmentName, element);
@@ -47,14 +47,9 @@ public class MarkupMerger {
         return responseString;
     }
 
-    private void validateFragmentAndPlaceholder(String fragmentName, Element element) {
+    private void verifyThatElementIsFoundInResponseFromEnonic(String fragmentName, Element element) {
         if (element == null) {
             throw new RuntimeException("Element [ " + fragmentName + " ] ikke funnet i responsen fra Enonic.");
-        }
-
-        String placeholder = createPlaceholder(fragmentName);
-        if (!originalResponseString.contains(placeholder) && !isFragmentSubmenu(fragmentName)) {
-            throw new RuntimeException("Fant ikke placeholder " + placeholder + " i applikasjonens markup.");
         }
     }
 

@@ -241,19 +241,20 @@ public class DecoratorFilterTest {
         decoratorFilter.doFilter(request, response, chain);
     }
 
-    @Test(expected = RuntimeException.class)
-    public void should_throw_exception_when_placeholder_is_not_found_in_application_markup() throws Exception {
+    @Test
+    public void should_replace_just_the_placeholders_which_are_found_in_application_markup() throws Exception {
         chain = new FilterChain() {
             @Override
             public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
                 servletResponse.getWriter().write("<html><body>{{fragment.header}}</body></html>");
                 servletResponse.setContentType("text/html");
-
             }
         };
         withFragments("header", "footer");
 
         decoratorFilter.doFilter(request, response, chain);
+
+        assertThat(response.getContentAsString(), is("<html><body><nav></nav></body></html>"));
     }
 
     @Test(expected = RuntimeException.class)
