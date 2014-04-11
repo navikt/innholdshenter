@@ -483,4 +483,15 @@ public class DecoratorFilterTest {
 
         verify(contentRetriever).getPageContent("http://nav.no/fragments?appname=AS-DinSide");
     }
+
+    @Test
+    public void setsContentLength() throws IOException, ServletException {
+        withDefaultFilterChain();
+        withFragments("header", "footer");
+        response.setContentLength(5);
+
+        decoratorFilter.doFilter(request, response, chain);
+
+        assertThat(response.getContentLength(), is(response.getContentAsByteArray().length));
+    }
 }

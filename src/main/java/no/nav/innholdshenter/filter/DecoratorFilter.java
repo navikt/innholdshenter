@@ -115,7 +115,9 @@ public class DecoratorFilter implements Filter {
     private void writeToResponse(String transformedOutput, HttpServletResponse response) throws IOException {
         String characterEncoding = response.getCharacterEncoding();
         try {
-            response.getOutputStream().write(transformedOutput.getBytes(characterEncoding));
+            byte[] transformedOutputAsBytes = transformedOutput.getBytes(characterEncoding);
+            response.setContentLength(transformedOutputAsBytes.length);
+            response.getOutputStream().write(transformedOutputAsBytes);
         } catch (IllegalStateException getWriterAlreadyCalled) {
             response.getWriter().write(transformedOutput);
         }
