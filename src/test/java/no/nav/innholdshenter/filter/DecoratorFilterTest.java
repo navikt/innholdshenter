@@ -134,7 +134,7 @@ public class DecoratorFilterTest {
         };
         withFragments("submenu");
         decoratorFilter.setSubMenuPath("/ditt-nav/din-side-arbeid");
-        when(contentRetriever.getPageContent(anyString())).thenReturn("<div id=\"submenu\"><nav id=\"submenu\"></nav></div><<</div>");
+        when(contentRetriever.getPageContent(anyString())).thenReturn("<div id=\"submenu\"><nav id=\"submenu\"></nav></div>");
 
         decoratorFilter.doFilter(request, response, chain);
 
@@ -362,6 +362,27 @@ public class DecoratorFilterTest {
         verify(contentRetriever).getPageContent("http://nav.no/fragments?submenu=path%2Fto%2Fmenu");
         assertThat(response.getContentAsString(), not(containsString("<div class=\"col-md-4\"></div>")));
         assertThat(response.getContentAsString(), containsString("<div class=\"col-md-12\"></div>"));
+    }
+
+    @Test
+    public void should_not_remove_submenu_when_hodeFotKey_is_present_in_markup_and_requestUri_matches_no_submenu_pattern() throws IOException, ServletException {
+        chain = new FilterChain() {
+            @Override
+            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
+                servletResponse.getWriter().write("<html><head><meta name=\"hodeFotKey\" content=\"/minside.do\"></head><body>{{fragment.submenu}}</body></html>");
+                servletResponse.setContentType("text/html");
+            }
+        };
+        withFragments("submenu");
+        decoratorFilter.setSubMenuPath("path/to/menu");
+        decoratorFilter.setNoSubmenuPatterns(asList(".*selftest.*"));
+        request.setRequestURI("/internal/selftest");
+        when(contentRetriever.getPageContent(anyString())).thenReturn("<div id=\"submenu\"><nav id=\"submenu\"></nav></div>");
+
+        decoratorFilter.doFilter(request, response, chain);
+
+        verify(contentRetriever).getPageContent("http://nav.no/fragments?submenu=path%2Fto%2Fmenu");
+        assertThat(response.getContentAsString(), is("<html><head><meta name=\"hodeFotKey\" content=\"/minside.do\"></head><body><nav id=\"submenu\"></nav></body></html>"));
     }
 
     @Test

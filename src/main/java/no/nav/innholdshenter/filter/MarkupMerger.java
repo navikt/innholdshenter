@@ -11,6 +11,7 @@ import java.util.regex.Matcher;
 import static no.nav.innholdshenter.filter.DecoratorFilterUtils.PLACEHOLDER_REGEX;
 import static no.nav.innholdshenter.filter.DecoratorFilterUtils.createMatcher;
 import static no.nav.innholdshenter.filter.DecoratorFilterUtils.createPlaceholder;
+import static no.nav.innholdshenter.filter.DecoratorFilterUtils.getRequestUriOrAlternativePathBasedOnMetaTag;
 import static no.nav.innholdshenter.filter.DecoratorFilterUtils.isFragmentSubmenu;
 
 public class MarkupMerger {
@@ -96,8 +97,9 @@ public class MarkupMerger {
     }
 
     private boolean requestUriMatchesNoSubmenuPattern() {
+        String uriToMatch = getRequestUriOrAlternativePathBasedOnMetaTag(originalResponseString, request);
         for (String noSubmenuPattern : noSubmenuPatterns) {
-            Matcher matcher = createMatcher(noSubmenuPattern, request.getRequestURI());
+            Matcher matcher = createMatcher(noSubmenuPattern, uriToMatch);
             if (matcher.matches()) {
                 return true;
             }

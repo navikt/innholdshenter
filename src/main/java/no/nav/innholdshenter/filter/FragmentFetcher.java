@@ -4,7 +4,6 @@ import no.nav.innholdshenter.common.EnonicContentRetriever;
 import org.apache.http.client.utils.URIBuilder;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +14,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 
 import static no.nav.innholdshenter.filter.DecoratorFilterUtils.createMatcher;
+import static no.nav.innholdshenter.filter.DecoratorFilterUtils.extractMetaTag;
+import static no.nav.innholdshenter.filter.DecoratorFilterUtils.getRequestUriOrAlternativePathBasedOnMetaTag;
 import static no.nav.innholdshenter.filter.DecoratorFilterUtils.isFragmentSubmenu;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
@@ -69,7 +70,7 @@ public class FragmentFetcher {
             addActiveItem(urlBuilder);
         }
 
-        String role = extractMetaTag("Brukerstatus");
+        String role = extractMetaTag(originalResponseString, "Brukerstatus");
         if (!isEmpty(role)) {
             urlBuilder.addParameter("userrole", role);
         }
@@ -102,7 +103,7 @@ public class FragmentFetcher {
     }
 
     private void addActiveItem(URIBuilder urlBuilder) {
-        String requestUri = getRequestUriOrAlternativePathBasedOnMetaTag();
+        String requestUri = getRequestUriOrAlternativePathBasedOnMetaTag(originalResponseString, request);
         if (extendedConfiguration != null) {
             Map<String, String> menuMap = extendedConfiguration.getMenuMap();
             for (String key : menuMap.keySet()) {
@@ -118,7 +119,7 @@ public class FragmentFetcher {
     }
 
     private void addSubmenuPath(URIBuilder urlBuilder) {
-        String requestUri = getRequestUriOrAlternativePathBasedOnMetaTag();
+        String requestUri = getRequestUriOrAlternativePathBasedOnMetaTag(originalResponseString, request);
         if (extendedConfiguration != null) {
             Map<String, String> subMenuPathMap = extendedConfiguration.getSubMenuPathMap();
             for (String key : subMenuPathMap.keySet()) {
@@ -131,26 +132,5 @@ public class FragmentFetcher {
         }
 
         urlBuilder.addParameter("submenu", subMenuPath);
-    }
-
-    private String getRequestUriOrAlternativePathBasedOnMetaTag() {
-        String alternativeRequestUri = extractMetaTag("hodeFotKey");
-
-        if (!isEmpty(alternativeRequestUri)) {
-            return alternativeRequestUri;
-        } else {
-            return request.getRequestURI();
-        }
-    }
-
-    private String extractMetaTag(String tag) {
-        Document doc = Jsoup.parse(originalResponseString);
-        Element metaTag = doc.select(String.format("meta[name=%s]", tag)).first();
-
-        if (metaTag != null) {
-            return metaTag.attr("content");
-        } else {
-            return null;
-        }
     }
 }

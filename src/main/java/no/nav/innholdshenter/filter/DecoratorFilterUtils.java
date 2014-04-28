@@ -1,8 +1,15 @@
 package no.nav.innholdshenter.filter;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static org.apache.commons.lang.StringUtils.isEmpty;
 
 public class DecoratorFilterUtils {
 
@@ -41,5 +48,26 @@ public class DecoratorFilterUtils {
 
     static String createPlaceholder(String fragmentName) {
         return PLACEHOLDER_START + PLACEHOLDER_PREFIX + fragmentName + PLACEHOLDER_END;
+    }
+
+    public static String getRequestUriOrAlternativePathBasedOnMetaTag(String originalResponseString, HttpServletRequest request) {
+        String alternativeRequestUri = extractMetaTag(originalResponseString, "hodeFotKey");
+
+        if (!isEmpty(alternativeRequestUri)) {
+            return alternativeRequestUri;
+        } else {
+            return request.getRequestURI();
+        }
+    }
+
+    public static String extractMetaTag(String originalResponseString, String tag) {
+        Document doc = Jsoup.parse(originalResponseString);
+        Element metaTag = doc.select(String.format("meta[name=%s]", tag)).first();
+
+        if (metaTag != null) {
+            return metaTag.attr("content");
+        } else {
+            return null;
+        }
     }
 }
