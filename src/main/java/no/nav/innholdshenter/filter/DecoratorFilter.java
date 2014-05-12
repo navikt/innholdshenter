@@ -95,6 +95,11 @@ public class DecoratorFilter implements Filter {
 
         DecoratorResponseWrapper responseWrapper = new DecoratorResponseWrapper(response);
         chain.doFilter(request, responseWrapper);
+
+        if (!hasAppropriateStatusCode(response.getStatus())) {
+            return;
+        }
+
         responseWrapper.flushBuffer();
         String originalResponseString = responseWrapper.getOutputAsString();
 
@@ -181,6 +186,14 @@ public class DecoratorFilter implements Filter {
             }
         }
         return false;
+    }
+
+    private static boolean hasAppropriateStatusCode(int statusCode) {
+        switch (statusCode) {
+            case 0: return true;
+            case HttpServletResponse.SC_OK: return true;
+            default: return false;
+        }
     }
 
     private String mergeWithFragments(String originalResponseString, HttpServletRequest request) {
