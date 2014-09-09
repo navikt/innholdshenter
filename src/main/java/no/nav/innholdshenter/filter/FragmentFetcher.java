@@ -28,19 +28,21 @@ public class FragmentFetcher {
     private String applicationName;
     private boolean shouldIncludeActiveItem;
     private List<String> fragmentNames;
+    private Map<String, String> additionalOptions;
     private String subMenuPath;
     private final HttpServletRequest request;
     private final String originalResponseString;
     private ExtendedConfiguration extendedConfiguration;
 
     public FragmentFetcher(EnonicContentRetriever contentRetriever, String fragmentsUrl, String applicationName, boolean shouldIncludeActiveItem,
-                           String subMenuPath, List<String> fragmentNames, HttpServletRequest request,
+                           String subMenuPath, List<String> fragmentNames, Map<String, String> additionalOptions, HttpServletRequest request,
                            String originalResponseString, ExtendedConfiguration extendedConfiguration) {
         this.contentRetriever = contentRetriever;
         this.fragmentsUrl = fragmentsUrl;
         this.applicationName = applicationName;
         this.shouldIncludeActiveItem = shouldIncludeActiveItem;
         this.fragmentNames = fragmentNames;
+        this.additionalOptions = additionalOptions;
         this.subMenuPath = subMenuPath;
         this.request = request;
         this.originalResponseString = originalResponseString;
@@ -81,6 +83,10 @@ public class FragmentFetcher {
             } else {
                 urlBuilder.addParameter(fragmentName, "true");
             }
+        }
+
+        for (String option : additionalOptions.keySet()) {
+            urlBuilder.addParameter(option, additionalOptions.get(option));
         }
 
         return urlBuilder.build().toString();

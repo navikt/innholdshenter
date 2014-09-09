@@ -46,11 +46,13 @@ public class DecoratorFilter implements Filter {
     private List<String> noSubmenuPatterns;
     private Map<String, String> excludeHeaders;
     private ExtendedConfiguration extendedConfiguration;
+    private Map<String, String> additionalOptions;
 
     public DecoratorFilter() {
         fragmentNames = new ArrayList<String>();
         noDecoratePatterns = new ArrayList<String>(DEFAULT_NO_DECORATE_PATTERNS);
         noSubmenuPatterns = new ArrayList<String>();
+        additionalOptions = new HashMap<String, String>();
         setDefaultIncludeContentTypes();
         setDefaultExcludeHeaders();
     }
@@ -197,7 +199,7 @@ public class DecoratorFilter implements Filter {
     }
 
     private String mergeWithFragments(String originalResponseString, HttpServletRequest request) {
-        FragmentFetcher fragmentFetcher = new FragmentFetcher(contentRetriever, fragmentsUrl, applicationName, shouldIncludeActiveItem, subMenuPath, fragmentNames,
+        FragmentFetcher fragmentFetcher = new FragmentFetcher(contentRetriever, fragmentsUrl, applicationName, shouldIncludeActiveItem, subMenuPath, fragmentNames, additionalOptions,
                 request, originalResponseString, extendedConfiguration);
         Document htmlFragments = fragmentFetcher.fetchHtmlFragments();
         MarkupMerger markupMerger = new MarkupMerger(fragmentNames, noSubmenuPatterns, originalResponseString, htmlFragments, request);
@@ -251,5 +253,9 @@ public class DecoratorFilter implements Filter {
 
     public void setExtendedConfiguration(ExtendedConfiguration extendedConfiguration) {
         this.extendedConfiguration = extendedConfiguration;
+    }
+
+    public void setAdditionalOptions(Map<String, String> additionalOptions) {
+        this.additionalOptions = additionalOptions;
     }
 }

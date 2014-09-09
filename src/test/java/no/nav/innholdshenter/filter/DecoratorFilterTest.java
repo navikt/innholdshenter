@@ -516,4 +516,17 @@ public class DecoratorFilterTest {
 
         assertThat(response.getContentLength(), is(response.getContentAsByteArray().length));
     }
+
+    @Test
+    public void appends_options_to_url() throws IOException, ServletException {
+        withDefaultFilterChain();
+        withFragments("header", "footer");
+        Map<String, String> options = new HashMap<String, String>();
+        options.put("banner", "banner-name");
+        decoratorFilter.setAdditionalOptions(options);
+
+        decoratorFilter.doFilter(request, response, chain);
+
+        verify(contentRetriever).getPageContent("http://nav.no/fragments?header=true&footer=true&banner=banner-name");
+    }
 }
