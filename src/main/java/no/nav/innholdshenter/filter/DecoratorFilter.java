@@ -7,12 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -23,9 +18,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 
 import static java.util.Arrays.asList;
-import static no.nav.innholdshenter.filter.DecoratorFilterUtils.createMatcher;
-import static no.nav.innholdshenter.filter.DecoratorFilterUtils.isFragmentSubmenu;
-import static no.nav.innholdshenter.filter.DecoratorFilterUtils.removePlaceholders;
+import static no.nav.innholdshenter.filter.DecoratorFilterUtils.*;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
 public class DecoratorFilter implements Filter {
@@ -97,16 +90,11 @@ public class DecoratorFilter implements Filter {
 
         DecoratorResponseWrapper responseWrapper = new DecoratorResponseWrapper(response);
         chain.doFilter(request, responseWrapper);
-
-        if (!hasAppropriateStatusCode(response.getStatus())) {
-            return;
-        }
-
         responseWrapper.flushBuffer();
         String originalResponseString = responseWrapper.getOutputAsString();
 
-        if (!shouldHandleContentType(responseWrapper.getContentType()) || isEmpty(originalResponseString)) {
-            logger.debug("Should not handle content type, or original response string is empty: {}", responseWrapper.getContentType());
+        if (!shouldHandleContentType(responseWrapper.getContentType()) || !hasAppropriateStatusCode(response.getStatus()) || isEmpty(originalResponseString)) {
+            logger.debug("Should not handle content type: {}, status code: {}, or original response string is empty.", responseWrapper.getContentType(), response.getStatus());
             writeOriginalOutputToResponse(responseWrapper, response);
         } else if (!shouldDecorateRequest(request)) {
             logger.debug("Should not decorate response for request: {}", request.getRequestURI());

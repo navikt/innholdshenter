@@ -29,10 +29,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class DecoratorFilterTest {
 
@@ -196,6 +193,17 @@ public class DecoratorFilterTest {
         withDefaultFilterChain();
         withFragments("header", "footer");
         request.setAttribute(ALREADY_DECORATED_HEADER, Boolean.TRUE);
+
+        decoratorFilter.doFilter(request, response, chain);
+
+        verify(contentRetriever, times(0)).getPageContent(anyString());
+    }
+
+    @Test
+    public void should_not_decorate_response_when_status_code_is_other_than_200() throws IOException, ServletException {
+        withDefaultFilterChain();
+        withFragments("header", "footer");
+        response.setStatus(404);
 
         decoratorFilter.doFilter(request, response, chain);
 
