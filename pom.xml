@@ -9,7 +9,7 @@
 
     <artifactId>innholdshenter</artifactId>
     <packaging>jar</packaging>
-    <version>2.6-SNAPSHOT</version>
+    <version>2.6</version>
     <name>nav-enonic-cms-innholdshenter</name>
 
     <build>
@@ -207,6 +207,6 @@
     <scm>
         <developerConnection>scm:git:http://stash.devillo.no/scm/felles/innholdshenter.git</developerConnection>
         <url>http://stash.devillo.no/projects/FELLES/repos/innholdshenter</url>
-        <tag>HEAD</tag>
+        <tag>2.6</tag>
     </scm>
 </project>
