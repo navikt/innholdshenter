@@ -200,10 +200,10 @@ public class DecoratorFilterTest {
     }
 
     @Test
-    public void should_not_decorate_response_when_status_code_is_other_than_200() throws IOException, ServletException {
+    public void should_not_decorate_response_when_status_code_is_in_3xx_range() throws IOException, ServletException {
         withDefaultFilterChain();
         withFragments("header", "footer");
-        response.setStatus(404);
+        response.setStatus(302);
 
         decoratorFilter.doFilter(request, response, chain);
 

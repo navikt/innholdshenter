@@ -179,11 +179,12 @@ public class DecoratorFilter implements Filter {
     }
 
     private static boolean hasAppropriateStatusCode(int statusCode) {
-        switch (statusCode) {
-            case 0: return true;
-            case HttpServletResponse.SC_OK: return true;
-            default: return false;
+        int errorZone = statusCode/100;
+
+        if (statusCode >= 0 && errorZone != 3) {
+            return true;
         }
+        return false;
     }
 
     private String mergeWithFragments(String originalResponseString, HttpServletRequest request) {
