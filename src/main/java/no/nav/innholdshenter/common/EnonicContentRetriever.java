@@ -1,15 +1,8 @@
 package no.nav.innholdshenter.common;
 
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.CacheException;
-import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.Ehcache;
-import net.sf.ehcache.Element;
+import net.sf.ehcache.*;
 import no.nav.innholdshenter.tools.InnholdshenterTools;
 import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
 import org.jgroups.Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-
 
 /**
  * Henter innholdet for en gitt URL. Hvis ferskt innhold finnes i cacheManager returneres det derfra.
@@ -43,29 +35,33 @@ public class EnonicContentRetriever {
     private EnonicCacheEntryFactory enonicCacheEntryFactory;
     private String uniqueAppName;
     private int refreshIntervalSeconds;
+    private static final int DEFAULT_HTTP_TIMEOUT = 3000;
 
     private String cacheName = "innholdshenterCache";
-    private int httpTimeoutMillis;
-    private HttpClient httpClient;
 
     protected EnonicContentRetriever() {
         cacheStatusMeldinger = new ConcurrentHashMap<String, CacheStatusMelding>();
         cacheManager = CacheManager.create();
-        httpClient = new DefaultHttpClient();
-        setHttpTimeoutMillis(3000);
     }
 
     public EnonicContentRetriever(String uniqueAppName) {
         this();
         this.uniqueAppName = uniqueAppName;
-        setupCache();
+        setupCache(DEFAULT_HTTP_TIMEOUT);
+    }
+
+
+    public EnonicContentRetriever(String uniqueAppName, int httpTimeoutMillis) {
+        this();
+        this.uniqueAppName = uniqueAppName;
+        setupCache(httpTimeoutMillis);
     }
 
     @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     public EnonicContentRetriever(String uniqueAppName, boolean nodeSyncing, String jGroupsHosts, int jGroupsBindPort) throws Exception {
         this();
         this.uniqueAppName = uniqueAppName;
-        setupCache();
+        setupCache(DEFAULT_HTTP_TIMEOUT);
         configureJGroups(nodeSyncing, jGroupsHosts, jGroupsBindPort);
     }
 
@@ -74,7 +70,7 @@ public class EnonicContentRetriever {
         this();
         this.uniqueAppName = uniqueAppName;
         this.cacheName = cacheName;
-        setupCache();
+        setupCache(DEFAULT_HTTP_TIMEOUT);
         configureJGroups(nodeSyncing, jGroupsHosts, jGroupsBindPort);
     }
 
@@ -149,17 +145,6 @@ public class EnonicContentRetriever {
         return inputBaseUrl;
     }
 
-    public int getHttpTimeoutMillis() {
-        return httpTimeoutMillis;
-    }
-
-    public void setHttpTimeoutMillis(int httpTimeout) {
-        this.httpTimeoutMillis = httpTimeout;
-        HttpParams httpParams = getHttpClient().getParams();
-        HttpConnectionParams.setSoTimeout(httpParams, httpTimeoutMillis);
-        HttpConnectionParams.setConnectionTimeout(httpParams, httpTimeoutMillis);
-    }
-
     public Map<String, CacheStatusMelding> getCacheStatusMeldinger() {
         return this.cacheStatusMeldinger;
     }
@@ -177,14 +162,13 @@ public class EnonicContentRetriever {
         this.cacheManager = cacheManager;
     }
 
-    private synchronized void setupCache() {
+    private synchronized void setupCache(int httpTimeoutMillis) {
         if (cacheManager.cacheExists(this.cacheName)) {
             return;
         }
         Cache oldCache = new Cache(this.cacheName, 1000, false, true, 0, 0);
         cacheManager.addCache(oldCache);
-        enonicCacheEntryFactory =
-                new EnonicCacheEntryFactory(getHttpClient(), cacheStatusMeldinger);
+        enonicCacheEntryFactory = new EnonicCacheEntryFactory(cacheStatusMeldinger, httpTimeoutMillis);
 
         Ehcache ehcache = cacheManager.getEhcache(cacheName);
         cache = new SelfPopulatingServingStaleElementsCache(ehcache, enonicCacheEntryFactory, getRefreshIntervalSeconds());
@@ -227,16 +211,6 @@ public class EnonicContentRetriever {
         return this.cacheName;
     }
 
-    private HttpClient getHttpClient() {
-        return httpClient;
-    }
-
-    public synchronized void setHttpClient(HttpClient httpClient) {
-        this.httpClient = httpClient;
-        setHttpTimeoutMillis(httpTimeoutMillis);
-        enonicCacheEntryFactory.setHttpClient(httpClient);
-    }
-
     public SelfPopulatingServingStaleElementsCache getCache() {
         return cache;
     }
@@ -275,5 +249,8 @@ public class EnonicContentRetriever {
         }
         return liste;
     }
-
+    //used for test purposes
+    public void setHttpClient(HttpClient client) {
+        enonicCacheEntryFactory.setHttpClient(client);
+    }
 }
