@@ -45,11 +45,8 @@ public class EnonicContentRetriever {
     }
 
     public EnonicContentRetriever(String uniqueAppName) {
-        this();
-        this.uniqueAppName = uniqueAppName;
-        setupCache(DEFAULT_HTTP_TIMEOUT);
+        this(uniqueAppName, DEFAULT_HTTP_TIMEOUT);
     }
-
 
     public EnonicContentRetriever(String uniqueAppName, int httpTimeoutMillis) {
         this();
@@ -58,19 +55,19 @@ public class EnonicContentRetriever {
     }
 
     @SuppressWarnings("PMD.SignatureDeclareThrowsException")
+    @Deprecated // nodesyncing brukes ikke
     public EnonicContentRetriever(String uniqueAppName, boolean nodeSyncing, String jGroupsHosts, int jGroupsBindPort) throws Exception {
-        this();
+        this(uniqueAppName);
         this.uniqueAppName = uniqueAppName;
-        setupCache(DEFAULT_HTTP_TIMEOUT);
         configureJGroups(nodeSyncing, jGroupsHosts, jGroupsBindPort);
     }
 
     @SuppressWarnings("PMD.SignatureDeclareThrowsException")
+    @Deprecated // nodesyncing brukes ikke
     public EnonicContentRetriever(String uniqueAppName, String cacheName, boolean nodeSyncing, String jGroupsHosts, int jGroupsBindPort) throws Exception {
-        this();
+        this(uniqueAppName);
         this.uniqueAppName = uniqueAppName;
         this.cacheName = cacheName;
-        setupCache(DEFAULT_HTTP_TIMEOUT);
         configureJGroups(nodeSyncing, jGroupsHosts, jGroupsBindPort);
     }
 
