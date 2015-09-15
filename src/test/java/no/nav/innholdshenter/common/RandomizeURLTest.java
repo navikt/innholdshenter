@@ -21,14 +21,13 @@ public class RandomizeURLTest {
     public static final String RANDOMSTRING = "AAAb312RAWEFF";
     EnonicContentRetriever enonicContentRetriever;
 
-    private static final String cacheName = "TestEhcacheCacheName";
     private static final String SERVER = "http://www-t1.nav.no:9000/";
     private static final String PATH = "systemsider/ApplicationFrame";
     private static final String URLPARAMS = "?1&fdsafad=321&fine=cool";
 
     @Before
     public void setUp() {
-        enonicContentRetriever = new EnonicContentRetriever(cacheName);
+        enonicContentRetriever = new EnonicContentRetriever();
     }
 
     @Test

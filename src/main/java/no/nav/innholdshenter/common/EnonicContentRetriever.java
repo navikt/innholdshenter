@@ -3,14 +3,11 @@ package no.nav.innholdshenter.common;
 import net.sf.ehcache.*;
 import no.nav.innholdshenter.tools.InnholdshenterTools;
 import org.apache.http.client.HttpClient;
-import org.jgroups.Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,60 +20,24 @@ public class EnonicContentRetriever {
     private static final String SLASH = "/";
     private static final String LOCALE_UTF_8 = "UTF-8";
     private static final String WARN_MELDING_REFRESH_CACHE = "Refresh cachen: {}";
-    private boolean nodeSyncing = false;
+    private static final int DEFAULT_HTTP_TIMEOUT = 3000;
 
-    private InnholdshenterGroupCommunicator groupCommunicator;
     private Map<String, CacheStatusMelding> cacheStatusMeldinger;
-
     private String baseUrl;
-
     private CacheManager cacheManager;
     private SelfPopulatingServingStaleElementsCache cache;
     private EnonicCacheEntryFactory enonicCacheEntryFactory;
-    private String uniqueAppName;
     private int refreshIntervalSeconds;
-    private static final int DEFAULT_HTTP_TIMEOUT = 3000;
-
     private String cacheName = "innholdshenterCache";
 
-    protected EnonicContentRetriever() {
+    public EnonicContentRetriever() {
+        this(DEFAULT_HTTP_TIMEOUT);
+    }
+
+    public EnonicContentRetriever(int httpTimeoutMillis) {
         cacheStatusMeldinger = new ConcurrentHashMap<String, CacheStatusMelding>();
         cacheManager = CacheManager.create();
-    }
-
-    public EnonicContentRetriever(String uniqueAppName) {
-        this(uniqueAppName, DEFAULT_HTTP_TIMEOUT);
-    }
-
-    public EnonicContentRetriever(String uniqueAppName, int httpTimeoutMillis) {
-        this();
-        this.uniqueAppName = uniqueAppName;
         setupCache(httpTimeoutMillis);
-    }
-
-    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
-    @Deprecated // nodesyncing brukes ikke
-    public EnonicContentRetriever(String uniqueAppName, boolean nodeSyncing, String jGroupsHosts, int jGroupsBindPort) throws Exception {
-        this(uniqueAppName);
-        this.uniqueAppName = uniqueAppName;
-        configureJGroups(nodeSyncing, jGroupsHosts, jGroupsBindPort);
-    }
-
-    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
-    @Deprecated // nodesyncing brukes ikke
-    public EnonicContentRetriever(String uniqueAppName, String cacheName, boolean nodeSyncing, String jGroupsHosts, int jGroupsBindPort) throws Exception {
-        this(uniqueAppName);
-        this.uniqueAppName = uniqueAppName;
-        this.cacheName = cacheName;
-        configureJGroups(nodeSyncing, jGroupsHosts, jGroupsBindPort);
-    }
-
-    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
-    private void configureJGroups(boolean nodeSyncing, String jGroupsHosts, int jGroupsBindPort) throws Exception {
-        this.nodeSyncing = nodeSyncing;
-        if (this.nodeSyncing) {
-            this.groupCommunicator = new InnholdshenterGroupCommunicator(this.uniqueAppName, jGroupsHosts, jGroupsBindPort, this);
-        }
     }
 
     private String createUrl(String path) {
@@ -175,77 +136,20 @@ public class EnonicContentRetriever {
         cache.setStatusMeldinger(cacheStatusMeldinger);
     }
 
-    protected void broadcastRefresh() {
-        if (nodeSyncing) {
-            logger.info("Sending refresh sync broadcast.");
-
-            try {
-                groupCommunicator.sendUpdateToNodes();
-            } catch (Exception e) {
-                logger.error("Syncing cache refresh with nodes failed: ", e);
-            }
-        }
-    }
-
-    public void refreshCache(boolean broadcastRefresh) {
+    public void refreshCache() {
         logger.warn(WARN_MELDING_REFRESH_CACHE, cacheName);
-        if (broadcastRefresh && nodeSyncing) {
-            broadcastRefresh();
-        } else {
-            try {
-                cache.refresh(false);
-            } catch (CacheException ce) {
-                logger.error("feil under refresh av cache", ce);
-            }
+
+        try {
+            cache.refresh(false);
+        } catch (CacheException ce) {
+            logger.error("feil under refresh av cache", ce);
         }
-    }
 
-    public void setGroupCommunicator(InnholdshenterGroupCommunicator groupCommunicator) {
-        this.groupCommunicator = groupCommunicator;
     }
-
-    public String getCacheName() {
-        return this.cacheName;
-    }
-
     public SelfPopulatingServingStaleElementsCache getCache() {
         return cache;
     }
 
-    /* brukes av cachestatuspaneler */
-    public boolean isElementExpired(Element element) {
-        return cache.isElementExpired(element);
-    }
-
-    /* brukes av cachestatuspaneler */
-    public List<Address> getClusterMembers() {
-        if (!nodeSyncing) {
-            return new LinkedList<Address>();
-        }
-        return groupCommunicator.getMembers();
-    }
-
-    /* brukes av cachestatuspaneler */
-    public Element getContentIfExists(Object key) {
-        if (cache.isKeyInCache(key)) {
-            return cache.getQuiet(key);
-        }
-        return new Element(key, "");
-    }
-
-    /* brukes av cachestatuspaneler */
-    public synchronized List<Element> getAllElements() {
-        if (!cacheManager.cacheExists(cacheName)) {
-            return new LinkedList<Element>();
-        }
-        List<Element> liste = new LinkedList<Element>();
-        Ehcache c = cacheManager.getEhcache(cacheName);
-        List keys = c.getKeys();
-        for (Object o : keys) {
-            liste.add(c.getQuiet(o));
-        }
-        return liste;
-    }
     //used for test purposes
     public void setHttpClient(HttpClient client) {
         enonicCacheEntryFactory.setHttpClient(client);

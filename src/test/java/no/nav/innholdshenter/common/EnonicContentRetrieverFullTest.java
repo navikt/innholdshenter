@@ -118,26 +118,6 @@ public class EnonicContentRetrieverFullTest extends EnonicContentRetrieverTestSe
     }
 
     @Test
-    public void refresh_kaller_group_communicator_hvis_tilgjengelig() throws Exception {
-        InnholdshenterGroupCommunicator groupCommunicator = mock(InnholdshenterGroupCommunicator.class);
-        contentRetriever.setGroupCommunicator(groupCommunicator);
-
-        contentRetriever.refreshCache(true);
-
-        verify(groupCommunicator).sendUpdateToNodes();
-    }
-
-    @Test
-    public void refresh_uten_broadcast_skal_ikke_loope() throws Exception {
-        InnholdshenterGroupCommunicator groupCommunicator = mock(InnholdshenterGroupCommunicator.class);
-        contentRetriever.setGroupCommunicator(groupCommunicator);
-
-        contentRetriever.refreshCache(false);
-
-        verify(groupCommunicator, never()).sendUpdateToNodes();
-    }
-
-    @Test
     public void skalHenteCachedePropertiesFraCache() throws Exception {
         when(httpClient.execute(any(HttpGet.class), any(BasicResponseHandler.class))).thenReturn(PROPERTIES_CONTENT_2);
         cache.put(new Element(URL, CACHED_PROPERTIES));
