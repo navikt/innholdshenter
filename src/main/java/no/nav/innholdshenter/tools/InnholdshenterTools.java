@@ -51,7 +51,7 @@ public class InnholdshenterTools {
      * @return returns a cleaner url, suitable for the cacheline.
      */
     public static String sanitizeUrlCacheKey(String url) {
-        URIBuilder uriBuilder = null;
+        URIBuilder uriBuilder;
         try {
             uriBuilder = new URIBuilder(url);
             List<NameValuePair> params = uriBuilder.getQueryParams();
@@ -73,12 +73,5 @@ public class InnholdshenterTools {
             return urlParam.split(",")[0];
         }
         return urlParam;
-    }
-
-    /* brukes av cachestatuspaneler */
-    public static String getHumanDateFromTimestamp(long timestampmillis) {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-        return sdf.format(timestampmillis);
-
     }
 }

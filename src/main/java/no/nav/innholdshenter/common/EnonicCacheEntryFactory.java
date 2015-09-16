@@ -7,6 +7,9 @@ import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,9 +26,12 @@ public class EnonicCacheEntryFactory implements CacheEntryFactory {
 
     private Map<String, CacheStatusMelding> statusMeldinger;
 
-    public EnonicCacheEntryFactory(HttpClient httpClient, Map<String, CacheStatusMelding> statusMeldinger) {
-        this.httpClient = httpClient;
+    public EnonicCacheEntryFactory(Map<String, CacheStatusMelding> statusMeldinger, int httpTimeoutMillis) {
+        this.httpClient = new DefaultHttpClient();
         this.statusMeldinger = statusMeldinger;
+        HttpParams httpParams = this.httpClient.getParams();
+        HttpConnectionParams.setSoTimeout(httpParams, httpTimeoutMillis);
+        HttpConnectionParams.setConnectionTimeout(httpParams, httpTimeoutMillis);
     }
 
     @Override
@@ -60,7 +66,8 @@ public class EnonicCacheEntryFactory implements CacheEntryFactory {
         return content;
     }
 
-    public synchronized void setHttpClient(HttpClient httpClient) {
+    //used for test purposes
+    public void setHttpClient(HttpClient httpClient) {
         this.httpClient = httpClient;
     }
 }
