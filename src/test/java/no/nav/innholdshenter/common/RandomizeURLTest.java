@@ -3,7 +3,6 @@ package no.nav.innholdshenter.common;
 import no.nav.innholdshenter.tools.InnholdshenterTools;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.validator.routines.UrlValidator;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -19,16 +18,10 @@ import static org.powermock.api.mockito.PowerMockito.when;
 @PrepareForTest(RandomStringUtils.class)
 public class RandomizeURLTest {
     public static final String RANDOMSTRING = "AAAb312RAWEFF";
-    EnonicContentRetriever enonicContentRetriever;
 
     private static final String SERVER = "http://www-t1.nav.no:9000/";
     private static final String PATH = "systemsider/ApplicationFrame";
     private static final String URLPARAMS = "?1&fdsafad=321&fine=cool";
-
-    @Before
-    public void setUp() {
-        enonicContentRetriever = new EnonicContentRetriever();
-    }
 
     @Test
     public void testGenerateRandomURL() {
