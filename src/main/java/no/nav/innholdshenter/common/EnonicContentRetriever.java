@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Henter innholdet for en gitt URL. Hvis ferskt innhold finnes i cacheManager returneres det derfra.
  */
-public class EnonicContentRetriever {
+public class EnonicContentRetriever implements ContentRetriever {
     private static final Logger logger = LoggerFactory.getLogger(EnonicContentRetriever.class);
     private static final String SLASH = "/";
     private static final String LOCALE_UTF_8 = "UTF-8";
@@ -44,21 +44,25 @@ public class EnonicContentRetriever {
         return InnholdshenterTools.sanitizeUrlCacheKey(baseUrl + path);
     }
 
+    @Override
     public String getPageContent(String path) {
         final String url = createUrl(path);
         return getPageContentFullUrl(url);
     }
 
+    @Override
     public String getPageContentFullUrl(final String url) {
         Element element = cache.get(url);
         return (String) element.getObjectValue();
     }
 
+    @Override
     public Properties getProperties(String path) {
         final String url = createUrl(path);
         return getPropertiesFullUrl(url);
     }
 
+    @Override
     public Properties getPropertiesFullUrl(final String url) {
         Element element = cache.get(url);
         return getPropertiesOrConvertIfNeeded(element);
@@ -92,6 +96,7 @@ public class EnonicContentRetriever {
         return properties;
     }
 
+    @Override
     public void setBaseUrl(String baseUrl) {
         this.baseUrl = appendSlashIfNotPresent(baseUrl);
     }

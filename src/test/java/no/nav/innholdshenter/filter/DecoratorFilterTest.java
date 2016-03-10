@@ -1,5 +1,6 @@
 package no.nav.innholdshenter.filter;
 
+import no.nav.innholdshenter.common.ContentRetriever;
 import no.nav.innholdshenter.common.EnonicContentRetriever;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +37,7 @@ public class DecoratorFilterTest {
     private MockHttpServletRequest request;
     private MockHttpServletResponse response;
     private FilterChain chain;
-    private EnonicContentRetriever contentRetriever;
+    private ContentRetriever contentRetriever;
 
     private DecoratorFilter decoratorFilter;
 

@@ -1,6 +1,6 @@
 package no.nav.innholdshenter.message;
 
-import no.nav.innholdshenter.common.EnonicContentRetriever;
+import no.nav.innholdshenter.common.ContentRetriever;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,7 +20,7 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class EnonicStringRetrieverTest {
     @Mock
-    private EnonicContentRetriever contentRetriever;
+    private ContentRetriever contentRetriever;
 
     @Mock
     private MessageListener messageListener;

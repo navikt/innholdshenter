@@ -1,6 +1,6 @@
 package no.nav.innholdshenter.hjelpetekst;
 
-import no.nav.innholdshenter.common.EnonicContentRetriever;
+import no.nav.innholdshenter.common.ContentRetriever;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 public class EnonicHtmlInnholdBeanTest {
 
     @Mock
-    private EnonicContentRetriever ecRetriever;
+    private ContentRetriever ecRetriever;
     @Mock
     private HtmlInnholdListener listener;
 

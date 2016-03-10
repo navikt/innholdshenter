@@ -1,6 +1,6 @@
 package no.nav.innholdshenter.message;
 
-import no.nav.innholdshenter.common.EnonicContentRetriever;
+import no.nav.innholdshenter.common.ContentRetriever;
 import org.apache.commons.collections.map.FixedSizeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,11 +20,11 @@ public class EnonicStringRetriever extends FixedSizeMap implements StringRetriev
     private static final String MISSING_KEY_TEMPLATE = "<b>[%s locale:%s, variant:%s]</b>";
 
     private String propertiesPath;
-    private EnonicContentRetriever enonicContentRetriever;
+    private ContentRetriever contentRetriever;
 
-    public EnonicStringRetriever(EnonicContentRetriever vsRetriever, String propertiesPath) {
+    public EnonicStringRetriever(ContentRetriever vsRetriever, String propertiesPath) {
         super(new HashMap<Object, String>());
-        this.enonicContentRetriever = vsRetriever;
+        this.contentRetriever = vsRetriever;
         this.propertiesPath = propertiesPath + "?locale=";
     }
 
@@ -52,7 +52,7 @@ public class EnonicStringRetriever extends FixedSizeMap implements StringRetriev
             } else {
                 path += getPropertiesPath(locale, variant);
             }
-            Properties properties = enonicContentRetriever.getProperties(path);
+            Properties properties = contentRetriever.getProperties(path);
             String value = properties.getProperty(key.trim());
             return (value != null) ? value : String.format(MISSING_KEY_TEMPLATE, key, locale, variant);
         } catch (RuntimeException e) {
