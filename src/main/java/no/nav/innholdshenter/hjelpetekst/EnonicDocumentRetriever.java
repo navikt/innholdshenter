@@ -1,6 +1,6 @@
 package no.nav.innholdshenter.hjelpetekst;
 
-import no.nav.innholdshenter.common.EnonicContentRetriever;
+import no.nav.innholdshenter.common.ContentRetriever;
 import org.jdom2.Document;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.input.sax.XMLReaderJDOMFactory;
@@ -16,7 +16,7 @@ class EnonicDocumentRetriever {
     private static final String LOCALE_UTF_8 = "UTF-8";
     private static final String FEILMELDING_COULD_NOT_LOAD_CONFIG_FROM_URL = "Could not load config from %s";
     private static final String FEILMELDING_COULD_NOT_PARSE_CONFIG_FROM_URL = "Could not parse config from %s";
-    private EnonicContentRetriever contentRetriever;
+    private ContentRetriever contentRetriever;
 
     public Document loadDocument(String configURL) {
         String configXML = contentRetriever.getPageContent(configURL);
@@ -40,7 +40,7 @@ class EnonicDocumentRetriever {
         return doc;
     }
 
-    public void setContentRetriever(EnonicContentRetriever contentRetriever) {
+    public void setContentRetriever(ContentRetriever contentRetriever) {
         this.contentRetriever = contentRetriever;
     }
 }

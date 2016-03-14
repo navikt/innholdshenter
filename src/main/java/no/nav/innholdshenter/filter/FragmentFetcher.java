@@ -1,6 +1,6 @@
 package no.nav.innholdshenter.filter;
 
-import no.nav.innholdshenter.common.EnonicContentRetriever;
+import no.nav.innholdshenter.common.ContentRetriever;
 import org.apache.http.client.utils.URIBuilder;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -23,7 +23,7 @@ public class FragmentFetcher {
 
     private final static Logger logger = LoggerFactory.getLogger(FragmentFetcher.class);
 
-    private EnonicContentRetriever contentRetriever;
+    private ContentRetriever contentRetriever;
     private String fragmentsUrl;
     private String applicationName;
     private boolean shouldIncludeActiveItem;
@@ -34,7 +34,7 @@ public class FragmentFetcher {
     private final String originalResponseString;
     private ExtendedConfiguration extendedConfiguration;
 
-    public FragmentFetcher(EnonicContentRetriever contentRetriever, String fragmentsUrl, String applicationName, boolean shouldIncludeActiveItem,
+    public FragmentFetcher(ContentRetriever contentRetriever, String fragmentsUrl, String applicationName, boolean shouldIncludeActiveItem,
                            String subMenuPath, List<String> fragmentNames, Map<String, String> additionalOptions, HttpServletRequest request,
                            String originalResponseString, ExtendedConfiguration extendedConfiguration) {
         this.contentRetriever = contentRetriever;

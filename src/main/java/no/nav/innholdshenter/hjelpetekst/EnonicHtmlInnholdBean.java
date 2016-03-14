@@ -1,6 +1,6 @@
 package no.nav.innholdshenter.hjelpetekst;
 
-import no.nav.innholdshenter.common.EnonicContentRetriever;
+import no.nav.innholdshenter.common.ContentRetriever;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.output.XMLOutputter;
@@ -34,7 +34,7 @@ public class EnonicHtmlInnholdBean {
     private EnonicDocumentRetriever enonicDocumentRetriever;
     private List<HtmlInnholdListener> htmlInnholdListeners = new ArrayList<HtmlInnholdListener>();
 
-    public EnonicHtmlInnholdBean(EnonicContentRetriever retriever, String helptextPath) {
+    public EnonicHtmlInnholdBean(ContentRetriever retriever, String helptextPath) {
         setRetriever(retriever);
         this.helptextPath = helptextPath;
     }
@@ -110,7 +110,7 @@ public class EnonicHtmlInnholdBean {
         this.helptextPath = helptextPath;
     }
 
-    private void setRetriever(EnonicContentRetriever retriever) {
+    private void setRetriever(ContentRetriever retriever) {
         enonicDocumentRetriever = new EnonicDocumentRetriever();
         enonicDocumentRetriever.setContentRetriever(retriever);
     }

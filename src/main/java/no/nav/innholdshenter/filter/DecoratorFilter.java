@@ -1,6 +1,6 @@
 package no.nav.innholdshenter.filter;
 
-import no.nav.innholdshenter.common.EnonicContentRetriever;
+import no.nav.innholdshenter.common.ContentRetriever;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,7 @@ public class DecoratorFilter implements Filter {
     public static final String ALREADY_DECORATED_HEADER = "X-NAV-decorator";
     private static final List<String> DEFAULT_NO_DECORATE_PATTERNS = asList(".*isAlive.*");
 
-    private EnonicContentRetriever contentRetriever;
+    private ContentRetriever contentRetriever;
     private List<String> fragmentNames;
     private String fragmentsUrl;
     private List<String> includeContentTypes;
@@ -205,7 +205,7 @@ public class DecoratorFilter implements Filter {
     }
 
     @Required
-    public void setContentRetriever(EnonicContentRetriever contentRetriever) {
+    public void setContentRetriever(ContentRetriever contentRetriever) {
         this.contentRetriever = contentRetriever;
     }
 
