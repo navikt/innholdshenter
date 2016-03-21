@@ -19,7 +19,7 @@ import java.util.regex.Matcher;
 
 import static java.util.Arrays.asList;
 import static no.nav.innholdshenter.filter.DecoratorFilterUtils.*;
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 public class DecoratorFilter implements Filter {
 
