@@ -17,7 +17,7 @@ import static no.nav.innholdshenter.filter.DecoratorFilterUtils.createMatcher;
 import static no.nav.innholdshenter.filter.DecoratorFilterUtils.extractMetaTag;
 import static no.nav.innholdshenter.filter.DecoratorFilterUtils.getRequestUriOrAlternativePathBasedOnMetaTag;
 import static no.nav.innholdshenter.filter.DecoratorFilterUtils.isFragmentSubmenu;
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 public class FragmentFetcher {
 
