@@ -5,6 +5,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.parser.Parser;
@@ -27,7 +28,7 @@ public class SimpleEnonicClient implements ContentRetriever {
     private HttpClient httpClient;
 
     public SimpleEnonicClient(String baseUrl) {
-        this.httpClient = new DefaultHttpClient();
+        this.httpClient = new DefaultHttpClient(new PoolingClientConnectionManager());
         this.baseUrl = baseUrl;
     }
 
@@ -46,12 +47,16 @@ public class SimpleEnonicClient implements ContentRetriever {
 
     @Override
     public String getPageContentFullUrl(String url) {
+        String uniqueRandomUrl = InnholdshenterTools.makeUniqueRandomUrl(url);
+        HttpGet request = new HttpGet(uniqueRandomUrl);
         try {
-            String uniqueRandomUrl = InnholdshenterTools.makeUniqueRandomUrl(url);
             logger.info(RETRIEVING_PAGE_CONTENT_FROM_URL, url);
-            return httpClient.execute(new HttpGet(uniqueRandomUrl), new BasicResponseHandler());
+            return httpClient.execute(request, new BasicResponseHandler());
         } catch (IOException exception) {
             throw new RuntimeException("Http-kall feilet", exception);
+        }
+        finally {
+            request.releaseConnection();
         }
     }
 
