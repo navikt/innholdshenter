@@ -42,10 +42,10 @@ public class DecoratorFilter implements Filter {
     private Map<String, String> additionalOptions;
 
     public DecoratorFilter() {
-        fragmentNames = new ArrayList<String>();
-        noDecoratePatterns = new ArrayList<String>(DEFAULT_NO_DECORATE_PATTERNS);
-        noSubmenuPatterns = new ArrayList<String>();
-        additionalOptions = new HashMap<String, String>();
+        fragmentNames = new ArrayList<>();
+        noDecoratePatterns = new ArrayList<>(DEFAULT_NO_DECORATE_PATTERNS);
+        noSubmenuPatterns = new ArrayList<>();
+        additionalOptions = new HashMap<>();
         setDefaultIncludeContentTypes();
         setDefaultExcludeHeaders();
     }
@@ -68,14 +68,14 @@ public class DecoratorFilter implements Filter {
     }
 
     private void setDefaultIncludeContentTypes() {
-        includeContentTypes = new ArrayList<String>();
+        includeContentTypes = new ArrayList<>();
         includeContentTypes.add("text/html");
         includeContentTypes.add("text/html; charset=UTF-8");
         includeContentTypes.add("application/xhtml+xml");
     }
 
     private void setDefaultExcludeHeaders() {
-        excludeHeaders = new HashMap<String, String>();
+        excludeHeaders = new HashMap<>();
         excludeHeaders.put("X-Requested-With", "XMLHttpRequest");
     }
 

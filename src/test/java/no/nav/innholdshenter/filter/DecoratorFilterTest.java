@@ -59,12 +59,9 @@ public class DecoratorFilterTest {
     }
 
     private void withDefaultFilterChain() {
-        chain = new FilterChain() {
-            @Override
-            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-                servletResponse.getWriter().write("<html><body>{{fragment.header}}{{fragment.footer}}</body></html>");
-                servletResponse.setContentType("text/html");
-            }
+        chain = (servletRequest, servletResponse) -> {
+            servletResponse.getWriter().write("<html><body>{{fragment.header}}{{fragment.footer}}</body></html>");
+            servletResponse.setContentType("text/html");
         };
     }
 
@@ -108,12 +105,9 @@ public class DecoratorFilterTest {
     @Test
     public void should_not_inject_fragments_when_response_is_invalid_content_type() throws IOException, ServletException {
         final String expected = "<html><body>{{fragment.header}}{{fragment.footer}}</body></html>";
-        chain = new FilterChain() {
-            @Override
-            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-                servletResponse.getWriter().write(expected);
-                servletResponse.setContentType(null);
-            }
+        chain = (servletRequest, servletResponse) -> {
+            servletResponse.getWriter().write(expected);
+            servletResponse.setContentType(null);
         };
 
         decoratorFilter.doFilter(request, response, chain);
@@ -123,12 +117,9 @@ public class DecoratorFilterTest {
 
     @Test
     public void should_inject_submenu_when_submenu_path_and_fragment_is_defined() throws IOException, ServletException {
-        chain = new FilterChain() {
-            @Override
-            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-                servletResponse.getWriter().write("<html><body>{{fragment.submenu}}</body></html>");
-                servletResponse.setContentType("text/html");
-            }
+        chain = (servletRequest, servletResponse) -> {
+            servletResponse.getWriter().write("<html><body>{{fragment.submenu}}</body></html>");
+            servletResponse.setContentType("text/html");
         };
         withFragments("submenu");
         decoratorFilter.setSubMenuPath("/ditt-nav/din-side-arbeid");
@@ -213,12 +204,9 @@ public class DecoratorFilterTest {
 
     @Test
     public void should_inject_static_resource_fragment() throws IOException, ServletException {
-        chain = new FilterChain() {
-            @Override
-            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-                servletResponse.getWriter().write("<html><head>{{fragment.resources-head}}</head><body></body></html>");
-                servletResponse.setContentType("text/html");
-            }
+        chain = (servletRequest, servletResponse) -> {
+            servletResponse.getWriter().write("<html><head>{{fragment.resources-head}}</head><body></body></html>");
+            servletResponse.setContentType("text/html");
         };
         withFragments("resources-head");
         when(contentRetriever.getPageContent(anyString())).thenReturn("<div id=\"resources-head\"><link href=\"main.css\" /></div>");
@@ -241,44 +229,17 @@ public class DecoratorFilterTest {
         assertThat(decoratorFilter.getNoDecoratePatterns().get(1), is(".*isAlive.*"));
     }
 
-    @Test(expected = RuntimeException.class)
-    public void should_throw_exception_when_expected_fragment_is_not_found_in_response_from_enonic() throws Exception {
-        withDefaultFilterChain();
-        withFragments("header", "footer");
-        when(contentRetriever.getPageContent(anyString())).thenReturn("<div id=\"header\"></div>");
-
-        decoratorFilter.doFilter(request, response, chain);
-    }
-
     @Test
     public void should_replace_just_the_placeholders_which_are_found_in_application_markup() throws Exception {
-        chain = new FilterChain() {
-            @Override
-            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-                servletResponse.getWriter().write("<html><body>{{fragment.header}}</body></html>");
-                servletResponse.setContentType("text/html");
-            }
+        chain = (servletRequest, servletResponse) -> {
+            servletResponse.getWriter().write("<html><body>{{fragment.header}}</body></html>");
+            servletResponse.setContentType("text/html");
         };
         withFragments("header", "footer");
 
         decoratorFilter.doFilter(request, response, chain);
 
         assertThat(response.getContentAsString(), is("<html><body><nav></nav></body></html>"));
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void should_throw_exception_when_application_markup_has_unresolved_placeholders() throws IOException, ServletException {
-        chain = new FilterChain() {
-            @Override
-            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-                servletResponse.getWriter().write("<html><body>{{fragment.header}}{{fragment.footer}}{{fragment.ubrukt_placeholder}}</body></html>");
-                servletResponse.setContentType("text/html");
-
-            }
-        };
-        withFragments("header", "footer");
-
-        decoratorFilter.doFilter(request, response, chain);
     }
 
     @Test
@@ -289,12 +250,9 @@ public class DecoratorFilterTest {
         ImageIO.write(image, "gif", outputStream);
         final byte[] bytes = outputStream.toByteArray();
 
-        chain = new FilterChain() {
-            @Override
-            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-                servletResponse.getOutputStream().write(bytes);
-                servletResponse.setContentType("image/gif;charset=UTF-8");
-            }
+        chain = (servletRequest, servletResponse) -> {
+            servletResponse.getOutputStream().write(bytes);
+            servletResponse.setContentType("image/gif;charset=UTF-8");
         };
 
         decoratorFilter.doFilter(request, response, chain);
@@ -305,12 +263,9 @@ public class DecoratorFilterTest {
 
     @Test
     public void should_handle_empty_response_when_response_should_be_merged_with_fragments() throws IOException, ServletException {
-        chain = new FilterChain() {
-            @Override
-            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-                servletResponse.getWriter().write("");
-                servletResponse.setContentType("text/html");
-            }
+        chain = (servletRequest, servletResponse) -> {
+            servletResponse.getWriter().write("");
+            servletResponse.setContentType("text/html");
         };
         withFragments("header", "footer");
 
@@ -321,12 +276,9 @@ public class DecoratorFilterTest {
 
     @Test
     public void should_replace_title_placeholder_with_value_from_html_title_tag() throws IOException, ServletException {
-        chain = new FilterChain() {
-            @Override
-            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-                servletResponse.getWriter().write("<html><head><title>Bidragsveileder</title></head><body><h1>{{fragment.title}}</h1></html>");
-                servletResponse.setContentType("text/html");
-            }
+        chain = (servletRequest, servletResponse) -> {
+            servletResponse.getWriter().write("<html><head><title>Bidragsveileder</title></head><body><h1>{{fragment.title}}</h1></html>");
+            servletResponse.setContentType("text/html");
         };
 
         decoratorFilter.doFilter(request, response, chain);
@@ -336,12 +288,9 @@ public class DecoratorFilterTest {
 
     @Test
     public void should_handle_no_title_in_application_markup() throws IOException, ServletException {
-        chain = new FilterChain() {
-            @Override
-            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-                servletResponse.getWriter().write("<html><head></head><body><h1>{{fragment.title}}</h1></html>");
-                servletResponse.setContentType("text/html");
-            }
+        chain = (servletRequest, servletResponse) -> {
+            servletResponse.getWriter().write("<html><head></head><body><h1>{{fragment.title}}</h1></html>");
+            servletResponse.setContentType("text/html");
         };
 
         decoratorFilter.doFilter(request, response, chain);
@@ -352,12 +301,9 @@ public class DecoratorFilterTest {
 
     @Test
     public void should_remove_submenu_and_expand_grid_when_requestUri_matches_no_submenu_pattern() throws IOException, ServletException {
-        chain = new FilterChain() {
-            @Override
-            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-                servletResponse.getWriter().write("<html><body><main id=\"maincontent\"><div class=\"row\"><div class=\"col-md-4\">{{fragment.submenu}}</div><div class=\"col-md-8\"></div></div></main></body></html>");
-                servletResponse.setContentType("text/html");
-            }
+        chain = (servletRequest, servletResponse) -> {
+            servletResponse.getWriter().write("<html><body><main id=\"maincontent\"><div class=\"row\"><div class=\"col-md-4\">{{fragment.submenu}}</div><div class=\"col-md-8\"></div></div></main></body></html>");
+            servletResponse.setContentType("text/html");
         };
 
         withFragments("submenu");
@@ -375,12 +321,9 @@ public class DecoratorFilterTest {
 
     @Test
     public void should_not_remove_submenu_when_hodeFotKey_is_present_in_markup_and_requestUri_matches_no_submenu_pattern() throws IOException, ServletException {
-        chain = new FilterChain() {
-            @Override
-            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-                servletResponse.getWriter().write("<html><head><meta name=\"hodeFotKey\" content=\"/minside.do\"></head><body>{{fragment.submenu}}</body></html>");
-                servletResponse.setContentType("text/html");
-            }
+        chain = (servletRequest, servletResponse) -> {
+            servletResponse.getWriter().write("<html><head><meta name=\"hodeFotKey\" content=\"/minside.do\"></head><body>{{fragment.submenu}}</body></html>");
+            servletResponse.setContentType("text/html");
         };
         withFragments("submenu");
         decoratorFilter.setSubMenuPath("path/to/menu");
@@ -396,12 +339,9 @@ public class DecoratorFilterTest {
 
     @Test
     public void should_not_throw_exception_when_page_does_not_contain_submenu_placeholder_and_page_should_not_contain_submenu() throws IOException, ServletException {
-        chain = new FilterChain() {
-            @Override
-            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-                servletResponse.getWriter().write("<html><body>{{fragment.header}}<main id=\"maincontent\"><div class=\"row\"><div class=\"col-md-4\">{{fragment.submenu}}</div><div class=\"col-md-8\"></div></div></main>{{fragment.footer}}</body></html>");
-                servletResponse.setContentType("text/html");
-            }
+        chain = (servletRequest, servletResponse) -> {
+            servletResponse.getWriter().write("<html><body>{{fragment.header}}<main id=\"maincontent\"><div class=\"row\"><div class=\"col-md-4\">{{fragment.submenu}}</div><div class=\"col-md-8\"></div></div></main>{{fragment.footer}}</body></html>");
+            servletResponse.setContentType("text/html");
         };
         withFragments("header", "footer", "submenu");
         decoratorFilter.setSubMenuPath("path/to/menu");
@@ -414,14 +354,11 @@ public class DecoratorFilterTest {
 
     @Test
     public void response_should_not_contain_a_body_when_status_code_is_304() throws IOException, ServletException, URISyntaxException {
-        chain = new FilterChain() {
-            @Override
-            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-                HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;
-                servletResponse.getOutputStream().write("hvaSomHelst".getBytes());
-                servletResponse.setContentType("image/gif;charset=UTF-8");
-                httpServletResponse.setStatus(304);
-            }
+        chain = (servletRequest, servletResponse) -> {
+            HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;
+            servletResponse.getOutputStream().write("hvaSomHelst".getBytes());
+            servletResponse.setContentType("image/gif;charset=UTF-8");
+            httpServletResponse.setStatus(304);
         };
 
         decoratorFilter.doFilter(request, response, chain);
@@ -432,12 +369,9 @@ public class DecoratorFilterTest {
 
     @Test
     public void should_send_active_item_in_menu_map_if_request_uri_matches_menu_map_key() throws IOException, ServletException {
-        chain = new FilterChain() {
-            @Override
-            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-                servletResponse.getWriter().write("<html></html>");
-                servletResponse.setContentType("text/html");
-            }
+        chain = (servletRequest, servletResponse) -> {
+            servletResponse.getWriter().write("<html></html>");
+            servletResponse.setContentType("text/html");
         };
         decoratorFilter.setShouldIncludeActiveItem(true);
         ExtendedConfiguration extendedConfiguration = new ExtendedConfiguration();
@@ -454,12 +388,9 @@ public class DecoratorFilterTest {
 
     @Test
     public void should_send_submenupath_based_on_request_uri_and_submenu_map() throws IOException, ServletException {
-        chain = new FilterChain() {
-            @Override
-            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-                servletResponse.getWriter().write("<html></html>");
-                servletResponse.setContentType("text/html");
-            }
+        chain = (servletRequest, servletResponse) -> {
+            servletResponse.getWriter().write("<html></html>");
+            servletResponse.setContentType("text/html");
         };
         withFragments("submenu");
         when(contentRetriever.getPageContent(anyString())).thenReturn("<div id=\"submenu\"><nav id=\"submenu\"></nav></div><<</div>");
@@ -478,12 +409,9 @@ public class DecoratorFilterTest {
 
     @Test
     public void should_use_hodeFotKey_as_requestUri_if_exists_in_application_markup() throws IOException, ServletException {
-        chain = new FilterChain() {
-            @Override
-            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-                servletResponse.getWriter().write("<meta name=\"hodeFotKey\" content=\"/sbl\">");
-                servletResponse.setContentType("text/html");
-            }
+        chain = (servletRequest, servletResponse) -> {
+            servletResponse.getWriter().write("<meta name=\"hodeFotKey\" content=\"/sbl\">");
+            servletResponse.setContentType("text/html");
         };
         request.setRequestURI("/meldekort");
         decoratorFilter.setShouldIncludeActiveItem(true);
@@ -495,12 +423,9 @@ public class DecoratorFilterTest {
 
     @Test
     public void should_send_tns_value_based_on_request_uri_and_tns_values() throws IOException, ServletException {
-        chain = new FilterChain() {
-            @Override
-            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
-                servletResponse.getWriter().write("<html></html>");
-                servletResponse.setContentType("text/html");
-            }
+        chain = (servletRequest, servletResponse) -> {
+            servletResponse.getWriter().write("<html></html>");
+            servletResponse.setContentType("text/html");
         };
         ExtendedConfiguration extendedConfiguration = new ExtendedConfiguration();
         Map<String, String> tnsValues = new HashMap<String, String>();
@@ -530,7 +455,7 @@ public class DecoratorFilterTest {
     public void appends_options_to_url() throws IOException, ServletException {
         withDefaultFilterChain();
         withFragments("header", "footer");
-        Map<String, String> options = new HashMap<String, String>();
+        Map<String, String> options = new HashMap<>();
         options.put("banner", "banner-name");
         decoratorFilter.setAdditionalOptions(options);
 

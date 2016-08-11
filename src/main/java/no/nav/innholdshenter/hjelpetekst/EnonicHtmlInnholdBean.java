@@ -32,7 +32,7 @@ public class EnonicHtmlInnholdBean {
     private String helptextPath;
 
     private EnonicDocumentRetriever enonicDocumentRetriever;
-    private List<HtmlInnholdListener> htmlInnholdListeners = new ArrayList<HtmlInnholdListener>();
+    private List<HtmlInnholdListener> htmlInnholdListeners = new ArrayList<>();
 
     public EnonicHtmlInnholdBean(ContentRetriever retriever, String helptextPath) {
         setRetriever(retriever);
@@ -75,7 +75,7 @@ public class EnonicHtmlInnholdBean {
     }
 
     public List<HtmlInnhold> getHjelpetekster() {
-        List<HtmlInnhold> hjelpetekster = new ArrayList<HtmlInnhold>();
+        List<HtmlInnhold> hjelpetekster = new ArrayList<>();
         try {
             Document document = enonicDocumentRetriever.loadDocument(helptextPath);
             Element rootElement = document.getRootElement();

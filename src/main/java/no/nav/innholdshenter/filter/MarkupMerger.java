@@ -3,6 +3,7 @@ package no.nav.innholdshenter.filter;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.slf4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -13,6 +14,7 @@ import static no.nav.innholdshenter.filter.DecoratorFilterUtils.createMatcher;
 import static no.nav.innholdshenter.filter.DecoratorFilterUtils.createPlaceholder;
 import static no.nav.innholdshenter.filter.DecoratorFilterUtils.getRequestUriOrAlternativePathBasedOnMetaTag;
 import static no.nav.innholdshenter.filter.DecoratorFilterUtils.isFragmentSubmenu;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class MarkupMerger {
 
@@ -21,6 +23,7 @@ public class MarkupMerger {
     private final String originalResponseString;
     private Document htmlFragments;
     private final HttpServletRequest request;
+    private static final Logger logger = getLogger(MarkupMerger.class);
 
     public MarkupMerger(List<String> fragmentNames, List<String> noSubmenuPatterns, String originalResponseString, Document htmlFragments, HttpServletRequest request) {
         this.fragmentNames = fragmentNames;
@@ -34,7 +37,11 @@ public class MarkupMerger {
         String responseString = originalResponseString;
         for (String fragmentName : fragmentNames) {
             Element element = htmlFragments.getElementById(fragmentName);
-            verifyThatElementIsFoundInResponseFromEnonic(fragmentName, element);
+            if (elementIsNotFoundInResponseFromEnonic(element)) {
+                logger.error(fragmentName + " ble ikke funnet i responsen fra Enonic. Undersøk om noe er fjernet fra ressursen i enonic (Appressurser / common-html).");
+                responseString = responseString.replace(createPlaceholder(fragmentName), "");
+                continue;
+            }
 
             if (isFragmentSubmenu(fragmentName)) {
                 responseString = mergeSubmenuFragment(responseString, fragmentName, element);
@@ -48,10 +55,8 @@ public class MarkupMerger {
         return responseString;
     }
 
-    private void verifyThatElementIsFoundInResponseFromEnonic(String fragmentName, Element element) {
-        if (element == null) {
-            throw new RuntimeException("Element [ " + fragmentName + " ] ikke funnet i responsen fra Enonic.");
-        }
+    private boolean elementIsNotFoundInResponseFromEnonic(Element element) {
+        return element == null;
     }
 
     private String extractAndInjectTitle(String responseString) {
@@ -63,7 +68,7 @@ public class MarkupMerger {
     private void checkForUnresolvedPlaceholders(String responseString) {
         Matcher matcher = createMatcher(PLACEHOLDER_REGEX, responseString);
         if (matcher.matches()) {
-            throw new RuntimeException("Fant unresolved placeholder " + matcher.group(1) + " i applikasjonens markup.");
+            logger.error("Fant unresolved placeholder " + matcher.group(1) + " i applikasjonens markup.");
         }
     }
 

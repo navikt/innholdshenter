@@ -35,7 +35,7 @@ public class EnonicContentRetriever implements ContentRetriever {
     }
 
     public EnonicContentRetriever(int httpTimeoutMillis) {
-        cacheStatusMeldinger = new ConcurrentHashMap<String, CacheStatusMelding>();
+        cacheStatusMeldinger = new ConcurrentHashMap<>();
         cacheManager = CacheManager.create();
         setupCache(httpTimeoutMillis);
     }

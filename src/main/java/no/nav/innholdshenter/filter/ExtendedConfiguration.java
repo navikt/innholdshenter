@@ -7,9 +7,9 @@ import java.util.Map;
  * Utvidet konfigurasjon for DecoratorFilter (brukes først og fremst av SBL Arbeid)
  */
 public class ExtendedConfiguration {
-    private Map<String, String> menuMap = new HashMap<String, String>();
-    private Map<String, String> subMenuPathMap = new HashMap<String, String>();
-    private Map<String, String> tnsValues = new HashMap<String, String>();
+    private Map<String, String> menuMap = new HashMap<>();
+    private Map<String, String> subMenuPathMap = new HashMap<>();
+    private Map<String, String> tnsValues = new HashMap<>();
 
     public void setMenuMap(Map<String, String> menuMap) {
         this.menuMap = menuMap;

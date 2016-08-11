@@ -54,12 +54,11 @@ public class InnholdshenterTools {
         try {
             uriBuilder = new URIBuilder(url);
             List<NameValuePair> params = uriBuilder.getQueryParams();
-            for (NameValuePair nameValuePair : params) {
-                if (nameValuePair.getName().startsWith("urlPath")) {
-                    String urlpath = sanitizeUrlPath(nameValuePair.getValue());
-                    uriBuilder.setParameter("urlPath", urlpath);
-                }
-            }
+            params.stream().filter(nameValuePair -> nameValuePair.getName().startsWith("urlPath"))
+                    .forEach(nameValuePair -> {
+                        String urlpath = sanitizeUrlPath(nameValuePair.getValue());
+                        uriBuilder.setParameter("urlPath", urlpath);
+                    });
         } catch (URISyntaxException e) {
             logger.debug(e.getMessage());
             return url;
