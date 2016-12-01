@@ -9,12 +9,9 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.regex.Matcher;
 
-import static no.nav.innholdshenter.filter.DecoratorFilterUtils.PLACEHOLDER_REGEX;
-import static no.nav.innholdshenter.filter.DecoratorFilterUtils.createMatcher;
-import static no.nav.innholdshenter.filter.DecoratorFilterUtils.createPlaceholder;
-import static no.nav.innholdshenter.filter.DecoratorFilterUtils.getRequestUriOrAlternativePathBasedOnMetaTag;
-import static no.nav.innholdshenter.filter.DecoratorFilterUtils.isFragmentSubmenu;
+import static no.nav.innholdshenter.filter.DecoratorFilterUtils.*;
 import static org.slf4j.LoggerFactory.getLogger;
+import static org.springframework.util.StringUtils.isEmpty;
 
 public class MarkupMerger {
 
@@ -22,13 +19,15 @@ public class MarkupMerger {
     private List<String> fragmentNames;
     private final String originalResponseString;
     private Document htmlFragments;
+    private String applicationName;
     private final HttpServletRequest request;
     private static final Logger logger = getLogger(MarkupMerger.class);
 
-    public MarkupMerger(List<String> fragmentNames, List<String> noSubmenuPatterns, String originalResponseString, Document htmlFragments, HttpServletRequest request) {
+    public MarkupMerger(List<String> fragmentNames, List<String> noSubmenuPatterns, String originalResponseString, Document htmlFragments, HttpServletRequest request, String applicationName) {
         this.fragmentNames = fragmentNames;
         this.noSubmenuPatterns = noSubmenuPatterns;
         this.originalResponseString = originalResponseString;
+        this.applicationName = applicationName;
         this.htmlFragments = htmlFragments;
         this.request = request;
     }
@@ -51,6 +50,7 @@ public class MarkupMerger {
         }
 
         responseString = extractAndInjectTitle(responseString);
+        responseString = extractAndInjectApplicationName(responseString);
         checkForUnresolvedPlaceholders(responseString);
         return responseString;
     }
@@ -63,6 +63,13 @@ public class MarkupMerger {
         Document document = Jsoup.parse(responseString);
         String title = document.title();
         return responseString.replace(createPlaceholder("title"), title);
+    }
+
+    private String extractAndInjectApplicationName(String responseString) {
+        if (isEmpty(applicationName)) {
+            return responseString;
+        }
+        return responseString.replace("{{applicationName}}", applicationName);
     }
 
     private void checkForUnresolvedPlaceholders(String responseString) {
