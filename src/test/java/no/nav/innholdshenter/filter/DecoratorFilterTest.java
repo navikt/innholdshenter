@@ -134,7 +134,7 @@ public class DecoratorFilterTest {
     public void should_build_url_with_activeitem_if_include_active_item_is_set() throws IOException, ServletException {
         withDefaultFilterChain();
         withFragments("header", "footer");
-        decoratorFilter.setShouldIncludeActiveItem(true);
+        decoratorFilter.setShouldIncludeActiveItem();
         request.setRequestURI("/minside");
 
         decoratorFilter.doFilter(request, response, chain);
@@ -373,7 +373,7 @@ public class DecoratorFilterTest {
             servletResponse.getWriter().write("<html></html>");
             servletResponse.setContentType("text/html");
         };
-        decoratorFilter.setShouldIncludeActiveItem(true);
+        decoratorFilter.setShouldIncludeActiveItem();
         ExtendedConfiguration extendedConfiguration = new ExtendedConfiguration();
         Map<String, String> menuMap = new HashMap<String, String>();
         menuMap.put("^/sbl/kategori.*", "/sbl/ag/sok/enkelt.do");
@@ -414,7 +414,7 @@ public class DecoratorFilterTest {
             servletResponse.setContentType("text/html");
         };
         request.setRequestURI("/meldekort");
-        decoratorFilter.setShouldIncludeActiveItem(true);
+        decoratorFilter.setShouldIncludeActiveItem();
 
         decoratorFilter.doFilter(request, response, chain);
 

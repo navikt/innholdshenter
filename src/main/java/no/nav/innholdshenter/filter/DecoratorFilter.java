@@ -179,18 +179,20 @@ public class DecoratorFilter implements Filter {
     }
 
     private static boolean hasAppropriateStatusCode(int statusCode) {
-        int errorZone = statusCode/100;
+        int errorZone = statusCode / 100;
 
-        if (statusCode >= 0 && errorZone != 3) {
-            return true;
-        }
-        return false;
+        return statusCode >= 0 && errorZone != 3;
     }
 
     private String mergeWithFragments(String originalResponseString, HttpServletRequest request) {
         FragmentFetcher fragmentFetcher = new FragmentFetcher(contentRetriever, fragmentsUrl, applicationName, shouldIncludeActiveItem, subMenuPath, fragmentNames, additionalOptions,
                 request, originalResponseString, extendedConfiguration);
-        Document htmlFragments = fragmentFetcher.fetchHtmlFragments();
+        Document htmlFragments;
+        try {
+            htmlFragments = fragmentFetcher.fetchHtmlFragments();
+        } catch (RuntimeException e) {
+            return originalResponseString;
+        }
         MarkupMerger markupMerger = new MarkupMerger(fragmentNames, noSubmenuPatterns, originalResponseString, htmlFragments, request, applicationName);
         return markupMerger.merge();
     }
@@ -223,8 +225,8 @@ public class DecoratorFilter implements Filter {
         this.subMenuPath = subMenuPath;
     }
 
-    public void setShouldIncludeActiveItem(boolean shouldIncludeActiveItem) {
-        this.shouldIncludeActiveItem = shouldIncludeActiveItem;
+    public void setShouldIncludeActiveItem() {
+        this.shouldIncludeActiveItem = true;
     }
 
     public void setNoDecoratePatterns(List<String> noDecoratePatterns) {
