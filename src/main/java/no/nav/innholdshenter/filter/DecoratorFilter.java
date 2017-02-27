@@ -1,6 +1,9 @@
 package no.nav.innholdshenter.filter;
 
+import net.sf.ehcache.CacheException;
 import no.nav.innholdshenter.common.ContentRetriever;
+import org.apache.commons.lang3.StringUtils;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,10 +14,7 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 
 import static java.util.Arrays.asList;
@@ -190,8 +190,9 @@ public class DecoratorFilter implements Filter {
         Document htmlFragments;
         try {
             htmlFragments = fragmentFetcher.fetchHtmlFragments();
-        } catch (RuntimeException e) {
-            return originalResponseString;
+        } catch (CacheException e) {
+            logger.warn("Klarte ikke å hente HTML fragment. Returnerer tom streng", e);
+            htmlFragments = Jsoup.parse(StringUtils.EMPTY);
         }
         MarkupMerger markupMerger = new MarkupMerger(fragmentNames, noSubmenuPatterns, originalResponseString, htmlFragments, request, applicationName);
         return markupMerger.merge();
