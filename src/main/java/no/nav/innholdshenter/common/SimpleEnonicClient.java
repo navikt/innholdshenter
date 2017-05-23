@@ -23,6 +23,7 @@ public class SimpleEnonicClient implements ContentRetriever {
     private static final Logger logger = LoggerFactory.getLogger(SimpleEnonicClient.class);
 
     private static final String RETRIEVING_PAGE_CONTENT_FROM_URL = "Retrieving page content from url {}";
+    private static final String ERROR_RETRIEVING_PAGE_CONTENT_FROM_URL = "Error retrieving content from url {}";
     private String baseUrl;
 
     private HttpClient httpClient;
@@ -53,6 +54,7 @@ public class SimpleEnonicClient implements ContentRetriever {
             logger.info(RETRIEVING_PAGE_CONTENT_FROM_URL, url);
             return httpClient.execute(request, new BasicResponseHandler());
         } catch (IOException exception) {
+            logger.error(ERROR_RETRIEVING_PAGE_CONTENT_FROM_URL, url);
             throw new RuntimeException("Http-kall feilet", exception);
         }
         finally {
