@@ -7,14 +7,16 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Required;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 
 import static java.util.Arrays.asList;
@@ -41,11 +43,30 @@ public class DecoratorFilter implements Filter {
     private ExtendedConfiguration extendedConfiguration;
     private Map<String, String> additionalOptions;
 
+    @Deprecated
+    /* Vi tar bort denne for A tvinge at feltene settes i konstruktoeren. Da kan vi dra ut hele Spring fra prosjeketet */
     public DecoratorFilter() {
         fragmentNames = new ArrayList<>();
         noDecoratePatterns = new ArrayList<>(DEFAULT_NO_DECORATE_PATTERNS);
         noSubmenuPatterns = new ArrayList<>();
         additionalOptions = new HashMap<>();
+        setDefaultIncludeContentTypes();
+        setDefaultExcludeHeaders();
+    }
+
+    public DecoratorFilter(String fragmentsUrl, ContentRetriever contentRetriever, List<String> fragmentNames, String applicationName) {
+        if (fragmentsUrl == null || contentRetriever == null || fragmentNames == null || applicationName == null) {
+            throw new IllegalArgumentException("Alle argumentene er paakrevd!");
+        }
+
+        noDecoratePatterns = new ArrayList<>(DEFAULT_NO_DECORATE_PATTERNS);
+        noSubmenuPatterns = new ArrayList<>();
+        additionalOptions = new HashMap<>();
+
+        this.fragmentNames = fragmentNames;
+        this.fragmentsUrl = fragmentsUrl;
+        this.contentRetriever = contentRetriever;
+        this.applicationName = applicationName;
         setDefaultIncludeContentTypes();
         setDefaultExcludeHeaders();
     }
@@ -202,22 +223,18 @@ public class DecoratorFilter implements Filter {
     public void destroy() {
     }
 
-    @Required
     public void setFragmentsUrl(String fragmentsUrl) {
         this.fragmentsUrl = fragmentsUrl;
     }
 
-    @Required
     public void setContentRetriever(ContentRetriever contentRetriever) {
         this.contentRetriever = contentRetriever;
     }
 
-    @Required
     public void setFragmentNames(List<String> fragmentNames) {
         this.fragmentNames = fragmentNames;
     }
 
-    @Required
     public void setApplicationName(String applicationName) {
         this.applicationName = applicationName;
     }

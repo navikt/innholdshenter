@@ -11,7 +11,6 @@ import java.util.regex.Matcher;
 
 import static no.nav.innholdshenter.filter.DecoratorFilterUtils.*;
 import static org.slf4j.LoggerFactory.getLogger;
-import static org.springframework.util.StringUtils.isEmpty;
 
 public class MarkupMerger {
 
@@ -66,7 +65,7 @@ public class MarkupMerger {
     }
 
     private String extractAndInjectApplicationName(String responseString) {
-        if (isEmpty(applicationName)) {
+        if (applicationName == null || applicationName.isEmpty()) {
             return responseString;
         }
         return responseString.replace("{{applicationName}}", applicationName);

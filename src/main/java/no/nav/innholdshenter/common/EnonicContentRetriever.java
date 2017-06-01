@@ -40,6 +40,14 @@ public class EnonicContentRetriever implements ContentRetriever {
         setupCache(httpTimeoutMillis);
     }
 
+    public EnonicContentRetriever(int httpTimeoutMillis, String baseUrl, int refreshIntervalSeconds) {
+        cacheStatusMeldinger = new ConcurrentHashMap<>();
+        cacheManager = CacheManager.create();
+        setupCache(httpTimeoutMillis);
+        setBaseUrl(baseUrl);
+        setRefreshIntervalSeconds(refreshIntervalSeconds);
+    }
+
     private String createUrl(String path) {
         return InnholdshenterTools.sanitizeUrlCacheKey(baseUrl + path);
     }
