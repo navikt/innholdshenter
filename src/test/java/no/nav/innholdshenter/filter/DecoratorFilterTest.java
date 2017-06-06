@@ -19,9 +19,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 import static no.nav.innholdshenter.filter.DecoratorFilter.ALREADY_DECORATED_HEADER;
@@ -49,9 +47,9 @@ public class DecoratorFilterTest {
         contentRetriever = mock(EnonicContentRetriever.class);
         when(contentRetriever.getPageContent(anyString())).thenReturn("<div id=\"header\"><nav></nav></div><div id=\"footer\"><footer></footer></div>");
 
-        decoratorFilter = new DecoratorFilter();
-        decoratorFilter.setContentRetriever(contentRetriever);
-        decoratorFilter.setFragmentsUrl("http://nav.no/fragments");
+        List<String> fragmentNames = Collections.emptyList();
+
+        decoratorFilter = new DecoratorFilter("http://nav.no/fragments", contentRetriever ,fragmentNames , "arbeid");
     }
 
     private void withFragments(String... fragments) {
@@ -88,7 +86,7 @@ public class DecoratorFilterTest {
 
         decoratorFilter.doFilter(request, response, chain);
 
-        verify(contentRetriever).getPageContent("http://nav.no/fragments?header=true&footer=true");
+        verify(contentRetriever).getPageContent("http://nav.no/fragments?appname=arbeid&header=true&footer=true");
     }
 
     @Test
@@ -139,7 +137,7 @@ public class DecoratorFilterTest {
 
         decoratorFilter.doFilter(request, response, chain);
 
-        verify(contentRetriever).getPageContent("http://nav.no/fragments?activeitem=%2Fminside&header=true&footer=true");
+        verify(contentRetriever).getPageContent("http://nav.no/fragments?appname=arbeid&activeitem=%2Fminside&header=true&footer=true");
     }
 
     @Test
@@ -154,7 +152,7 @@ public class DecoratorFilterTest {
 
         decoratorFilter.doFilter(request, response, chain);
 
-        verify(contentRetriever).getPageContent("http://nav.no/fragments?userrole=ARBS");
+        verify(contentRetriever).getPageContent("http://nav.no/fragments?appname=arbeid&userrole=ARBS");
     }
 
     @Test
@@ -314,7 +312,7 @@ public class DecoratorFilterTest {
 
         decoratorFilter.doFilter(request, response, chain);
 
-        verify(contentRetriever).getPageContent("http://nav.no/fragments?submenu=path%2Fto%2Fmenu");
+        verify(contentRetriever).getPageContent("http://nav.no/fragments?appname=arbeid&submenu=path%2Fto%2Fmenu");
         assertThat(response.getContentAsString(), not(containsString("<div class=\"col-md-4\"></div>")));
         assertThat(response.getContentAsString(), containsString("<div class=\"col-md-12\"></div>"));
     }
@@ -333,7 +331,7 @@ public class DecoratorFilterTest {
 
         decoratorFilter.doFilter(request, response, chain);
 
-        verify(contentRetriever).getPageContent("http://nav.no/fragments?submenu=path%2Fto%2Fmenu");
+        verify(contentRetriever).getPageContent("http://nav.no/fragments?appname=arbeid&submenu=path%2Fto%2Fmenu");
         assertThat(response.getContentAsString(), is("<html><head><meta name=\"hodeFotKey\" content=\"/minside.do\"></head><body><nav id=\"submenu\"></nav></body></html>"));
     }
 
@@ -383,7 +381,7 @@ public class DecoratorFilterTest {
 
         decoratorFilter.doFilter(request, response, chain);
 
-        verify(contentRetriever).getPageContent("http://nav.no/fragments?activeitem=%2Fsbl%2Fag%2Fsok%2Fenkelt.do");
+        verify(contentRetriever).getPageContent("http://nav.no/fragments?appname=arbeid&activeitem=%2Fsbl%2Fag%2Fsok%2Fenkelt.do");
     }
 
     @Test
@@ -404,7 +402,7 @@ public class DecoratorFilterTest {
 
         decoratorFilter.doFilter(request, response, chain);
 
-        verify(contentRetriever).getPageContent("http://nav.no/fragments?submenu=ditt-nav%2Fdin-side");
+        verify(contentRetriever).getPageContent("http://nav.no/fragments?appname=arbeid&submenu=ditt-nav%2Fdin-side");
     }
 
     @Test
@@ -418,7 +416,7 @@ public class DecoratorFilterTest {
 
         decoratorFilter.doFilter(request, response, chain);
 
-        verify(contentRetriever).getPageContent("http://nav.no/fragments?activeitem=%2Fsbl");
+        verify(contentRetriever).getPageContent("http://nav.no/fragments?appname=arbeid&activeitem=%2Fsbl");
     }
 
     @Test
@@ -461,6 +459,12 @@ public class DecoratorFilterTest {
 
         decoratorFilter.doFilter(request, response, chain);
 
-        verify(contentRetriever).getPageContent("http://nav.no/fragments?header=true&footer=true&banner=banner-name");
+        verify(contentRetriever).getPageContent("http://nav.no/fragments?appname=arbeid&header=true&footer=true&banner=banner-name");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throwsWhenArgumentsAreMissing(){
+        List<String> fragmentNames = asList("header", "footer");
+        new DecoratorFilter("http://nav.no/fragments", contentRetriever ,fragmentNames , null);
     }
 }
