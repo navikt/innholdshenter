@@ -20,7 +20,6 @@ public class EnonicCacheEntryFactory implements CacheEntryFactory {
     private static final Logger logger = LoggerFactory.getLogger(EnonicCacheEntryFactory.class);
 
     private static final String DEBUG_RETRIEVING_PAGE_CONTENT_FROM_URL = "Retrieving page content from url {}";
-    private static final String HTTP_STATUS_FEIL = "Http-kall feilet, url: {} status: {} grunn: {}";
 
     private HttpClient httpClient;
 
@@ -57,15 +56,14 @@ public class EnonicCacheEntryFactory implements CacheEntryFactory {
             content = httpClient.execute(httpGet, responseHandler);
             logStatus(200, "OK", key);
 
-        } catch (HttpResponseException exception) {
-            logger.error(HTTP_STATUS_FEIL, key, exception.getStatusCode(), exception.getMessage());
-            logStatus(exception.getStatusCode(), exception.getMessage(), key);
-            throw new IOException(exception);
+        } catch (HttpResponseException e) {
+            logger.warn("Http-kall feilet, url: {} status: {} grunn: {}", key, e.getStatusCode(), e.getMessage(), e);
+            logStatus(e.getStatusCode(), e.getMessage(), key);
+            throw new IOException(e);
         }
 
         return content;
     }
-
     //used for test purposes
     public void setHttpClient(HttpClient httpClient) {
         this.httpClient = httpClient;
