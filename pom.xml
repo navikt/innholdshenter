@@ -2,16 +2,35 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>no.nav.sbl</groupId>
-        <artifactId>mor-pom</artifactId>
-        <version>3</version>
-    </parent>
-
+    <groupId>no.nav.sbl</groupId>
     <artifactId>innholdshenter</artifactId>
     <packaging>jar</packaging>
     <version>5.3-SNAPSHOT</version>
     <name>nav-enonic-cms-innholdshenter</name>
+
+    <properties>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+    </properties>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <organization>NAV (Arbeids- og velferdsdirektoratet) - The Norwegian Labour and Welfare Administration</organization>
+            <organizationUrl>https://www.nav.no</organizationUrl>
+        </developer>
+    </developers>
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/navikt/tjenestespesifikasjoner</url>
+        </repository>
+    </distributionManagement>
 
     <dependencies>
         <dependency>
@@ -166,10 +185,10 @@
 
 
     </dependencies>
-
     <scm>
-        <developerConnection>scm:git:http://stash.devillo.no/scm/felles/innholdshenter.git</developerConnection>
-        <url>http://stash.devillo.no/projects/FELLES/repos/innholdshenter</url>
+        <developerConnection>scm:git:git@github.com:navikt/innholdshenter.git</developerConnection>
+        <connection>scm:git:git@github.com:navikt/innholdshenter.git</connection>
+        <url>https://github.com/navikt/innholdshenter</url>
         <tag>HEAD</tag>
     </scm>
 </project>
